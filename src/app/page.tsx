@@ -9,9 +9,9 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <AboutPreview />
       <FeaturedProjects />
       <SkillsSection />
+      <AboutPreview />
       <FeaturedArticles />
       <FooterCTA />
     </>
