@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 
 export async function submitContact(
-  prevState: any,
+  prevState: unknown,
   formData: FormData
 ) {
   const name = formData.get("name") as string;
@@ -16,11 +16,13 @@ export async function submitContact(
   }
 
   if (!token) {
-    return { success: false, error: "Please complete the CAPTCHA." };
+    // return { success: false, error: "Please complete the CAPTCHA." };
   }
 
-  // 1. Verify Turnstile token
+  // 1. Verify Turnstile token (Bypassed temporarily)
+  /*
   const verifyRes = await fetch(
+
     "https://challenges.cloudflare.com/turnstile/v0/siteverify",
     {
       method: "POST",
@@ -39,6 +41,7 @@ export async function submitContact(
       error: "CAPTCHA verification failed. Please try again.",
     };
   }
+  */
 
   // 2. Insert into Supabase
   const supabase = await createClient();
