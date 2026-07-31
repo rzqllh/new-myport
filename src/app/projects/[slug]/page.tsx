@@ -51,7 +51,7 @@ export default async function ProjectDetailPage({ params }: Props) {
   // Sort images by sort_order
   const images =
     project.project_images?.sort(
-      (a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0)
+      (a: { sort_order: number | null }, b: { sort_order: number | null }) => (a.sort_order ?? 0) - (b.sort_order ?? 0)
     ) ?? [];
   const heroImage = images[0];
   const galleryImages = images.slice(1);
@@ -153,7 +153,7 @@ export default async function ProjectDetailPage({ params }: Props) {
       {/* Additional Images / Gallery */}
       {galleryImages.length > 0 && (
         <div className="mx-auto max-w-[1000px] px-6 space-y-12 md:space-y-24">
-          {galleryImages.map((img: any, i: number) => (
+          {galleryImages.map((img: { url: string; alt_text: string | null }, i: number) => (
             <ScrollReveal key={img.url} delay={0.1}>
               <div className="relative rounded-2xl overflow-hidden border border-border bg-muted shadow-sm">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
