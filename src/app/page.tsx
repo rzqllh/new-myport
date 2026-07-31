@@ -1,16 +1,18 @@
 import { Hero } from "@/components/sections/hero";
-import { FeaturedProjects } from "@/components/sections/featured-projects";
 import { AboutPreview } from "@/components/sections/about-preview";
+import { FeaturedProjects } from "@/components/sections/featured-projects";
 import { SkillsSection } from "@/components/sections/skills-section";
+import { FeaturedArticles } from "@/components/sections/featured-articles";
 import { FooterCTA } from "@/components/sections/footer-cta";
 
 export default function HomePage() {
   return (
     <>
       <Hero />
-      <FeaturedProjects />
       <AboutPreview />
+      <FeaturedProjects />
       <SkillsSection />
+      <FeaturedArticles />
       <FooterCTA />
     </>
   );

@@ -107,14 +107,11 @@ export function Hero() {
             variants={itemVariants}
             className="flex flex-wrap items-center gap-3"
           >
-            <Button size="lg" render={<Link href="/contact" />}>
-                Let&apos;s Work Together
+            <Button size="lg" render={<Link href="/projects" />}>
+                View Projects
                 <ArrowRight weight="bold" data-icon="inline-end" />
             </Button>
-            <Button size="lg" variant="outline" render={<Link href="/projects" />}>
-              View Projects
-            </Button>
-            <Button size="lg" variant="ghost" render={<a href="/Hafizh Rizqullah Prasetya - CV.pdf" target="_blank" rel="noopener noreferrer" download />}>
+            <Button size="lg" variant="outline" render={<a href="/Hafizh Rizqullah Prasetya - CV.pdf" target="_blank" rel="noopener noreferrer" download />}>
                 <DownloadSimple weight="duotone" data-icon="inline-start" />
                 Download CV
             </Button>
