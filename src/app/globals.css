@@ -1,0 +1,217 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ─── Font variables ─────────────────────────────────────────────────────── */
+@theme inline {
+  --font-sans: var(--font-sans);         /* Archivo — body */
+  --font-display: var(--font-display);   /* Space Grotesk — headlines */
+  --font-mono: var(--font-mono);         /* JetBrains Mono — code */
+
+  /* shadcn color token bridge */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Radius scale */
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+/* ─── Light mode tokens ──────────────────────────────────────────────────── */
+/*
+ * Design system: Cool slate neutrals + Electric Blue accent (#2563EB)
+ * Typography: Space Grotesk (display) · Archivo (body) · JetBrains Mono (code)
+ * Spec: docs/superpowers/specs/2026-07-31-portfolio-design.md §5.C
+ */
+:root {
+  /* Surfaces */
+  --background: oklch(0.984 0 0);           /* ~#FAFAFA cool off-white */
+  --foreground: oklch(0.145 0.015 264);     /* ~#0F172A slate-900 */
+
+  --card: oklch(1 0 0);                     /* #FFFFFF */
+  --card-foreground: oklch(0.145 0.015 264);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0.015 264);
+
+  /* Primary = Electric Blue — the one accent */
+  --primary: oklch(0.488 0.213 264.4);      /* ~#2563EB */
+  --primary-foreground: oklch(1 0 0);       /* white text on blue */
+
+  /* Secondary — subtle slate */
+  --secondary: oklch(0.970 0.005 264);      /* ~#F1F5F9 slate-100 */
+  --secondary-foreground: oklch(0.205 0.015 264);
+
+  /* Muted */
+  --muted: oklch(0.970 0.005 264);          /* ~#F1F5F9 */
+  --muted-foreground: oklch(0.524 0.018 264); /* ~#64748B slate-500 */
+
+  /* Accent — same blue family, lighter for accent use */
+  --accent: oklch(0.940 0.028 264);         /* ~#EFF6FF blue-50 */
+  --accent-foreground: oklch(0.488 0.213 264.4);
+
+  /* Semantic */
+  --destructive: oklch(0.577 0.245 27.3);   /* red-500 */
+  --border: oklch(0.895 0.012 264);         /* ~#E2E8F0 slate-200 */
+  --input: oklch(0.895 0.012 264);
+  --ring: oklch(0.488 0.213 264.4);         /* Blue — focus rings match accent */
+
+  /* Radius: 8px buttons/inputs, scales up for cards/modals */
+  --radius: 0.5rem;
+
+  /* Sidebar */
+  --sidebar: oklch(0.984 0 0);
+  --sidebar-foreground: oklch(0.145 0.015 264);
+  --sidebar-primary: oklch(0.488 0.213 264.4);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.940 0.028 264);
+  --sidebar-accent-foreground: oklch(0.488 0.213 264.4);
+  --sidebar-border: oklch(0.895 0.012 264);
+  --sidebar-ring: oklch(0.488 0.213 264.4);
+}
+
+/* ─── Dark mode tokens ───────────────────────────────────────────────────── */
+.dark {
+  --background: oklch(0.107 0.008 264);     /* ~#0A0A0B near-black cool */
+  --foreground: oklch(0.976 0.003 264);     /* ~#F8FAFC slate-50 */
+
+  --card: oklch(0.138 0.010 264);           /* ~#111113 */
+  --card-foreground: oklch(0.976 0.003 264);
+
+  --popover: oklch(0.138 0.010 264);
+  --popover-foreground: oklch(0.976 0.003 264);
+
+  /* Primary — slightly lighter blue for dark bg contrast */
+  --primary: oklch(0.623 0.215 264.4);      /* ~#3B82F6 blue-500 */
+  --primary-foreground: oklch(1 0 0);
+
+  /* Secondary */
+  --secondary: oklch(0.200 0.012 264);      /* dark surface variant */
+  --secondary-foreground: oklch(0.976 0.003 264);
+
+  /* Muted */
+  --muted: oklch(0.200 0.012 264);
+  --muted-foreground: oklch(0.650 0.018 264); /* ~#94A3B8 slate-400 */
+
+  /* Accent */
+  --accent: oklch(0.200 0.012 264);
+  --accent-foreground: oklch(0.623 0.215 264.4);
+
+  /* Semantic */
+  --destructive: oklch(0.704 0.191 22.2);   /* red-400 for dark */
+  --border: oklch(0.220 0.015 264);         /* ~#1E293B slate-800 */
+  --input: oklch(0.220 0.015 264 / 50%);
+  --ring: oklch(0.623 0.215 264.4);
+
+  /* Sidebar */
+  --sidebar: oklch(0.130 0.010 264);
+  --sidebar-foreground: oklch(0.976 0.003 264);
+  --sidebar-primary: oklch(0.623 0.215 264.4);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.200 0.012 264);
+  --sidebar-accent-foreground: oklch(0.623 0.215 264.4);
+  --sidebar-border: oklch(0.220 0.015 264);
+  --sidebar-ring: oklch(0.623 0.215 264.4);
+}
+
+/* ─── Base layer ─────────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+  html {
+    @apply scroll-smooth;
+  }
+
+  /* Typography scale using display font for headings */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+  }
+
+  code, pre, kbd, samp {
+    font-family: var(--font-mono);
+  }
+
+  /* Smooth focus ring */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: calc(var(--radius) * 0.5);
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ─── Utility classes ────────────────────────────────────────────────────── */
+@layer utilities {
+  /* Display font utility */
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  /* Glass surface effect */
+  .glass {
+    backdrop-filter: blur(16px);
+    background-color: oklch(1 0 0 / 80%);
+    border: 1px solid oklch(0.895 0.012 264 / 60%);
+  }
+  .dark .glass {
+    background-color: oklch(0.107 0.008 264 / 80%);
+    border: 1px solid oklch(1 0 0 / 10%);
+  }
+
+  /* Gradient text utility */
+  .text-gradient {
+    background: linear-gradient(
+      135deg,
+      oklch(0.488 0.213 264.4),
+      oklch(0.600 0.230 240)
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
