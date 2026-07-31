@@ -16,7 +16,7 @@ export default function NotFound() {
           The page you&apos;re looking for doesn&apos;t exist, has been moved, or is
           temporarily unavailable.
         </p>
-        <Button size="lg" render={<Link href="/" />}>
+        <Button size="lg" render={<Link href="/" />} nativeButton={false}>
           <ArrowLeft weight="bold" data-icon="inline-start" />
           Back to Home
         </Button>

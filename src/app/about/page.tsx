@@ -51,12 +51,12 @@ export default async function AboutPage() {
             <ScrollReveal delay={0.1}>
               <div className="flex gap-4">
                 {about?.resume_url && (
-                  <Button render={<a href={about.resume_url} target="_blank" rel="noopener noreferrer" download />}>
+                  <Button render={<a href={about.resume_url} target="_blank" rel="noopener noreferrer" download />} nativeButton={false}>
                     <DownloadSimple weight="bold" data-icon="inline-start" />
                     Resume
                   </Button>
                 )}
-                <Button variant="outline" render={<a href="https://linkedin.com/in/hafizhrizqullah" target="_blank" rel="noopener noreferrer" />}>
+                <Button variant="outline" render={<a href="https://linkedin.com/in/hafizhrizqullah" target="_blank" rel="noopener noreferrer" />} nativeButton={false}>
                   LinkedIn
                   <ArrowUpRight weight="bold" data-icon="inline-end" />
                 </Button>

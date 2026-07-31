@@ -107,11 +107,11 @@ export function Hero() {
             variants={itemVariants}
             className="flex flex-wrap items-center gap-3"
           >
-            <Button size="lg" render={<Link href="/projects" />}>
+            <Button size="lg" render={<Link href="/projects" />} nativeButton={false}>
                 View Projects
                 <ArrowRight weight="bold" data-icon="inline-end" />
             </Button>
-            <Button size="lg" variant="outline" render={<a href="/Hafizh Rizqullah Prasetya - CV.pdf" target="_blank" rel="noopener noreferrer" download />}>
+            <Button size="lg" variant="outline" render={<a href="/Hafizh Rizqullah Prasetya - CV.pdf" target="_blank" rel="noopener noreferrer" download />} nativeButton={false}>
                 <DownloadSimple weight="duotone" data-icon="inline-start" />
                 Download CV
             </Button>

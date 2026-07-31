@@ -28,12 +28,12 @@ export function FooterCTA() {
               </p>
               
               <div className="flex flex-wrap items-center justify-center gap-3">
-                <Button size="lg" variant="secondary" render={<Link href="/contact" />}>
+                <Button size="lg" render={<Link href="/contact" />} nativeButton={false}>
                     Get in touch
                     <ArrowRight weight="bold" data-icon="inline-end" />
                 </Button>
                 
-                <Button size="lg" variant="outline" className="bg-transparent text-primary-foreground border-primary-foreground/20 hover:bg-primary-foreground/10 hover:text-primary-foreground" render={<a href="/Hafizh Rizqullah Prasetya - CV.pdf" target="_blank" rel="noopener noreferrer" download />}>
+                <Button size="lg" variant="outline" className="bg-transparent text-primary-foreground border-primary-foreground/20 hover:bg-primary-foreground/10 hover:text-primary-foreground" render={<a href="/Hafizh Rizqullah Prasetya - CV.pdf" target="_blank" rel="noopener noreferrer" download />} nativeButton={false}>
                     <FileText weight="duotone" data-icon="inline-start" />
                     Download CV
                 </Button>
