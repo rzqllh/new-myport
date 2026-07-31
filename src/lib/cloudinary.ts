@@ -56,15 +56,16 @@ export function cloudinaryUrl(
     crop = "fill",
   } = options;
 
-  const transforms: string[] = [
+  const transforms = [
     `f_${format}`,
     `q_${quality}`,
     crop && width ? `c_${crop}` : "",
     width ? `w_${width}` : "",
     height ? `h_${height}` : "",
   ]
-    .filter(Boolean)
+    .filter((t): t is string => Boolean(t))
     .join(",");
+
 
   return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${transforms}/${publicId}`;
 }
