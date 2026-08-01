@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { ScrollReveal } from "@/components/scroll-reveal";
+import { RevealCard } from "@/components/reveal-card";
 import { ProjectCard } from "@/components/project-card";
 
 export const metadata: Metadata = {
@@ -40,12 +41,12 @@ export default async function ProjectsPage() {
       {projects && projects.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {projects.map((project, i) => (
-            <ScrollReveal key={project.id} delay={i * 0.05}>
+            <RevealCard key={project.id} delay={i * 0.05} className="h-full">
               <ProjectCard
                 project={project as Parameters<typeof ProjectCard>[0]["project"]}
                 className="h-full"
               />
-            </ScrollReveal>
+            </RevealCard>
           ))}
         </div>
       ) : (

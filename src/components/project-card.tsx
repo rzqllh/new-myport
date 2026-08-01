@@ -32,9 +32,7 @@ export function ProjectCard({
     <Link
       href={`/projects/${project.slug}`}
       className={cn(
-        "group relative flex flex-col rounded-2xl border border-border bg-card overflow-hidden",
-        "transition-all duration-300 ease-out",
-        "hover:shadow-lg hover:shadow-foreground/5 hover:-translate-y-1",
+        "group relative flex flex-col h-full rounded-2xl overflow-hidden",
         "focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2",
         className
       )}

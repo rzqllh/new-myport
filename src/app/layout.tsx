@@ -27,31 +27,44 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Hafizh Rizqullah Prasetya — PMO · Designer · Developer",
-    template: "%s | Hafizh Rizqullah Prasetya",
-  },
-  description:
-    "Personal portfolio of Hafizh Rizqullah Prasetya — a hybrid Project Management Officer, UI/UX Designer, and Web Developer based in Indonesia.",
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://hafizhrizqullah.vercel.app"
-  ),
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    siteName: "Hafizh Rizqullah Prasetya",
-  },
-  twitter: {
-    card: "summary_large_image",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
+import { createClient } from "@/lib/supabase/server";
 
-export default function RootLayout({
+export async function generateMetadata(): Promise<Metadata> {
+  const supabase = await createClient();
+  const { data } = await supabase.from("site_settings").select("key, value");
+  
+  const settings = Object.fromEntries((data ?? []).map((row) => [row.key, row.value]));
+  
+  const title = settings.general?.site_title || "Hafizh Rizqullah Prasetya";
+  const tagline = settings.general?.tagline || "PMO · Designer · Developer";
+  const desc = settings.seo?.meta_description || "Personal portfolio of Hafizh Rizqullah Prasetya";
+  const ogImage = settings.seo?.og_image || "";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hafizhrizqullah.vercel.app";
+
+  return {
+    title: {
+      default: `${title} — ${tagline}`,
+      template: `%s | ${title}`,
+    },
+    description: desc,
+    metadataBase: new URL(baseUrl),
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      siteName: title,
+      ...(ogImage && { images: [{ url: ogImage }] }),
+    },
+    twitter: {
+      card: "summary_large_image",
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (

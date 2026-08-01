@@ -30,11 +30,12 @@ export default async function AdminProjectsPage() {
             Manage your portfolio case studies and projects.
           </p>
         </div>
-        <Button asChild>
-          <Link href="/admin/projects/new">
-            <Plus weight="bold" className="mr-2" />
-            New Project
-          </Link>
+        <Button 
+          render={<Link href="/admin/projects/new" />}
+          nativeButton={false}
+        >
+          <Plus weight="bold" className="mr-2" />
+          New Project
         </Button>
       </div>
 
@@ -77,10 +78,13 @@ export default async function AdminProjectsPage() {
                     )}
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Button variant="ghost" size="icon" asChild>
-                      <Link href={`/admin/projects/${project.id}/edit`}>
-                        <PencilSimple weight="duotone" className="size-4" />
-                      </Link>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      render={<Link href={`/admin/projects/${project.id}/edit`} />}
+                      nativeButton={false}
+                    >
+                      <PencilSimple weight="duotone" className="size-4" />
                     </Button>
                     <DeleteProjectButton id={project.id} />
                   </TableCell>
