@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 import { createClient } from "@/lib/supabase/server";
 import { ScrollReveal } from "@/components/scroll-reveal";
+import { RevealCard } from "@/components/reveal-card";
 
 export async function FeaturedArticles() {
   const supabase = await createClient();
@@ -52,10 +53,10 @@ export async function FeaturedArticles() {
               : "Recently";
 
             return (
-              <ScrollReveal key={post.id} delay={i * 0.05} className="h-full">
+              <RevealCard key={post.id} delay={i * 0.05} className="h-full">
                 <Link
                   href={`/blog/${post.slug}`}
-                  className="group flex flex-col h-full p-6 lg:p-8 rounded-2xl border border-border bg-card hover:bg-muted/50 transition-all duration-300 hover:shadow-sm hover:-translate-y-1"
+                  className="group flex flex-col h-full p-6 lg:p-8 rounded-2xl hover:bg-muted/50 transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
                 >
                   <p className="text-xs font-medium text-muted-foreground mb-4">
                     {date}
@@ -77,7 +78,7 @@ export async function FeaturedArticles() {
                     </p>
                   )}
                 </Link>
-              </ScrollReveal>
+              </RevealCard>
             );
           })}
         </div>

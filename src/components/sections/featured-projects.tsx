@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { createClient } from "@/lib/supabase/server";
 import { ScrollReveal } from "@/components/scroll-reveal";
+import { RevealCard } from "@/components/reveal-card";
 import { ProjectCard } from "@/components/project-card";
 
 export async function FeaturedProjects() {
@@ -56,24 +57,24 @@ export async function FeaturedProjects() {
         {/* Asymmetric grid: 1 large left + 2 stacked right */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {primary && (
-            <ScrollReveal delay={0.05}>
+            <RevealCard delay={0.05}>
               <ProjectCard
                 project={primary as Parameters<typeof ProjectCard>[0]["project"]}
                 featured
                 className="h-full"
               />
-            </ScrollReveal>
+            </RevealCard>
           )}
 
           {secondary.length > 0 && (
             <div className="flex flex-col gap-6">
               {secondary.map((project, i) => (
-                <ScrollReveal key={project.id} delay={0.1 + i * 0.05}>
+                <RevealCard key={project.id} delay={0.1 + i * 0.05} className="flex-1">
                   <ProjectCard
                     project={project as Parameters<typeof ProjectCard>[0]["project"]}
-                    className="flex-1"
+                    className="h-full"
                   />
-                </ScrollReveal>
+                </RevealCard>
               ))}
             </div>
           )}
