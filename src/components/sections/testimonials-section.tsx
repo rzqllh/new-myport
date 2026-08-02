@@ -29,8 +29,8 @@ export async function TestimonialsSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {testimonials.map((t, i) => (
-            <RevealCard key={t.id} delay={i * 0.05} interactive={false} className="h-full">
-              <figure className="flex flex-col h-full p-6">
+            <RevealCard key={t.id} delay={i * 0.05} className="h-full">
+              <figure className="flex flex-col h-full p-6 rounded-2xl border border-border bg-card">
                 <Quotes weight="fill" size={24} className="text-primary/40 mb-4 shrink-0" />
                 <blockquote className="flex-1 text-sm leading-relaxed text-muted-foreground">
                   &ldquo;{t.quote}&rdquo;

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageUpload } from "@/components/image-upload";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 
 interface AboutData {
   id: string;
@@ -30,14 +31,10 @@ export function AboutForm({ initialData }: AboutFormProps) {
   const [photoUrl, setPhotoUrl] = useState(initialData?.photo_url ?? "");
 
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    setError(null);
-    setSaved(false);
 
     const payload = {
       bio: bio || null,
@@ -57,9 +54,9 @@ export function AboutForm({ initialData }: AboutFormProps) {
     }
 
     if (err) {
-      setError(err.message);
+      toast.error(err.message);
     } else {
-      setSaved(true);
+      toast.success("Changes saved successfully.");
       router.refresh();
     }
 
@@ -68,17 +65,6 @@ export function AboutForm({ initialData }: AboutFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl">
-      {error && (
-        <div className="bg-destructive/10 text-destructive p-4 rounded-lg text-sm">
-          {error}
-        </div>
-      )}
-      {saved && (
-        <div className="bg-green-500/10 text-green-600 dark:text-green-400 p-4 rounded-lg text-sm">
-          Changes saved successfully.
-        </div>
-      )}
-
       {/* Photo */}
       <div className="space-y-3">
         <div>
@@ -92,6 +78,7 @@ export function AboutForm({ initialData }: AboutFormProps) {
             value={photoUrl || undefined}
             folder="portfolio/about"
             label="Upload photo"
+            aspectRatio={1}
             onUpload={(url) => setPhotoUrl(url)}
             onRemove={() => setPhotoUrl("")}
           />

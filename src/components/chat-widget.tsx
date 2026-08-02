@@ -2,9 +2,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { MessageCircle, X, Send } from 'lucide-react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Card } from './ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,6 +30,7 @@ export default function ChatWidget() {
     setIsLoading(true);
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const payload: any = { 
         messages: [...messages, { role: 'user', parts: [{ text: currentInput }] }] 
       };
@@ -69,7 +69,7 @@ export default function ChatWidget() {
       if (data.sessionToken) setSessionToken(data.sessionToken);
       setMessages(p => [...p, { role: 'model', parts: [{ text: data.message }] }]);
 
-    } catch (e) {
+        } catch {
       setMessages(p => [...p, { role: 'model', parts: [{ text: 'Network error. Please try again.' }] }]);
     } finally {
       setIsLoading(false);
@@ -88,7 +88,7 @@ export default function ChatWidget() {
   }
 
   return (
-    <Card className="fixed bottom-4 right-4 w-[350px] h-[500px] flex flex-col shadow-xl border-border z-50 bg-background">
+    <div className="fixed bottom-4 right-4 w-[350px] h-[500px] flex flex-col shadow-xl border border-border rounded-xl z-50 bg-background">
       <div className="flex justify-between items-center p-4 border-b">
         <h3 className="font-semibold">Chat with AI</h3>
         <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
@@ -134,6 +134,6 @@ export default function ChatWidget() {
           </Button>
         </form>
       </div>
-    </Card>
+    </div>
   );
 }
