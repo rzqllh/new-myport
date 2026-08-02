@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import { Space_Grotesk, Archivo, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
-import { PageTransition } from "@/components/layout/page-transition";
 import "./globals.css";
+
+const ChatWidget = dynamic(() => import('@/components/chat-widget'), { ssr: false });
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -80,11 +80,8 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
-          <PageTransition>
-            <main className="flex-1 pt-[72px]">{children}</main>
-          </PageTransition>
-          <Footer />
+          {children}
+          <ChatWidget />
         </ThemeProvider>
       </body>
     </html>
