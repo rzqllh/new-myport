@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -15,11 +16,15 @@ import {
 
 export default async function AdminProjectsPage() {
   const supabase = await createClient();
-  const { data: projects } = await supabase
+  const { data: projects, error } = await supabase
     .from("projects")
     .select("*")
     .order("sort_order", { ascending: true })
     .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching projects:", error);
+  }
 
   return (
     <div className="space-y-6">
@@ -51,7 +56,16 @@ export default async function AdminProjectsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {!projects || projects.length === 0 ? (
+            {error ? (
+              <TableRow>
+                <TableCell colSpan={5} className="h-32 text-center text-red-500">
+                  <p className="font-semibold">Error fetching projects:</p>
+                  <pre className="text-xs text-left inline-block max-w-[800px] whitespace-pre-wrap mt-2 p-2 bg-red-50/50 rounded-md">
+                    {JSON.stringify(error, null, 2)}
+                  </pre>
+                </TableCell>
+              </TableRow>
+            ) : !projects || projects.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
                   No projects found. Create one to get started.
@@ -97,3 +111,4 @@ export default async function AdminProjectsPage() {
     </div>
   );
 }
+

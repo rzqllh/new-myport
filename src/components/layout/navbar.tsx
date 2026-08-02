@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "motion/react";
 import { List, X } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -20,6 +20,12 @@ import { cn } from "@/lib/utils";
 export function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { scrollY } = useScroll();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    setIsScrolled(latest > 20);
+  });
 
   return (
     <header className="fixed top-4 left-4 right-4 z-50">
@@ -27,9 +33,10 @@ export function Navbar() {
         className={cn(
           "mx-auto max-w-[1400px]",
           "flex items-center justify-between",
-          "px-4 py-2.5 rounded-2xl",
-          "glass border border-border/60",
-          "shadow-sm"
+          "px-4 py-2.5 rounded-2xl transition-all duration-300",
+          isScrolled 
+            ? "glass border border-border/60 shadow-sm bg-background/80" 
+            : "bg-transparent border-transparent"
         )}
         aria-label="Main navigation"
       >

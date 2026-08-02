@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ImageUpload } from "@/components/image-upload";
+import { toast } from "sonner";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -18,7 +20,7 @@ interface GeneralSettings {
 interface SocialSettings {
   github: string;
   linkedin: string;
-  twitter: string;
+  instagram: string;
   email: string;
 }
 
@@ -29,6 +31,14 @@ interface SeoSettings {
 
 interface CvSettings {
   url: string;
+}
+
+interface HeroStatsSettings {
+  client_satisfaction: string;
+  on_time_delivery: string;
+  teams_collaborated: string;
+  years_experience: string;
+  based_in: string;
 }
 
 interface SettingsFormProps {
@@ -49,7 +59,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
   const [social, setSocial] = useState<SocialSettings>({
     github: initialSettings.social?.github ?? "",
     linkedin: initialSettings.social?.linkedin ?? "",
-    twitter: initialSettings.social?.twitter ?? "",
+    instagram: initialSettings.social?.instagram ?? "",
     email: initialSettings.social?.email ?? "",
   });
 
@@ -62,9 +72,15 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     url: initialSettings.cv?.url ?? "",
   });
 
+  const [heroStats, setHeroStats] = useState<HeroStatsSettings>({
+    client_satisfaction: initialSettings.hero_stats?.client_satisfaction ?? "100%",
+    on_time_delivery: initialSettings.hero_stats?.on_time_delivery ?? "98%",
+    teams_collaborated: initialSettings.hero_stats?.teams_collaborated ?? "15+",
+    years_experience: initialSettings.hero_stats?.years_experience ?? "5+",
+    based_in: initialSettings.hero_stats?.based_in ?? "Indonesia",
+  });
+
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
 
   async function upsertKey(key: string, value: Record<string, string>) {
     const { error: err } = await supabase
@@ -76,8 +92,6 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    setError(null);
-    setSaved(false);
 
     try {
       await Promise.all([
@@ -85,11 +99,12 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         upsertKey("social", social as unknown as Record<string, string>),
         upsertKey("seo", seo as unknown as Record<string, string>),
         upsertKey("cv", cv as unknown as Record<string, string>),
+        upsertKey("hero_stats", heroStats as unknown as Record<string, string>),
       ]);
-      setSaved(true);
+      toast.success("Settings saved successfully.");
       router.refresh();
     } catch (err: unknown) {
-      setError(
+      toast.error(
         err instanceof Error ? err.message : "Failed to save settings."
       );
     } finally {
@@ -97,48 +112,15 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     }
   }
 
-  // ── Section wrapper ────────────────────────────────────────────────────────
-  function Section({
-    title,
-    description,
-    children,
-  }: {
-    title: string;
-    description?: string;
-    children: React.ReactNode;
-  }) {
-    return (
-      <section className="space-y-4 pt-6 first:pt-0 border-t first:border-t-0">
-        <div>
-          <h2 className="text-base font-semibold">{title}</h2>
-          {description && (
-            <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
-          )}
-        </div>
-        {children}
-      </section>
-    );
-  }
-
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <form onSubmit={handleSubmit} className="space-y-0 max-w-2xl divide-y divide-border">
-      {error && (
-        <div className="bg-destructive/10 text-destructive p-4 rounded-lg text-sm mb-6">
-          {error}
-        </div>
-      )}
-      {saved && (
-        <div className="bg-green-500/10 text-green-600 dark:text-green-400 p-4 rounded-lg text-sm mb-6">
-          Settings saved successfully.
-        </div>
-      )}
-
       {/* ── General ─────────────────────────────────────────────────────── */}
-      <Section
-        title="General"
-        description="Basic site identity shown in the browser tab and page headers."
-      >
+      <section className="space-y-4 pt-6 first:pt-0 border-t first:border-t-0">
+        <div>
+          <h2 className="text-base font-semibold">General</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">Basic site identity shown in the browser tab and page headers.</p>
+        </div>
         <div className="grid grid-cols-1 gap-4">
           <div className="space-y-1.5">
             <Label htmlFor="site_title">Site Title</Label>
@@ -163,19 +145,20 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
             />
           </div>
         </div>
-      </Section>
+      </section>
 
       {/* ── Social ──────────────────────────────────────────────────────── */}
-      <Section
-        title="Social Links"
-        description="Used in the footer and contact page."
-      >
+      <section className="space-y-4 pt-6 first:pt-0 border-t first:border-t-0">
+        <div>
+          <h2 className="text-base font-semibold">Social Links</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">Used in the footer and contact page.</p>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {(
             [
               { key: "github", label: "GitHub URL", placeholder: "https://github.com/…" },
               { key: "linkedin", label: "LinkedIn URL", placeholder: "https://linkedin.com/in/…" },
-              { key: "twitter", label: "Twitter / X URL", placeholder: "https://x.com/…" },
+              { key: "instagram", label: "Instagram URL", placeholder: "https://instagram.com/…" },
               { key: "email", label: "Email Address", placeholder: "hello@example.com" },
             ] as Array<{ key: keyof SocialSettings; label: string; placeholder: string }>
           ).map(({ key, label, placeholder }) => (
@@ -192,13 +175,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
             </div>
           ))}
         </div>
-      </Section>
+      </section>
 
       {/* ── SEO ─────────────────────────────────────────────────────────── */}
-      <Section
-        title="SEO"
-        description="Default meta description and Open Graph image for pages without their own."
-      >
+      <section className="space-y-4 pt-6 first:pt-0 border-t first:border-t-0">
+        <div>
+          <h2 className="text-base font-semibold">SEO</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">Default meta description and Open Graph image for pages without their own.</p>
+        </div>
         <div className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="meta_description">Meta Description</Label>
@@ -217,27 +201,61 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
             </p>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="og_image">OG Image URL</Label>
-            <Input
-              id="og_image"
-              value={seo.og_image}
-              onChange={(e) =>
-                setSeo((p) => ({ ...p, og_image: e.target.value }))
-              }
-              placeholder="https://res.cloudinary.com/…/og-default.jpg"
-            />
-            <p className="text-xs text-muted-foreground">
+            <Label>OG Image</Label>
+            <div className="max-w-md">
+              <ImageUpload
+                value={seo.og_image || undefined}
+                folder="portfolio/seo"
+                label="Upload OG Image"
+                aspectRatio={1200 / 630}
+                onUpload={(url) => setSeo((p) => ({ ...p, og_image: url }))}
+                onRemove={() => setSeo((p) => ({ ...p, og_image: "" }))}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
               Recommended: 1200×630 px
             </p>
           </div>
         </div>
-      </Section>
+      </section>
+
+      {/* ── Hero Stats ──────────────────────────────────────────────────────── */}
+      <section className="space-y-4 pt-6 first:pt-0 border-t first:border-t-0">
+        <div>
+          <h2 className="text-base font-semibold">Hero Section Stats</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">Dynamic numbers shown on the landing page hero section.</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {(
+            [
+              { key: "client_satisfaction", label: "Client Satisfaction", placeholder: "100%" },
+              { key: "on_time_delivery", label: "On Time Delivery", placeholder: "98%" },
+              { key: "teams_collaborated", label: "Teams Collaborated With", placeholder: "15+" },
+              { key: "years_experience", label: "Years of Experience", placeholder: "5+" },
+              { key: "based_in", label: "Based In", placeholder: "Indonesia" },
+            ] as Array<{ key: keyof HeroStatsSettings; label: string; placeholder: string }>
+          ).map(({ key, label, placeholder }) => (
+            <div key={key} className="space-y-1.5">
+              <Label htmlFor={`hero_stats_${key}`}>{label}</Label>
+              <Input
+                id={`hero_stats_${key}`}
+                value={heroStats[key]}
+                onChange={(e) =>
+                  setHeroStats((p) => ({ ...p, [key]: e.target.value }))
+                }
+                placeholder={placeholder}
+              />
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* ── CV ──────────────────────────────────────────────────────────── */}
-      <Section
-        title="CV / Resume"
-        description="Direct link used in the hero CTA and contact page."
-      >
+      <section className="space-y-4 pt-6 first:pt-0 border-t first:border-t-0">
+        <div>
+          <h2 className="text-base font-semibold">CV / Resume</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">Direct link used in the hero CTA and contact page.</p>
+        </div>
         <div className="space-y-1.5">
           <Label htmlFor="cv_url">CV Download URL</Label>
           <Input
@@ -247,7 +265,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
             placeholder="https://drive.google.com/…"
           />
         </div>
-      </Section>
+      </section>
 
       {/* ── Submit ──────────────────────────────────────────────────────── */}
       <div className="flex justify-end pt-6">

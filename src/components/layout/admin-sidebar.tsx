@@ -18,11 +18,11 @@ import {
 const ADMIN_NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: SquaresFour },
   { href: "/admin/projects", label: "Projects", icon: FolderOpen },
-  { href: "/admin/blog", label: "Blog", icon: Article },
-  { href: "/admin/about", label: "About", icon: User },
   { href: "/admin/skills", label: "Skills", icon: Code },
+  { href: "/admin/about", label: "About", icon: User },
   { href: "/admin/experience", label: "Experience", icon: Briefcase },
   { href: "/admin/testimonials", label: "Testimonials", icon: Quotes },
+  { href: "/admin/blog", label: "Blog", icon: Article },
   { href: "/admin/messages", label: "Messages", icon: Envelope },
   { href: "/admin/settings", label: "Settings", icon: Gear },
 ];

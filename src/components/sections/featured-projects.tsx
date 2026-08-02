@@ -8,18 +8,29 @@ import { ProjectCard } from "@/components/project-card";
 export async function FeaturedProjects() {
   const supabase = await createClient();
 
-  const { data: projects } = await supabase
+  const { data: projects, error } = await supabase
     .from("projects")
     .select(
       `
-      id, slug, title, description, category, tech_stack, status, featured,
-      project_images(url, alt_text, sort_order)
+      id, slug, title, description, category, tech_stack, status, featured, cover_url, cover_public_id
     `
     )
     .eq("featured", true)
     .eq("status", "published")
     .order("sort_order")
     .limit(3);
+
+  // If there's an error, show it prominently instead of silently hiding
+  if (error) {
+    return (
+      <section className="py-24 md:py-32 bg-red-50 text-red-600 font-mono text-xs">
+        <div className="mx-auto max-w-[1400px] px-6">
+          <p className="font-bold text-base mb-2">Error fetching featured projects:</p>
+          <pre>{JSON.stringify(error, null, 2)}</pre>
+        </div>
+      </section>
+    );
+  }
 
   // If no featured projects yet, section is hidden (not rendered)
   if (!projects || projects.length === 0) return null;

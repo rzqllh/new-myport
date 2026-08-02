@@ -11,7 +11,8 @@ interface Project {
   category: string | null;
   tech_stack: string[];
   status: string;
-  project_images?: Array<{ url: string; alt_text: string | null }>;
+  cover_url?: string | null;
+  cover_public_id?: string | null;
 }
 
 interface ProjectCardProps {
@@ -25,14 +26,14 @@ export function ProjectCard({
   className,
   featured = false,
 }: ProjectCardProps) {
-  const image = project.project_images?.[0];
-  const hasImage = !!image;
+  const hasImage = !!project.cover_url;
 
   return (
     <Link
       href={`/projects/${project.slug}`}
       className={cn(
-        "group relative flex flex-col h-full rounded-2xl overflow-hidden",
+        "group relative flex flex-col h-full rounded-2xl overflow-hidden border border-border bg-card",
+        "transition-all duration-300 ease-out hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1.5",
         "focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2",
         className
       )}
@@ -41,29 +42,29 @@ export function ProjectCard({
       {/* Image area */}
       <div
         className={cn(
-          "relative overflow-hidden bg-muted",
+          "relative overflow-hidden bg-muted border-b border-border",
           featured ? "aspect-[16/9]" : "aspect-[4/3]"
         )}
       >
         {hasImage ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={image.url}
-            alt={image.alt_text ?? project.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            src={project.cover_url!}
+            alt={project.title}
+            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             loading="lazy"
           />
         ) : (
           /* Placeholder when no image — text-only card treatment */
-          <div className="absolute inset-0 flex items-end p-6 bg-gradient-to-br from-primary/5 via-transparent to-primary/10">
-            <p className="text-sm text-muted-foreground font-mono">
+          <div className="absolute inset-0 flex items-center justify-center p-6 bg-gradient-to-br from-muted/50 to-muted">
+            <p className="text-sm text-muted-foreground font-mono tracking-wider uppercase">
               {project.category ?? "Project"}
             </p>
           </div>
         )}
 
         {/* Hover overlay */}
-        <div className="absolute inset-0 bg-foreground/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="absolute inset-0 bg-foreground/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
       {/* Content */}

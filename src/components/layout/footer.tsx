@@ -1,17 +1,27 @@
 import Link from "next/link";
-import { GithubLogo, LinkedinLogo, TwitterLogo, Envelope } from "@phosphor-icons/react/dist/ssr";
+import { GithubLogo, LinkedinLogo, TwitterLogo, Envelope, InstagramLogo } from "@phosphor-icons/react/dist/ssr";
 import { Separator } from "@/components/ui/separator";
-import { NAV_ITEMS, SITE_NAME, SITE_TAGLINE, SOCIAL_LINKS } from "@/lib/constants";
+import { NAV_ITEMS, SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/server";
 
-const SOCIAL_ICONS = [
-  { href: SOCIAL_LINKS.github, label: "GitHub", Icon: GithubLogo },
-  { href: SOCIAL_LINKS.linkedin, label: "LinkedIn", Icon: LinkedinLogo },
-  { href: SOCIAL_LINKS.twitter, label: "Twitter / X", Icon: TwitterLogo },
-  { href: SOCIAL_LINKS.email, label: "Email", Icon: Envelope },
-].filter((s) => s.href && s.href !== "mailto:");
-
-export function Footer() {
+export async function Footer() {
   const year = new Date().getFullYear();
+  const supabase = await createClient();
+  
+  const { data: settings } = await supabase
+    .from("site_settings")
+    .select("key, value")
+    .in("key", ["social"]);
+
+  const social = (settings?.find(s => s.key === "social")?.value as Record<string, string>) || {};
+
+  const SOCIAL_ICONS = [
+    { href: social.github, label: "GitHub", Icon: GithubLogo },
+    { href: social.linkedin, label: "LinkedIn", Icon: LinkedinLogo },
+    { href: social.twitter, label: "Twitter / X", Icon: TwitterLogo },
+    { href: social.instagram, label: "Instagram", Icon: InstagramLogo },
+    { href: social.email, label: "Email", Icon: Envelope },
+  ].filter((s) => s.href && s.href !== "mailto:");
 
   return (
     <footer className="border-t border-border bg-muted/30">

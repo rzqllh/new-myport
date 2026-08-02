@@ -56,7 +56,7 @@ export async function FeaturedArticles() {
               <RevealCard key={post.id} delay={i * 0.05} className="h-full">
                 <Link
                   href={`/blog/${post.slug}`}
-                  className="group flex flex-col h-full p-6 lg:p-8 rounded-2xl hover:bg-muted/50 transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
+                  className="group flex flex-col h-full p-6 lg:p-8 rounded-2xl border border-border bg-card hover:bg-muted/50 transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
                 >
                   <p className="text-xs font-medium text-muted-foreground mb-4">
                     {date}

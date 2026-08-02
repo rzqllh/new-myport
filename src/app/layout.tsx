@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
-import dynamic from "next/dynamic";
 import { Space_Grotesk, Archivo, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
-
-const ChatWidget = dynamic(() => import('@/components/chat-widget'), { ssr: false });
+import ChatWidget from "@/components/chat-widget";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
