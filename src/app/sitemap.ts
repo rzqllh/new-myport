@@ -3,8 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient();
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hafizhrizqullah.vercel.app";
-
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://rzqllh-port.vercel.app/"
   const { data: projects } = await supabase
     .from("projects")
     .select("slug, updated_at");

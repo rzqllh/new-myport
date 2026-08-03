@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { Turnstile } from '@marsidev/react-turnstile';
-import { MessageCircle, X, Send } from 'lucide-react';
+import { ChatCircle, X, PaperPlaneRight } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -82,7 +82,7 @@ export default function ChatWidget() {
         className="fixed bottom-4 right-4 rounded-full w-14 h-14 shadow-lg z-50" 
         onClick={() => setIsOpen(true)}
       >
-        <MessageCircle size={24} />
+        <ChatCircle weight="fill" size={24} />
       </Button>
     );
   }
@@ -92,7 +92,7 @@ export default function ChatWidget() {
       <div className="flex justify-between items-center p-4 border-b">
         <h3 className="font-semibold">Chat with AI</h3>
         <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
-          <X size={20} />
+          <X weight="bold" size={20} />
         </Button>
       </div>
       
@@ -130,7 +130,7 @@ export default function ChatWidget() {
             disabled={isLoading || (!sessionToken && !turnstileToken)}
           />
           <Button type="submit" size="icon" disabled={isLoading || (!sessionToken && !turnstileToken)}>
-            <Send size={16} />
+            <PaperPlaneRight weight="fill" size={16} />
           </Button>
         </form>
       </div>
