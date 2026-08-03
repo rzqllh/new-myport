@@ -16,7 +16,7 @@ const globalRateLimit = new Ratelimit({ redis, limiter: Ratelimit.fixedWindow(50
 
 export async function POST(req: Request) {
   try {
-    const { messages, turnstileToken, sessionToken } = await req.json();
+    const { messages, sessionToken } = await req.json();
 
     let newSessionToken;
 
@@ -24,13 +24,8 @@ export async function POST(req: Request) {
       if (!(await verifyChatSession(sessionToken))) {
         return NextResponse.json({ error: 'Session expired', code: 'SESSION_EXPIRED' }, { status: 401 });
       }
-    } else if (turnstileToken) {
-      if (!(await verifyTurnstileToken(turnstileToken))) {
-        return NextResponse.json({ error: 'Verification failed', code: 'TURNSTILE_FAILED' }, { status: 403 });
-      }
-      newSessionToken = await signChatSession();
     } else {
-      return NextResponse.json({ error: 'Unauthorized', code: 'UNAUTHORIZED' }, { status: 401 });
+      newSessionToken = await signChatSession();
     }
 
     const ip = req.headers.get('x-forwarded-for') || '127.0.0.1';

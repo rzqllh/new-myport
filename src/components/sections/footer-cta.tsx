@@ -3,9 +3,9 @@ import { ArrowRight, FileText } from "@phosphor-icons/react/dist/ssr";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/scroll-reveal";
 
-export function FooterCTA() {
+export function FooterCTA({ cvUrl }: { cvUrl?: string }) {
   return (
-    <section aria-labelledby="cta-heading" className="py-24 md:py-32">
+    <section id="contact" aria-labelledby="cta-heading" className="py-24 md:py-32">
       <div className="mx-auto max-w-[1400px] px-6">
         <ScrollReveal>
           <div className="relative rounded-3xl overflow-hidden bg-primary px-6 py-16 md:py-24 text-center">
@@ -32,11 +32,12 @@ export function FooterCTA() {
                     Get in touch
                     <ArrowRight weight="bold" data-icon="inline-end" />
                 </Button>
-                
-                <Button size="lg" variant="outline" className="bg-transparent text-primary-foreground border-primary-foreground/20 hover:bg-primary-foreground/10 hover:text-primary-foreground" render={<a href="/Hafizh Rizqullah Prasetya - CV.pdf" target="_blank" rel="noopener noreferrer" download />} nativeButton={false}>
-                    <FileText weight="duotone" data-icon="inline-start" />
-                    Download CV
-                </Button>
+                {cvUrl && (
+                  <Button size="lg" variant="outline" className="bg-transparent text-primary-foreground border-primary-foreground/20 hover:bg-primary-foreground/10 hover:text-primary-foreground" render={<a href={cvUrl} target="_blank" rel="noopener noreferrer" />} nativeButton={false}>
+                      <FileText weight="duotone" data-icon="inline-start" />
+                      Download CV
+                  </Button>
+                )}
               </div>
             </div>
           </div>

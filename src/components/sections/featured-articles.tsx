@@ -17,7 +17,7 @@ export async function FeaturedArticles() {
   if (!posts || posts.length === 0) return null;
 
   return (
-    <section aria-labelledby="articles-heading" className="py-24 md:py-32">
+    <section id="blog" aria-labelledby="articles-heading" className="py-24 md:py-32">
       <div className="mx-auto max-w-[1400px] px-6">
         {/* Section Header */}
         <ScrollReveal className="flex items-end justify-between mb-12 gap-4">

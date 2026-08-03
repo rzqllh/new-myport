@@ -39,6 +39,7 @@ export async function FeaturedProjects() {
 
   return (
     <section
+      id="projects"
       aria-labelledby="featured-projects-heading"
       className="py-24 md:py-32"
     >
@@ -65,30 +66,17 @@ export async function FeaturedProjects() {
           </Link>
         </ScrollReveal>
 
-        {/* Asymmetric grid: 1 large left + 2 stacked right */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {primary && (
-            <RevealCard delay={0.05}>
+        {/* Responsive Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {projects.map((project, i) => (
+            <RevealCard key={project.id} delay={0.05 + i * 0.05} className="h-full">
               <ProjectCard
-                project={primary as Parameters<typeof ProjectCard>[0]["project"]}
-                featured
+                project={project as Parameters<typeof ProjectCard>[0]["project"]}
                 className="h-full"
+                featured={i === 0 && projects.length % 2 !== 0} // Feature the first if odd number of projects to balance, or just leave it
               />
             </RevealCard>
-          )}
-
-          {secondary.length > 0 && (
-            <div className="flex flex-col gap-6">
-              {secondary.map((project, i) => (
-                <RevealCard key={project.id} delay={0.1 + i * 0.05} className="flex-1">
-                  <ProjectCard
-                    project={project as Parameters<typeof ProjectCard>[0]["project"]}
-                    className="h-full"
-                  />
-                </RevealCard>
-              ))}
-            </div>
-          )}
+          ))}
         </div>
 
         {/* Mobile "All projects" link */}

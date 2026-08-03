@@ -1,9 +1,12 @@
 import { unstable_cache } from 'next/cache';
-import { createClient } from './supabase/server';
+import { createClient } from '@supabase/supabase-js';
 
 export const getCachedGroundingData = unstable_cache(
   async () => {
-    const supabase = await createClient();
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
     const [projects, experiences, skills] = await Promise.all([
       supabase.from('projects').select('title, description, tech_stack, role').eq('status', 'published').order('sort_order'),
       supabase.from('experiences').select('company, role, description, start_date, end_date').order('sort_order'),

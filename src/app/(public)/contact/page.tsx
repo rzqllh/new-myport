@@ -1,21 +1,19 @@
 import type { Metadata } from "next";
-import { Envelope, MapPin, GithubLogo, LinkedinLogo, TwitterLogo } from "@phosphor-icons/react/dist/ssr";
+import { Envelope, MapPin } from "@phosphor-icons/react/dist/ssr";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { ContactForm } from "@/components/contact-form";
-import { SOCIAL_LINKS } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Contact",
   description: "Get in touch for freelance projects, startup roles, and collaborations.",
 };
 
-const SOCIAL_ICONS = [
-  { href: SOCIAL_LINKS.github, label: "GitHub", Icon: GithubLogo },
-  { href: SOCIAL_LINKS.linkedin, label: "LinkedIn", Icon: LinkedinLogo },
-  { href: SOCIAL_LINKS.twitter, label: "Twitter", Icon: TwitterLogo },
-].filter((s) => s.href);
+export default async function ContactPage() {
+  const supabase = await createClient();
+  const { data } = await supabase.from("site_settings").select("value").eq("key", "social").single();
+  const social = (data?.value as Record<string, string>) || {};
 
-export default function ContactPage() {
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-24 md:py-32">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24">
@@ -45,10 +43,10 @@ export default function ContactPage() {
                   <div>
                     <p className="text-sm font-medium text-foreground mb-1">Email</p>
                     <a
-                      href={SOCIAL_LINKS.email}
+                      href={social.email || "#"}
                       className="text-muted-foreground hover:text-primary transition-colors"
                     >
-                      {SOCIAL_LINKS.email.replace("mailto:", "")}
+                      {social.email ? social.email.replace("mailto:", "") : "hello@example.com"}
                     </a>
                   </div>
                 </div>
@@ -61,26 +59,6 @@ export default function ContactPage() {
                     <p className="text-sm font-medium text-foreground mb-1">Location</p>
                     <p className="text-muted-foreground">Indonesia (Remote / Hybrid)</p>
                   </div>
-                </div>
-              </div>
-            </ScrollReveal>
-
-            <ScrollReveal delay={0.15}>
-              <div className="mt-12 pt-12 border-t border-border">
-                <p className="text-sm font-medium text-foreground mb-4">Connect</p>
-                <div className="flex items-center gap-3">
-                  {SOCIAL_ICONS.map(({ href, label, Icon }) => (
-                    <a
-                      key={label}
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={label}
-                      className="p-2.5 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors shadow-sm"
-                    >
-                      <Icon weight="duotone" className="size-5" />
-                    </a>
-                  ))}
                 </div>
               </div>
             </ScrollReveal>
