@@ -22,9 +22,7 @@ export async function FeaturedArticles() {
         {/* Section Header */}
         <ScrollReveal className="flex items-end justify-between mb-12 gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">
-              Writing
-            </p>
+
             <h2
               id="articles-heading"
               className="font-display font-bold text-3xl md:text-4xl tracking-tighter text-foreground"

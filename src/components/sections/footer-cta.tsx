@@ -9,11 +9,7 @@ export function FooterCTA({ cvUrl }: { cvUrl?: string }) {
       <div className="mx-auto max-w-[1400px] px-6">
         <ScrollReveal>
           <div className="relative rounded-3xl overflow-hidden bg-primary px-6 py-16 md:py-24 text-center">
-            {/* Background texture/glow */}
-            <div
-              className="absolute inset-0 bg-gradient-to-br from-primary-foreground/10 to-transparent pointer-events-none"
-              aria-hidden="true"
-            />
+
             
             <div className="relative z-10 max-w-2xl mx-auto flex flex-col items-center">
               <h2
@@ -23,8 +19,7 @@ export function FooterCTA({ cvUrl }: { cvUrl?: string }) {
                 Have a project in mind?
               </h2>
               <p className="text-primary-foreground/80 text-lg mb-10 max-w-[480px]">
-                I&apos;m currently open to new opportunities, freelance projects,
-                and exciting collaborations.
+                Available for full-time roles and freelance projects. Let&apos;s build something good.
               </p>
               
               <div className="flex flex-wrap items-center justify-center gap-3">

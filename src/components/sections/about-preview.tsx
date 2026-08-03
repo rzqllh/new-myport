@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { createClient } from "@/lib/supabase/server";
 import { ScrollReveal } from "@/components/scroll-reveal";
-
+import { cn } from "@/lib/utils";
 export async function AboutPreview() {
   const supabase = await createClient();
   const { data: about } = await supabase
@@ -35,24 +35,16 @@ export async function AboutPreview() {
                 id="about-preview-heading"
                 className="font-display font-bold text-3xl md:text-4xl tracking-tighter text-foreground mb-6"
               >
-                The hybrid who bridges strategy and execution
+                Bridging business goals and technical reality.
               </h2>
             </ScrollReveal>
 
             <ScrollReveal delay={0.1}>
-              {bio ? (
-                <p className="text-muted-foreground leading-relaxed max-w-[65ch] mb-8">
-                  {bio.length > 280 ? bio.slice(0, 280) + "..." : bio}
-                </p>
-              ) : (
-                <p className="text-muted-foreground leading-relaxed max-w-[65ch] mb-8">
-                  PMO · UI/UX Designer · Web Developer — I operate at the
-                  intersection of product thinking, design craft, and
-                  engineering. Based in Indonesia, I&apos;ve worked across
-                  government digitization, interior design platforms, and
-                  e-commerce products.
-                </p>
-              )}
+              <p className="text-muted-foreground leading-relaxed max-w-[65ch] mb-8 text-lg">
+                {bio && bio.includes("Results-driven IT graduate") 
+                  ? "PMO · UI/UX Designer · Web Developer. Based in Indonesia, I manage projects, design interfaces, and write code. I've shipped everything from government-adjacent systems to fintech interfaces." 
+                  : bio || "PMO · UI/UX Designer · Web Developer. Based in Indonesia, I manage projects, design interfaces, and write code. I've shipped everything from government-adjacent systems to fintech interfaces."}
+              </p>
             </ScrollReveal>
 
             <ScrollReveal delay={0.15}>
@@ -64,53 +56,53 @@ export async function AboutPreview() {
                 <ArrowRight weight="bold" className="size-4" />
               </Link>
             </ScrollReveal>
-
-            {experiences && experiences.length > 0 && (
-              <ScrollReveal delay={0.2} className="mt-12 pt-8 border-t border-border">
-                <h3 className="text-sm font-semibold mb-6 uppercase tracking-wider text-muted-foreground">
-                  Experience & Education
-                </h3>
-                <div className="relative before:absolute before:inset-y-2 before:left-[5px] before:w-px before:bg-border space-y-6">
-                  {experiences.map((exp) => (
-                    <div key={exp.id} className="relative flex gap-6">
-                      <div className="absolute left-0 top-1.5 w-3 h-3 rounded-full border-2 border-background bg-primary z-10" />
-                      <div>
-                        <h4 className="font-medium text-foreground tracking-tight">{exp.position}</h4>
-                        <p className="text-sm text-muted-foreground">{exp.company}</p>
-                        <p className="text-xs text-muted-foreground mt-1 font-mono uppercase">
-                          {new Date(exp.start_date).getFullYear()} — {exp.current ? "Present" : exp.end_date ? new Date(exp.end_date).getFullYear() : ""}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollReveal>
-            )}
           </div>
 
           {/* Photo / decorative side */}
           <ScrollReveal delay={0.1} className="hidden lg:block">
-            {about?.photo_url ? (
-              <div className="relative aspect-[4/5] rounded-3xl overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+            <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl shadow-black/5 ring-1 ring-border">
+              {about?.photo_url ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                   src={about.photo_url}
                   alt="Hafizh Rizqullah Prasetya"
                   className="w-full h-full object-cover"
                 />
-              </div>
-            ) : (
-              /* Decorative placeholder when no photo */
-              <div className="relative aspect-[4/5] rounded-3xl bg-muted border border-border flex items-center justify-center overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
-                <div className="text-center text-muted-foreground">
-                  <div className="w-24 h-24 rounded-full bg-muted-foreground/10 mx-auto mb-4" />
-                  <p className="text-sm">Photo coming soon</p>
+              ) : (
+                <div className="w-full h-full relative flex items-center justify-center bg-zinc-100/50 dark:bg-zinc-900/50 overflow-hidden">
+                  {/* Subtle Grid Pattern */}
+                  <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" 
+                       style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+                  {/* Abstract Mesh Gradients */}
+                  <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-zinc-200/50 via-transparent to-zinc-300/50 dark:from-zinc-800/50 dark:to-zinc-950/50" />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] rounded-full bg-gradient-to-tr from-transparent via-zinc-400/20 to-transparent dark:via-zinc-600/10 blur-3xl opacity-60" />
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </ScrollReveal>
         </div>
+
+        {/* ─── Experience Stack ─── */}
+        {experiences && experiences.length > 0 && (
+          <ScrollReveal delay={0.2} className="mt-20 pt-16 border-t border-border">
+            <h3 className="text-xs font-semibold mb-8 uppercase tracking-widest text-muted-foreground">
+              Experience
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {experiences.map((exp) => (
+                <div key={exp.id} className="group p-6 rounded-2xl bg-card/50 border border-border/50 hover:bg-card hover:border-border transition-all duration-300">
+                  <div className="flex justify-between items-start mb-4">
+                    <h4 className="font-semibold text-foreground tracking-tight text-lg group-hover:text-primary transition-colors">{exp.position}</h4>
+                    <span className="text-xs font-mono uppercase px-2 py-1 rounded-md bg-muted/50 text-muted-foreground">
+                      {new Date(exp.start_date).getFullYear()} — {exp.current ? "Present" : exp.end_date ? new Date(exp.end_date).getFullYear() : ""}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{exp.company}</p>
+                </div>
+              ))}
+            </div>
+          </ScrollReveal>
+        )}
       </div>
     </section>
   );

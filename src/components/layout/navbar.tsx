@@ -35,7 +35,7 @@ export function Navbar() {
     const handleIntersect = (entries: IntersectionObserverEntry[]) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          setActiveSection(`/${entry.target.id}`);
+          setActiveSection(`/#${entry.target.id}`);
         }
       });
     };
@@ -58,7 +58,7 @@ export function Navbar() {
     if (pathname === "/") {
       e.preventDefault();
       window.scrollTo({ top: 0, behavior: "smooth" });
-      setActiveSection("/home");
+      setActiveSection("/#home");
     }
   };
 
@@ -92,10 +92,11 @@ export function Navbar() {
           {NAV_ITEMS.map((item) => {
             let isActive = false;
             if (pathname === "/") {
-              const activeMapped = activeSection === "/home" || activeSection === "" ? "/" : activeSection;
-              isActive = activeMapped === item.href;
+              const activeMapped = activeSection === "/#home" || activeSection === "" ? "/" : activeSection;
+              // We cast item.href to string to avoid TS narrowing errors since we removed '/' from NAV_ITEMS
+              isActive = activeMapped === (item.href as string);
             } else {
-              isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+              isActive = pathname.startsWith(item.href as string);
             }
             return (
               <li key={item.href}>
@@ -177,10 +178,11 @@ export function Navbar() {
                   {NAV_ITEMS.map((item, i) => {
                     let isActive = false;
                     if (pathname === "/") {
-                      const activeMapped = activeSection === "/home" || activeSection === "" ? "/" : activeSection;
-                      isActive = activeMapped === item.href;
+                      const activeMapped = activeSection === "/#home" || activeSection === "" ? "/" : activeSection;
+                      // We cast item.href to string to avoid TS narrowing errors since we removed '/' from NAV_ITEMS
+                      isActive = activeMapped === (item.href as string);
                     } else {
-                      isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+                      isActive = pathname.startsWith(item.href as string);
                     }
                     return (
                       <motion.li

@@ -6,8 +6,8 @@ TRUNCATE TABLE about, experiences, skills, projects, site_settings RESTART IDENT
 
 -- 1. About
 INSERT INTO about (bio, philosophy, hobbies, photo_url) VALUES (
-  'Results-driven IT graduate with hands-on experience building web-based systems, including dashboards, authentication flows, and data-driven applications. Experienced as a Project Management Officer at Telkom Indonesia, contributing to IT project coordination, progress tracking, and cross-functional alignment.',
-  'Bridging the gap between technical execution and business strategy to deliver impactful products.',
+  'PMO · UI/UX Designer · Web Developer. Based in Indonesia, I manage projects, design interfaces, and write code. I''ve shipped everything from government-adjacent systems to fintech interfaces.',
+  'I bridge the gap between business goals and technical reality.',
   'Photography, Technology, UI/UX Research',
   ''
 );
@@ -24,11 +24,11 @@ INSERT INTO experiences (company, role, description, start_date, end_date, is_cu
   1
 ),
 (
-  'Ministry of Education, Culture, Research and Technology',
-  'Computer Operator',
-  'Documented and inventoried Indonesian cultural treasures across 451 museums nationwide. Managed and architected a massive digital asset repository containing over 100,395 multimedia items, optimizing data retrieval for cultural heritage websites. Oversaw the management of cultural reserves, cataloging 30,930 registered objects, buildings, sites, structures, and areas. Acted as the primary IT consultant for museum website operations and digital asset management, ensuring 100% data accuracy and seamless system integration.',
-  '2023-03-01',
-  '2023-04-30',
+  'Gunadarma University',
+  'Bachelor of Informatics',
+  'Focused on software engineering, database management, and human-computer interaction. Graduated with a strong foundation in building scalable web applications and analyzing user experience.',
+  '2018-09-01',
+  '2022-10-31',
   FALSE,
   2
 );

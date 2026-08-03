@@ -11,6 +11,13 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const CATEGORY_ORDER = ["frontend", "design", "backend", "tools"];
 
+const SPAN_MAP: Record<string, string> = {
+  frontend: "lg:col-span-2",
+  backend: "lg:col-span-2",
+  design: "lg:col-span-1",
+  tools: "lg:col-span-1",
+};
+
 interface Skill {
   id: string;
   name: string;
@@ -44,9 +51,6 @@ export async function SkillsSection() {
     >
       <div className="mx-auto max-w-[1400px] px-6">
         <ScrollReveal className="mb-12">
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">
-            Skills
-          </p>
           <h2
             id="skills-heading"
             className="font-display font-bold text-3xl md:text-4xl tracking-tighter text-foreground"
@@ -55,22 +59,29 @@ export async function SkillsSection() {
           </h2>
         </ScrollReveal>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Object.entries(grouped).map(([category, catSkills], groupIdx) => (
-            <ScrollReveal key={category} delay={groupIdx * 0.05}>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+            <ScrollReveal 
+              key={category} 
+              delay={groupIdx * 0.05} 
+              className={cn("h-full", SPAN_MAP[category] || "")}
+            >
+              <div className="h-full flex flex-col p-8 rounded-[2rem] bg-card border border-border shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+                {/* Subtle top glow */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                
+                <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-6">
                   {CATEGORY_LABELS[category] ?? category}
-                </p>
-                <div className="flex flex-wrap gap-2">
+                </h3>
+                <div className="flex flex-wrap gap-2.5 relative z-10">
                   {catSkills.map((skill: Skill) => (
                     <span
                       key={skill.id}
                       className={cn(
-                        "px-3 py-1.5 rounded-full text-sm font-medium transition-colors",
+                        "px-3.5 py-2 rounded-xl text-[11px] font-semibold uppercase tracking-wider transition-colors border",
                         skill.proficiency >= 80
-                          ? "bg-primary/10 text-primary border border-primary/20"
-                          : "bg-muted text-muted-foreground border border-border hover:text-foreground"
+                          ? "bg-foreground/5 text-foreground border-foreground/10"
+                          : "bg-transparent text-muted-foreground border-border hover:bg-muted"
                       )}
                     >
                       {skill.name}
