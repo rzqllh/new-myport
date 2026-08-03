@@ -165,7 +165,7 @@ export function MessagesClient({ initialMessages }: MessagesClientProps) {
 
                 {/* Expanded body */}
                 {isExpanded && (
-                  <div className="px-5 pb-5 space-y-4 border-t border-border/50">
+                  <div className="px-5 pb-5 flex flex-col gap-4 border-t border-border/50">
                     <div className="pt-4">
                       <p className="text-xs text-muted-foreground mb-1">
                         {formatDate(msg.created_at)}

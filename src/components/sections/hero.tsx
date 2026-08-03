@@ -164,21 +164,18 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 0, her
             </motion.div>
           </motion.div>
 
-          {/* ─── Right Column (Visuals & Floating Cards) ─── */}
+          {/* ─── Right Column (Visuals) ─── */}
           <motion.div
             variants={rightColVariants}
             initial="hidden"
             animate="visible"
             className="relative w-full aspect-square md:aspect-auto md:h-[420px] flex items-center justify-center lg:justify-center mt-4 lg:mt-0"
           >
-            {/* Ambient Background Blob */}
-            <div className="absolute inset-0 bg-primary/10 dark:bg-primary/5 blur-[100px] rounded-full scale-75" />
-
             {/* Photo Container */}
             <motion.div 
               whileHover={!prefersReducedMotion ? { scale: 1.02, rotate: 1 } : {}}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="relative w-full max-w-[340px] h-[340px] lg:max-w-[400px] lg:h-[400px] rounded-[2rem] bg-gradient-to-b from-primary/5 to-transparent border border-white/20 dark:border-white/5 overflow-hidden shadow-2xl cursor-pointer"
+              className="relative w-full max-w-[340px] h-[340px] lg:max-w-[400px] lg:h-[400px] rounded-[2rem] bg-gradient-to-b from-foreground/5 to-transparent border border-border overflow-hidden shadow-2xl cursor-pointer"
             >
               {photoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -193,104 +190,6 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 0, her
                 </div>
               )}
             </motion.div>
-
-            {/* Floating Metric 1: Projects Completed */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8, duration: 0.6 }}
-              className="absolute top-[10%] left-[0%] lg:-left-[10%]"
-            >
-              <motion.div
-                animate={!prefersReducedMotion ? { y: [-6, 6, -6] } : {}}
-                transition={{ repeat: Infinity, duration: 4, ease: "easeInOut", delay: 0.2 }}
-                className="p-4 bg-background/80 backdrop-blur-xl border border-border rounded-2xl shadow-xl shadow-foreground/5 flex flex-col gap-1 w-44"
-              >
-                <div className="size-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center mb-1">
-                  <TrendUp weight="bold" size={16} />
-                </div>
-                <p className="text-xs text-muted-foreground">Projects Completed</p>
-                <p className="text-xl font-bold font-display">{projectsCount}+</p>
-                <p className="text-[10px] text-muted-foreground/80 mt-1">Across web & mobile</p>
-              </motion.div>
-            </motion.div>
-
-            {/* Floating Metric 2: Client Satisfaction */}
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1.0, duration: 0.6 }}
-              className="absolute top-[20%] right-[-5%] lg:-right-[5%]"
-            >
-              <motion.div
-                animate={!prefersReducedMotion ? { y: [6, -6, 6] } : {}}
-                transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut", delay: 0.5 }}
-                className="p-4 bg-background/80 backdrop-blur-xl border border-border rounded-2xl shadow-xl shadow-foreground/5 flex items-center gap-3"
-              >
-                <div className="size-10 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
-                  <Star weight="fill" size={20} />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Client Satisfaction</p>
-                  <p className="text-lg font-bold font-display leading-tight">{heroStats.client_satisfaction || '100%'}</p>
-                  <p className="text-[10px] text-muted-foreground/80">Positive feedback</p>
-                </div>
-              </motion.div>
-            </motion.div>
-
-            {/* Floating Metric 3: On Time Delivery */}
-            <motion.div 
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.2, duration: 0.6 }}
-              className="absolute bottom-[20%] left-[-5%] lg:left-[-5%]"
-            >
-              <motion.div
-                animate={!prefersReducedMotion ? { y: [-4, 4, -4] } : {}}
-                transition={{ repeat: Infinity, duration: 3.8, ease: "easeInOut", delay: 0.8 }}
-                className="p-4 bg-background/80 backdrop-blur-xl border border-border rounded-2xl shadow-xl shadow-foreground/5 flex items-center gap-3"
-              >
-                <div className="size-10 rounded-full bg-green-500 text-white flex items-center justify-center shrink-0">
-                  <CheckCircle weight="fill" size={20} />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">On Time Delivery</p>
-                  <p className="text-lg font-bold font-display leading-tight">{heroStats.on_time_delivery || '98%'}</p>
-                  <p className="text-[10px] text-muted-foreground/80">Projects delivered</p>
-                </div>
-              </motion.div>
-            </motion.div>
-
-            {/* Floating Metric 4: Tech Stack */}
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 1.4, duration: 0.6 }}
-              className="absolute bottom-[10%] right-[0%] lg:right-[5%]"
-            >
-              <motion.div
-                animate={!prefersReducedMotion ? { y: [4, -4, 4] } : {}}
-                transition={{ repeat: Infinity, duration: 4.2, ease: "easeInOut", delay: 1.1 }}
-                className="p-5 bg-background/80 backdrop-blur-xl border border-border rounded-2xl shadow-xl shadow-foreground/5"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-sm font-semibold">Tech Stack</p>
-                  <div className="size-6 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center">
-                    <Code weight="bold" size={12} />
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {/* Visual tech icons placeholders - replacing complex SVGs with simple colored circles for now to keep code clean */}
-                  <div className="size-8 rounded-full bg-sky-100 flex items-center justify-center text-sky-500 font-bold text-[10px]">Re</div>
-                  <div className="size-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-[10px]">TS</div>
-                  <div className="size-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-[10px]">Nd</div>
-                  <div className="size-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-[10px]">Fg</div>
-                  <div className="size-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 font-bold text-[10px]">Tw</div>
-                </div>
-                <p className="text-[10px] text-muted-foreground mt-2">... and more</p>
-              </motion.div>
-            </motion.div>
-
           </motion.div>
         </div>
 
@@ -338,6 +237,45 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 0, her
           </div>
         </motion.div>
 
+        {/* ─── Secondary Stats Bar (Metrics) ─── */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.8, duration: 0.8 }}
+          className="mt-4 w-full max-w-5xl mx-auto bg-card border border-border rounded-3xl shadow-sm grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border overflow-hidden"
+        >
+          {/* Metric 1 */}
+          <div className="flex items-center justify-center gap-4 p-4 lg:p-6 w-full text-left">
+            <div className="size-14 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 flex items-center justify-center shrink-0 shadow-sm border border-border">
+              <TrendUp weight="bold" size={28} />
+            </div>
+            <div className="w-[140px]">
+              <p className="text-xs text-muted-foreground font-medium">Projects Completed</p>
+              <p className="text-xl font-bold font-display">{projectsCount}+</p>
+              <p className="text-xs text-muted-foreground/80 mt-0.5">Across web & mobile</p>
+            </div>
+          </div>
+
+          {/* Metric 2 */}
+          <div className="flex items-center justify-center gap-4 p-4 lg:p-6 w-full text-left">
+            <div className="size-14 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 flex items-center justify-center shrink-0 shadow-sm border border-border">
+              <Code weight="bold" size={28} />
+            </div>
+            <div className="flex-1 max-w-[200px]">
+              <p className="text-xs text-muted-foreground font-medium mb-1.5">Core Tech Stack</p>
+              <div className="flex items-center gap-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg" alt="React" className="size-6" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg" alt="TypeScript" className="size-6 rounded-sm" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nextjs/nextjs-original.svg" alt="Next.js" className="size-6 dark:invert" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg" alt="Tailwind CSS" className="size-6" />
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );
