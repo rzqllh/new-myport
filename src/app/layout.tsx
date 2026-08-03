@@ -72,7 +72,7 @@ export default async function RootLayout({
   const siteName = settings.general?.site_title || "Hafizh Rizqullah Prasetya";
   const tagline = settings.general?.tagline || "PMO · Designer · Developer";
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hafizhrizqullah.vercel.app";
-  const github = settings.social?.github || "https://github.com/rzqllh";
+  const github = settings.social?.github;
 
   return (
     <html
@@ -98,7 +98,7 @@ export default async function RootLayout({
       <body className="min-h-[100dvh] bg-background text-foreground font-sans flex flex-col">
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >

@@ -28,10 +28,10 @@ const CATEGORIES: { value: SkillCategory; label: string }[] = [
 ];
 
 const CATEGORY_COLORS: Record<SkillCategory, string> = {
-  frontend: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  backend: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
-  design: "bg-pink-500/10 text-pink-600 dark:text-pink-400",
-  tools: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  frontend: "bg-muted text-foreground border border-border/50",
+  backend: "bg-muted text-foreground border border-border/50",
+  design: "bg-muted text-foreground border border-border/50",
+  tools: "bg-muted text-foreground border border-border/50",
 };
 
 export function SkillsClient({ initialSkills }: { initialSkills: Skill[] }) {

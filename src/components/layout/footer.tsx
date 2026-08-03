@@ -30,7 +30,7 @@ export async function Footer() {
 
   return (
     <footer className="border-t border-border bg-muted/30">
-      <div className="mx-auto max-w-[1400px] px-6 py-12 md:py-16">
+      <div className="mx-auto max-w-[1400px] px-6 pt-12 md:pt-16 pb-8 md:pb-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {/* Brand */}
           <div className="space-y-3">

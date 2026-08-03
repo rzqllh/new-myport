@@ -2,7 +2,7 @@
 export const SITE_NAME = "Hafizh Rizqullah Prasetya";
 export const SITE_TAGLINE = "PMO · Designer · Developer";
 export const SITE_DESCRIPTION =
-  "Personal portfolio of Hafizh Rizqullah Prasetya — a hybrid Project Management Officer, UI/UX Designer, and Web Developer based in Indonesia, specializing in building thoughtful digital experiences.";
+  "Personal portfolio of Hafizh Rizqullah Prasetya — PMO, UI/UX Designer, and Developer. From raw ideas to releases, I build things that work.";
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://hafizhrizqullah.vercel.app";
 
@@ -16,11 +16,10 @@ export const SOCIAL_LINKS = {
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 export const NAV_ITEMS = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Projects", href: "/projects" },
-  { label: "Blog", href: "/blog" },
-  { label: "Contact", href: "/contact" },
+  { label: "About", href: "/#about" },
+  { label: "Projects", href: "/#projects" },
+  { label: "Blog", href: "/#blog" },
+  { label: "Contact", href: "/#contact" },
 ] as const;
 
 // ─── Admin Navigation ─────────────────────────────────────────────────────────

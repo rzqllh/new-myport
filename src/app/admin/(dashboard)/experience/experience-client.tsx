@@ -128,7 +128,7 @@ export function ExperienceClient({ initialItems }: { initialItems: Experience[] 
               <div className="text-xs text-muted-foreground mt-0.5">
                 {formatDateRange(item)}
                 {item.is_current && (
-                  <span className="ml-2 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-green-500/10 text-green-600 dark:text-green-400">
+                  <span className="ml-2 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-muted text-foreground border border-border/50">
                     Current
                   </span>
                 )}

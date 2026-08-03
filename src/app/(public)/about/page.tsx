@@ -15,13 +15,16 @@ export const metadata: Metadata = {
 export default async function AboutPage() {
   const supabase = await createClient();
 
-  const [{ data: about }, { data: experiences }] = await Promise.all([
+  const [{ data: about }, { data: experiences }, { data: settings }] = await Promise.all([
     supabase.from("about").select("*").single(),
     supabase
       .from("experiences")
       .select("*")
       .order("start_date", { ascending: false }),
+    supabase.from("site_settings").select("key, value").eq("key", "social").single(),
   ]);
+
+  const social = settings?.value || {};
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-24 md:py-32">
@@ -56,10 +59,12 @@ export default async function AboutPage() {
                     Resume
                   </Button>
                 )}
-                <Button variant="outline" render={<a href="https://linkedin.com/in/hafizhrizqullah" target="_blank" rel="noopener noreferrer" />} nativeButton={false}>
-                  LinkedIn
-                  <ArrowUpRight weight="bold" data-icon="inline-end" />
-                </Button>
+                {social?.linkedin && (
+                  <Button variant="outline" render={<a href={social.linkedin} target="_blank" rel="noopener noreferrer" />} nativeButton={false}>
+                    LinkedIn
+                    <ArrowUpRight weight="bold" data-icon="inline-end" />
+                  </Button>
+                )}
               </div>
             </ScrollReveal>
           </div>

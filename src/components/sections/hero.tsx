@@ -117,9 +117,7 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 0, her
               variants={itemVariants}
               className="text-lg text-muted-foreground leading-relaxed max-w-[540px] mb-10"
             >
-              I build products end-to-end — from project roadmaps to polished
-              interfaces. Currently based in Indonesia, open to startup and
-              cross-functional roles.
+              I manage projects, design interfaces, and write code. From raw idea to final release, I build things that work.
             </motion.p>
 
             {/* CTAs and Socials */}
@@ -185,97 +183,19 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 0, her
                   className="w-full h-full object-cover object-top transition-transform duration-700 hover:scale-105"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                  No Photo
+                <div className="w-full h-full relative flex items-center justify-center bg-zinc-100/50 dark:bg-zinc-900/50 overflow-hidden">
+                  {/* Subtle Grid Pattern */}
+                  <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" 
+                       style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+                  {/* Abstract Mesh Gradients */}
+                  <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-zinc-200/50 via-transparent to-zinc-300/50 dark:from-zinc-800/50 dark:to-zinc-950/50" />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] rounded-full bg-gradient-to-tr from-transparent via-zinc-400/20 to-transparent dark:via-zinc-600/10 blur-3xl opacity-60" />
                 </div>
               )}
             </motion.div>
           </motion.div>
         </div>
 
-        {/* ─── Bottom Stats Bar ─── */}
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.6, duration: 0.8 }}
-          className="mt-8 w-full max-w-5xl mx-auto bg-card border border-border rounded-3xl shadow-sm grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border overflow-hidden"
-        >
-          {/* Stat 1 */}
-          <div className="flex items-center justify-center gap-4 p-4 lg:p-6 w-full text-left">
-            <div className="size-14 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-blue-600/20">
-              <UsersThree weight="fill" size={28} />
-            </div>
-            <div className="w-[140px]">
-              <p className="text-xs text-muted-foreground font-medium">Collaborated with</p>
-              <p className="text-xl font-bold font-display">{heroStats.teams_collaborated || '5+'} Teams</p>
-              <p className="text-xs text-muted-foreground/80 mt-0.5">Startups to enterprises</p>
-            </div>
-          </div>
-
-          {/* Stat 2 */}
-          <div className="flex items-center justify-center gap-4 p-4 lg:p-6 w-full text-left">
-            <div className="size-14 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/20">
-              <Rocket weight="fill" size={28} />
-            </div>
-            <div className="w-[140px]">
-              <p className="text-xs text-muted-foreground font-medium">Experience</p>
-              <p className="text-xl font-bold font-display">{heroStats.years_experience || '2+'} Years</p>
-              <p className="text-xs text-muted-foreground/80 mt-0.5">In product & design</p>
-            </div>
-          </div>
-
-          {/* Stat 3 */}
-          <div className="flex items-center justify-center gap-4 p-4 lg:p-6 w-full text-left">
-            <div className="size-14 rounded-full bg-purple-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-purple-500/20">
-              <GlobeHemisphereWest weight="fill" size={28} />
-            </div>
-            <div className="w-[140px]">
-              <p className="text-xs text-muted-foreground font-medium">Based in</p>
-              <p className="text-xl font-bold font-display">{heroStats.based_in || 'Indonesia'}</p>
-              <p className="text-xs text-muted-foreground/80 mt-0.5">Open to remote</p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* ─── Secondary Stats Bar (Metrics) ─── */}
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.8, duration: 0.8 }}
-          className="mt-4 w-full max-w-5xl mx-auto bg-card border border-border rounded-3xl shadow-sm grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border overflow-hidden"
-        >
-          {/* Metric 1 */}
-          <div className="flex items-center justify-center gap-4 p-4 lg:p-6 w-full text-left">
-            <div className="size-14 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 flex items-center justify-center shrink-0 shadow-sm border border-border">
-              <TrendUp weight="bold" size={28} />
-            </div>
-            <div className="w-[140px]">
-              <p className="text-xs text-muted-foreground font-medium">Projects Completed</p>
-              <p className="text-xl font-bold font-display">{projectsCount}+</p>
-              <p className="text-xs text-muted-foreground/80 mt-0.5">Across web & mobile</p>
-            </div>
-          </div>
-
-          {/* Metric 2 */}
-          <div className="flex items-center justify-center gap-4 p-4 lg:p-6 w-full text-left">
-            <div className="size-14 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 flex items-center justify-center shrink-0 shadow-sm border border-border">
-              <Code weight="bold" size={28} />
-            </div>
-            <div className="flex-1 max-w-[200px]">
-              <p className="text-xs text-muted-foreground font-medium mb-1.5">Core Tech Stack</p>
-              <div className="flex items-center gap-3">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg" alt="React" className="size-6" />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg" alt="TypeScript" className="size-6 rounded-sm" />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nextjs/nextjs-original.svg" alt="Next.js" className="size-6 dark:invert" />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg" alt="Tailwind CSS" className="size-6" />
-              </div>
-            </div>
-          </div>
-        </motion.div>
       </div>
     </section>
   );

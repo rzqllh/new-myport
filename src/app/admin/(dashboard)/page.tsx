@@ -36,7 +36,7 @@ export default async function AdminDashboardPage() {
           </div>
           <p className="text-3xl font-display font-bold">{totalProjects || 0}</p>
           <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-            <CheckCircle weight="fill" className="text-emerald-500" />
+            <CheckCircle weight="fill" className="text-foreground" />
             <span>{publishedProjects || 0} published</span>
           </div>
         </div>
