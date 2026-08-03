@@ -55,7 +55,7 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 0, her
       };
 
   return (
-    <section aria-label="Hero" className="relative min-h-[100dvh] flex flex-col justify-center pt-20 pb-8 overflow-hidden">
+    <section id="home" aria-label="Hero" className="relative min-h-[100dvh] flex flex-col justify-center pt-20 pb-8 overflow-hidden">
       {/* Subtle background grid */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
@@ -140,15 +140,26 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 0, her
 
               {/* Social Links Row */}
               <div className="flex items-center gap-3">
-                <a href={socialLinks.github || "#"} target="_blank" rel="noopener noreferrer" className="size-11 flex items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shadow-sm">
-                  <GithubLogo weight="fill" size={20} />
-                </a>
-                <a href={socialLinks.linkedin || "#"} target="_blank" rel="noopener noreferrer" className="size-11 flex items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shadow-sm">
-                  <LinkedinLogo weight="fill" size={20} />
-                </a>
-                <a href={socialLinks.instagram || "#"} target="_blank" rel="noopener noreferrer" className="size-11 flex items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shadow-sm">
-                  <InstagramLogo weight="fill" size={20} />
-                </a>
+                {socialLinks.github && (
+                  <a href={socialLinks.github} target="_blank" rel="noopener noreferrer" className="size-11 flex items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shadow-sm">
+                    <GithubLogo weight="fill" size={20} />
+                  </a>
+                )}
+                {socialLinks.linkedin && (
+                  <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="size-11 flex items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shadow-sm">
+                    <LinkedinLogo weight="fill" size={20} />
+                  </a>
+                )}
+                {socialLinks.instagram && (
+                  <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="size-11 flex items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shadow-sm">
+                    <InstagramLogo weight="fill" size={20} />
+                  </a>
+                )}
+                {socialLinks.email && (
+                  <a href={socialLinks.email} target="_blank" rel="noopener noreferrer" className="size-11 flex items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shadow-sm">
+                    <EnvelopeSimple weight="fill" size={20} />
+                  </a>
+                )}
               </div>
             </motion.div>
           </motion.div>
@@ -297,7 +308,7 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 0, her
             </div>
             <div className="w-[140px]">
               <p className="text-xs text-muted-foreground font-medium">Collaborated with</p>
-              <p className="text-xl font-bold font-display">{heroStats.teams_collaborated || '15+'} Teams</p>
+              <p className="text-xl font-bold font-display">{heroStats.teams_collaborated || '5+'} Teams</p>
               <p className="text-xs text-muted-foreground/80 mt-0.5">Startups to enterprises</p>
             </div>
           </div>
@@ -309,7 +320,7 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 0, her
             </div>
             <div className="w-[140px]">
               <p className="text-xs text-muted-foreground font-medium">Experience</p>
-              <p className="text-xl font-bold font-display">{heroStats.years_experience || '5+'} Years</p>
+              <p className="text-xl font-bold font-display">{heroStats.years_experience || '2+'} Years</p>
               <p className="text-xs text-muted-foreground/80 mt-0.5">In product & design</p>
             </div>
           </div>

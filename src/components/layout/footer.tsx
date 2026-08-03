@@ -3,6 +3,7 @@ import { GithubLogo, LinkedinLogo, TwitterLogo, Envelope, InstagramLogo } from "
 import { Separator } from "@/components/ui/separator";
 import { NAV_ITEMS, SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
+import { FooterContact } from "./footer-contact";
 
 export async function Footer() {
   const year = new Date().getFullYear();
@@ -11,9 +12,13 @@ export async function Footer() {
   const { data: settings } = await supabase
     .from("site_settings")
     .select("key, value")
-    .in("key", ["social"]);
+    .in("key", ["social", "general"]);
 
   const social = (settings?.find(s => s.key === "social")?.value as Record<string, string>) || {};
+  const general = (settings?.find(s => s.key === "general")?.value as Record<string, string>) || {};
+  
+  const siteName = general.site_title || SITE_NAME;
+  const siteTagline = general.tagline || SITE_TAGLINE;
 
   const SOCIAL_ICONS = [
     { href: social.github, label: "GitHub", Icon: GithubLogo },
@@ -33,9 +38,9 @@ export async function Footer() {
               href="/"
               className="font-display font-bold text-lg tracking-tight text-foreground hover:text-primary transition-colors"
             >
-              {SITE_NAME}
+              {siteName}
             </Link>
-            <p className="text-sm text-muted-foreground">{SITE_TAGLINE}</p>
+            <p className="text-sm text-muted-foreground">{siteTagline}</p>
             {/* Social links */}
             {SOCIAL_ICONS.length > 0 && (
               <div className="flex items-center gap-2 pt-1">
@@ -77,28 +82,14 @@ export async function Footer() {
           </div>
 
           {/* Contact snippet */}
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Get in touch
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Open to startup roles, freelance projects, and cross-functional
-              collaborations.
-            </p>
-            <Link
-              href="/contact"
-              className="inline-flex items-center text-sm font-medium text-primary hover:underline underline-offset-4"
-            >
-              Send a message →
-            </Link>
-          </div>
+          <FooterContact />
         </div>
 
         <Separator className="my-8" />
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
           <p>
-            © {year} {SITE_NAME}. Built with Next.js, Supabase, and ☕.
+            © {year} {siteName}. Built with Next.js, Supabase, and ☕.
           </p>
           <Link
             href="/admin"

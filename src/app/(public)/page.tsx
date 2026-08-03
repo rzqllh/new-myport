@@ -35,12 +35,12 @@ export default async function HomePage() {
         projectsCount={projectsCount || 0}
         heroStats={heroStats as Record<string, string>}
       />
-      <FeaturedProjects />
-      <SkillsSection />
       <AboutPreview />
+      <SkillsSection />
+      <FeaturedProjects />
       <TestimonialsSection />
       <FeaturedArticles />
-      <FooterCTA />
+      <FooterCTA cvUrl={(cv as { url?: string })?.url} />
     </>
   );
 }

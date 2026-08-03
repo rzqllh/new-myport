@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "motion/react";
 import { List, X } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
@@ -22,10 +22,45 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const { scrollY } = useScroll();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>("");
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 20);
   });
+
+  useEffect(() => {
+    if (pathname !== "/") return;
+
+    const observers: IntersectionObserver[] = [];
+    const handleIntersect = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(`/${entry.target.id}`);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(handleIntersect, {
+      rootMargin: "-40% 0px -40% 0px",
+      threshold: 0,
+    });
+
+    const sections = ["home", "about", "projects", "blog", "contact"];
+    sections.forEach((id) => {
+      const element = document.getElementById(id);
+      if (element) observer.observe(element);
+    });
+
+    return () => observer.disconnect();
+  }, [pathname]);
+
+  const scrollToTop = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      setActiveSection("/home");
+    }
+  };
 
   return (
     <header className="fixed top-4 left-4 right-4 z-50">
@@ -43,6 +78,7 @@ export function Navbar() {
         {/* Logo */}
         <Link
           href="/"
+          onClick={scrollToTop}
           className="font-display font-bold text-sm tracking-tight text-foreground hover:text-primary transition-colors"
         >
           {SITE_NAME.split(" ")[0]}{" "}
@@ -54,10 +90,13 @@ export function Navbar() {
         {/* Desktop nav */}
         <ul className="hidden md:flex items-center gap-1" role="list">
           {NAV_ITEMS.map((item) => {
-            const isActive =
-              item.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(item.href);
+            let isActive = false;
+            if (pathname === "/") {
+              const activeMapped = activeSection === "/home" || activeSection === "" ? "/" : activeSection;
+              isActive = activeMapped === item.href;
+            } else {
+              isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+            }
             return (
               <li key={item.href}>
                 <Link
@@ -136,10 +175,13 @@ export function Navbar() {
               <nav aria-label="Mobile navigation">
                 <ul className="flex flex-col gap-1" role="list">
                   {NAV_ITEMS.map((item, i) => {
-                    const isActive =
-                      item.href === "/"
-                        ? pathname === "/"
-                        : pathname.startsWith(item.href);
+                    let isActive = false;
+                    if (pathname === "/") {
+                      const activeMapped = activeSection === "/home" || activeSection === "" ? "/" : activeSection;
+                      isActive = activeMapped === item.href;
+                    } else {
+                      isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+                    }
                     return (
                       <motion.li
                         key={item.href}

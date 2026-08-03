@@ -65,12 +65,36 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const supabase = await createClient();
+  const { data } = await supabase.from("site_settings").select("key, value");
+  const settings = Object.fromEntries((data ?? []).map((row) => [row.key, row.value]));
+  
+  const siteName = settings.general?.site_title || "Hafizh Rizqullah Prasetya";
+  const tagline = settings.general?.tagline || "PMO · Designer · Developer";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hafizhrizqullah.vercel.app";
+  const github = settings.social?.github || "https://github.com/rzqllh";
+
   return (
     <html
       lang="en"
       suppressHydrationWarning
       className={`${spaceGrotesk.variable} ${archivo.variable} ${jetbrainsMono.variable} antialiased`}
     >
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Person",
+              name: siteName,
+              url: baseUrl,
+              jobTitle: tagline,
+              sameAs: github ? [github] : []
+            }),
+          }}
+        />
+      </head>
       <body className="min-h-[100dvh] bg-background text-foreground font-sans flex flex-col">
         <ThemeProvider
           attribute="class"
@@ -80,21 +104,6 @@ export default async function RootLayout({
         >
           {children}
           <ChatWidget />
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "Person",
-                name: "Hafizh Rizqullah Prasetya",
-                url: "https://hafizhrizqullah.vercel.app",
-                jobTitle: "PMO · Designer · Developer",
-                sameAs: [
-                  "https://github.com/rzqllh"
-                ]
-              }),
-            }}
-          />
         </ThemeProvider>
       </body>
     </html>

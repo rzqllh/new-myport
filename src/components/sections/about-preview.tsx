@@ -10,10 +10,17 @@ export async function AboutPreview() {
     .select("bio, photo_url")
     .single();
 
+  const { data: experiences } = await supabase
+    .from("experiences")
+    .select("id, company, position, start_date, end_date, current")
+    .order("start_date", { ascending: false })
+    .limit(3);
+
   const bio = about?.bio?.trim();
 
   return (
     <section
+      id="about"
       aria-labelledby="about-preview-heading"
       className="py-24 md:py-32 border-t border-border"
     >
@@ -62,6 +69,28 @@ export async function AboutPreview() {
                 <ArrowRight weight="bold" className="size-4" />
               </Link>
             </ScrollReveal>
+
+            {experiences && experiences.length > 0 && (
+              <ScrollReveal delay={0.2} className="mt-12 pt-8 border-t border-border">
+                <h3 className="text-sm font-semibold mb-6 uppercase tracking-wider text-muted-foreground">
+                  Experience & Education
+                </h3>
+                <div className="relative before:absolute before:inset-y-2 before:left-[5px] before:w-px before:bg-border space-y-6">
+                  {experiences.map((exp) => (
+                    <div key={exp.id} className="relative flex gap-6">
+                      <div className="absolute left-0 top-1.5 w-3 h-3 rounded-full border-2 border-background bg-primary z-10" />
+                      <div>
+                        <h4 className="font-medium text-foreground tracking-tight">{exp.position}</h4>
+                        <p className="text-sm text-muted-foreground">{exp.company}</p>
+                        <p className="text-xs text-muted-foreground mt-1 font-mono uppercase">
+                          {new Date(exp.start_date).getFullYear()} — {exp.current ? "Present" : exp.end_date ? new Date(exp.end_date).getFullYear() : ""}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollReveal>
+            )}
           </div>
 
           {/* Photo / decorative side */}
