@@ -55,7 +55,7 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 0, her
       };
 
   return (
-    <section aria-label="Hero" className="relative h-[100dvh] flex flex-col justify-center pt-20 pb-8 overflow-hidden">
+    <section aria-label="Hero" className="relative min-h-[100dvh] flex flex-col justify-center pt-20 pb-8 overflow-hidden">
       {/* Subtle background grid */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
@@ -125,15 +125,16 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 0, her
             {/* CTAs and Socials */}
             <motion.div
               variants={itemVariants}
-              className="flex flex-col sm:flex-row items-start sm:items-center gap-4"
+              className="flex flex-col sm:flex-row items-start sm:items-center gap-3"
             >
-              <Button size="lg" className="rounded-xl shadow-lg shadow-primary/20" render={<Link href="/projects" />} nativeButton={false}>
+              <Button size="lg" className="h-11 px-6 rounded-xl shadow-lg shadow-primary/20" render={<Link href="/projects" />} nativeButton={false}>
                 View Projects
                 <ArrowRight weight="bold" />
               </Button>
               {cvUrl && (
-                <Button size="icon" variant="outline" className="size-11 rounded-xl bg-background" render={<a href={cvUrl} target="_blank" rel="noopener noreferrer" title="Download CV" />} nativeButton={false}>
-                  <DownloadSimple weight="bold" className="size-5" />
+                <Button size="lg" variant="outline" className="h-11 px-6 rounded-xl bg-background" render={<a href={cvUrl} target="_blank" rel="noopener noreferrer" title="Download CV" />} nativeButton={false}>
+                  <DownloadSimple weight="bold" className="mr-1" />
+                  Download CV
                 </Button>
               )}
 

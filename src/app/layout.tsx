@@ -80,6 +80,21 @@ export default async function RootLayout({
         >
           {children}
           <ChatWidget />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "Person",
+                name: "Hafizh Rizqullah Prasetya",
+                url: "https://hafizhrizqullah.vercel.app",
+                jobTitle: "PMO · Designer · Developer",
+                sameAs: [
+                  "https://github.com/rzqllh"
+                ]
+              }),
+            }}
+          />
         </ThemeProvider>
       </body>
     </html>

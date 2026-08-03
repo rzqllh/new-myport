@@ -1,6 +1,6 @@
 # Hafizh Portfolio + CMS Admin Dashboard — Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Build a multi-page personal portfolio with a full CMS admin dashboard for Hafizh Rizqullah Prasetya — a PMO/Developer/Designer hybrid targeting startup hiring managers.
 
@@ -118,7 +118,7 @@ src/
 - Tailwind v4 configured with CSS custom properties
 - `cn()` utility from shadcn
 
-- [ ] **Step 1: Initialize Next.js project**
+- [x] **Step 1: Initialize Next.js project**
 
 ```bash
 npx -y create-next-app@latest ./ --typescript --tailwind --eslint --app --src-dir --import-alias "@/*" --turbopack --use-npm
@@ -126,7 +126,7 @@ npx -y create-next-app@latest ./ --typescript --tailwind --eslint --app --src-di
 
 > **Note:** Run with `--help` first to verify flags. The `./` installs into the current directory.
 
-- [ ] **Step 2: Verify dev server starts**
+- [x] **Step 2: Verify dev server starts**
 
 ```bash
 npm run dev
@@ -134,13 +134,13 @@ npm run dev
 
 Expected: Server runs at `localhost:3000`, shows Next.js default page.
 
-- [ ] **Step 3: Install core dependencies**
+- [x] **Step 3: Install core dependencies**
 
 ```bash
 npm install @phosphor-icons/react motion gsap @supabase/supabase-js @supabase/ssr cloudinary @tiptap/react @tiptap/starter-kit @tiptap/extension-image @tiptap/extension-link @tiptap/extension-code-block-lowlight
 ```
 
-- [ ] **Step 4: Initialize shadcn/ui**
+- [x] **Step 4: Initialize shadcn/ui**
 
 ```bash
 npx shadcn@latest init
@@ -148,7 +148,7 @@ npx shadcn@latest init
 
 Select: New York style, Slate base color, CSS variables enabled.
 
-- [ ] **Step 5: Configure fonts in root layout**
+- [x] **Step 5: Configure fonts in root layout**
 
 In `src/app/layout.tsx`, configure `next/font/google` for Space Grotesk, Archivo, and JetBrains Mono. Apply font CSS variables to the `<html>` element.
 
@@ -174,15 +174,15 @@ const jetbrainsMono = JetBrains_Mono({
 });
 ```
 
-- [ ] **Step 6: Configure design tokens in globals.css**
+- [x] **Step 6: Configure design tokens in globals.css**
 
 Set CSS custom properties for the color palette from the spec (Section 5.C): `--background`, `--foreground`, `--accent`, `--muted`, `--card`, `--border`, `--destructive` for both light and dark modes using `@media (prefers-color-scheme)` and `.dark` class strategy.
 
-- [ ] **Step 7: Create constants file**
+- [x] **Step 7: Create constants file**
 
 Create `src/lib/constants.ts` with site metadata (name, description, URL), social links (GitHub: rzqllh, LinkedIn, Twitter, email), and navigation items.
 
-- [ ] **Step 8: Verify fonts and theme render correctly**
+- [x] **Step 8: Verify fonts and theme render correctly**
 
 ```bash
 npm run dev
@@ -190,7 +190,7 @@ npm run dev
 
 Open `localhost:3000`, inspect in DevTools that font CSS variables are applied, and colors match the spec.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add .
@@ -213,11 +213,11 @@ git commit -m "feat: scaffold Next.js project with fonts, theme, and shadcn/ui"
 - `createServerClient()` — server-side Supabase client (for RSC/API routes)
 - All 9 database tables with RLS policies
 
-- [ ] **Step 1: Create Supabase project**
+- [x] **Step 1: Create Supabase project**
 
 Go to [supabase.com](https://supabase.com), create a free project. Copy the `SUPABASE_URL` and `SUPABASE_ANON_KEY`.
 
-- [ ] **Step 2: Create `.env.local`**
+- [x] **Step 2: Create `.env.local`**
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
@@ -225,7 +225,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
 
-- [ ] **Step 3: Write initial migration SQL**
+- [x] **Step 3: Write initial migration SQL**
 
 Create `supabase/migrations/001_initial_schema.sql` with all 9 tables from spec Section 8:
 
@@ -342,11 +342,11 @@ INSERT INTO site_settings (key, value) VALUES
   ('cv', '{"url": ""}');
 ```
 
-- [ ] **Step 4: Run migration in Supabase SQL Editor**
+- [x] **Step 4: Run migration in Supabase SQL Editor**
 
 Go to Supabase Dashboard → SQL Editor → paste and execute the migration.
 
-- [ ] **Step 5: Enable Row Level Security (RLS)**
+- [x] **Step 5: Enable Row Level Security (RLS)**
 
 ```sql
 -- Enable RLS on all tables
@@ -387,7 +387,7 @@ CREATE POLICY "Admin full access site_settings" ON site_settings FOR ALL USING (
 CREATE POLICY "Admin full access about" ON about FOR ALL USING (auth.role() = 'authenticated');
 ```
 
-- [ ] **Step 6: Create Supabase client utilities**
+- [x] **Step 6: Create Supabase client utilities**
 
 Create `src/lib/supabase/client.ts`:
 
@@ -427,15 +427,15 @@ export async function createClient() {
 }
 ```
 
-- [ ] **Step 7: Generate TypeScript types from Supabase**
+- [x] **Step 7: Generate TypeScript types from Supabase**
 
 Create `src/lib/supabase/types.ts` with type definitions matching the schema above (Database, Tables, Enums types).
 
-- [ ] **Step 8: Verify Supabase connection**
+- [x] **Step 8: Verify Supabase connection**
 
 Create a temporary test in `src/app/page.tsx` that fetches `site_settings` and logs it. Verify connection works in dev server.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add .
@@ -455,11 +455,11 @@ git commit -m "feat: setup Supabase schema, RLS policies, and client utilities"
 - `uploadImage(file: File): Promise<{ url: string; publicId: string }>` — upload helper
 - `<ImageUpload />` — client component with Cloudinary upload widget
 
-- [ ] **Step 1: Create Cloudinary account and get credentials**
+- [x] **Step 1: Create Cloudinary account and get credentials**
 
 Sign up at [cloudinary.com](https://cloudinary.com). Copy `CLOUD_NAME`, `API_KEY`, `API_SECRET`.
 
-- [ ] **Step 2: Add Cloudinary env vars**
+- [x] **Step 2: Add Cloudinary env vars**
 
 Append to `.env.local`:
 
@@ -469,15 +469,15 @@ CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 ```
 
-- [ ] **Step 3: Create upload utility**
+- [x] **Step 3: Create upload utility**
 
 Create `src/lib/cloudinary.ts` with a function that generates signed upload params and a helper for constructing optimized image URLs with Cloudinary transformations.
 
-- [ ] **Step 4: Create ImageUpload component**
+- [x] **Step 4: Create ImageUpload component**
 
 Create `src/components/image-upload.tsx` — a `"use client"` component using Cloudinary's unsigned upload widget (via their JS SDK loaded from CDN). On successful upload, it calls an `onUpload(url, publicId)` callback.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add .
@@ -507,37 +507,37 @@ git commit -m "feat: add Cloudinary image upload utility and component"
 - Consumes: `cn()` from `src/lib/utils.ts`, constants from `src/lib/constants.ts`
 - Produces: Layout shell used by all pages
 
-- [ ] **Step 1: Install shadcn/ui components needed for layout**
+- [x] **Step 1: Install shadcn/ui components needed for layout**
 
 ```bash
 npx shadcn@latest add button sheet separator
 ```
 
-- [ ] **Step 2: Create ThemeToggle component**
+- [x] **Step 2: Create ThemeToggle component**
 
 `src/components/theme-toggle.tsx` — `"use client"` component using `next-themes` (install it: `npm install next-themes`). Toggle between light/dark with Phosphor `Sun` and `Moon` duotone icons. Use Motion `layout` prop for smooth icon morph.
 
-- [ ] **Step 3: Create Navbar component**
+- [x] **Step 3: Create Navbar component**
 
 `src/components/layout/navbar.tsx` — `"use client"` component. Floating navbar with `top-4 left-4 right-4` spacing (per ui-ux-pro-max rules). Max height 72px. Contains: logo/name, nav links (Home, About, Projects, Blog, Contact), ThemeToggle, mobile hamburger (shadcn Sheet).
 
-- [ ] **Step 4: Create Footer component**
+- [x] **Step 4: Create Footer component**
 
 `src/components/layout/footer.tsx` — Server component. Social links (Phosphor icons: GithubLogo, LinkedinLogo, TwitterLogo, Envelope), quick nav links, copyright with current year.
 
-- [ ] **Step 5: Create ScrollReveal wrapper**
+- [x] **Step 5: Create ScrollReveal wrapper**
 
 `src/components/scroll-reveal.tsx` — `"use client"` component using Motion `whileInView`. Props: `children`, `delay` (default 0), `className`. Fade up + 24px Y translate, 600ms duration, spring easing. Honors `prefers-reduced-motion` via `useReducedMotion()`.
 
-- [ ] **Step 6: Create PageTransition wrapper**
+- [x] **Step 6: Create PageTransition wrapper**
 
 `src/components/layout/page-transition.tsx` — `"use client"` component using Motion `AnimatePresence` + `motion.div`. Fade + slight Y translate (200ms) on route change.
 
-- [ ] **Step 7: Wire layout components into root layout**
+- [x] **Step 7: Wire layout components into root layout**
 
 Modify `src/app/layout.tsx` to include: ThemeProvider (next-themes), Navbar, PageTransition wrapper around `{children}`, Footer.
 
-- [ ] **Step 8: Verify layout renders correctly**
+- [x] **Step 8: Verify layout renders correctly**
 
 ```bash
 npm run dev
@@ -545,7 +545,7 @@ npm run dev
 
 Check: floating navbar renders on single line, footer visible, theme toggle works (light/dark), mobile hamburger opens Sheet.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add .
@@ -573,35 +573,35 @@ git commit -m "feat: add navbar, footer, theme toggle, scroll reveal, and page t
 - Consumes: `createClient()` from `src/lib/supabase/server.ts`, `<ScrollReveal />`, layout components
 - Produces: Home page server component that fetches featured projects, skills, about preview from Supabase
 
-- [ ] **Step 1: Create Hero section**
+- [x] **Step 1: Create Hero section**
 
 `src/components/sections/hero.tsx` — `"use client"` component (for Motion animations). Split-screen layout (left text, right visual placeholder). Left side: eyebrow "PMO · Designer · Developer" (small uppercase, tracking-wider), headline (Space Grotesk 700, `text-4xl md:text-5xl lg:text-6xl tracking-tighter`), subtext (max 20 words, Archivo, `text-muted-foreground`), 2 CTAs (Primary: "Let's Work Together" → /contact, Secondary: "View Projects" → /projects). Hero fits initial viewport using `min-h-[100dvh]` with max `pt-24`.
 
-- [ ] **Step 2: Create ProjectCard component**
+- [x] **Step 2: Create ProjectCard component**
 
 `src/components/project-card.tsx` — Props: `title`, `description`, `category`, `techStack`, `slug`, `imageUrl` (optional). Card with image area (shows image if available, otherwise minimal card with title + description + tech tags). Hover: scale 1.02 + shadow lift (Motion spring). Link wraps entire card to `/projects/[slug]`.
 
-- [ ] **Step 3: Create FeaturedProjects section**
+- [x] **Step 3: Create FeaturedProjects section**
 
 `src/components/sections/featured-projects.tsx` — Server component. Fetches featured projects from Supabase (`featured = true, status = 'published'`). Asymmetric grid: 1 large card + 2 stacked (CSS Grid, not 3 equal columns). Each card uses `<ProjectCard />`. ScrollReveal stagger on viewport entry.
 
-- [ ] **Step 4: Create AboutPreview section**
+- [x] **Step 4: Create AboutPreview section**
 
 `src/components/sections/about-preview.tsx` — Server component. Fetches `about` table from Supabase. Left-aligned text block, `max-w-[65ch]`. Short bio paragraph + "Read More" link to /about. No eyebrow (already used in hero — eyebrow restraint rule).
 
-- [ ] **Step 5: Create SkillsSection**
+- [x] **Step 5: Create SkillsSection**
 
 `src/components/sections/skills-section.tsx` — Server component. Fetches skills from Supabase, grouped by category. Display as horizontal scroll-snap pills or compact tag cloud (NOT a boring bullet list). Each pill shows skill name + Phosphor icon.
 
-- [ ] **Step 6: Create FooterCTA section**
+- [x] **Step 6: Create FooterCTA section**
 
 `src/components/sections/footer-cta.tsx` — Full-width section: headline "Have a project in mind?", primary CTA button → /contact, secondary link to download CV.
 
-- [ ] **Step 7: Assemble Home page**
+- [x] **Step 7: Assemble Home page**
 
 Modify `src/app/page.tsx` to compose all sections in order: Hero → FeaturedProjects → AboutPreview → SkillsSection → FooterCTA. Each section wrapped in `<ScrollReveal>` with staggered delays.
 
-- [ ] **Step 8: Verify home page**
+- [x] **Step 8: Verify home page**
 
 ```bash
 npm run dev
@@ -609,7 +609,7 @@ npm run dev
 
 Check at 375px, 768px, 1024px, 1440px. Hero fits viewport, no horizontal scroll, sections animate on scroll entry, theme toggle works across all sections.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add .
@@ -628,23 +628,23 @@ git commit -m "feat: build complete home page with hero, projects, about, skills
 - Consumes: `createClient()`, `<ProjectCard />`, `<ScrollReveal />`
 - Produces: `/projects` (filterable grid) and `/projects/[slug]` (case study detail)
 
-- [ ] **Step 1: Create Projects grid page**
+- [x] **Step 1: Create Projects grid page**
 
 `src/app/projects/page.tsx` — Server component. Fetches all published projects from Supabase. Filter bar at top (category tags: "All", "Web Dev", "UI/UX", "Project Management"). CSS Grid: `grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6`. Each project uses `<ProjectCard />`. Filter is a client component that filters the pre-fetched list client-side.
 
-- [ ] **Step 2: Create Project Detail page**
+- [x] **Step 2: Create Project Detail page**
 
 `src/app/projects/[slug]/page.tsx` — Server component. Fetches single project by slug + its images. Sections: full-width hero image (if available), Overview, Role, Tech Stack (tags), Image Gallery (if images exist), Back to Projects link, Previous/Next project navigation.
 
-- [ ] **Step 3: Generate metadata for SEO**
+- [x] **Step 3: Generate metadata for SEO**
 
 Both pages export `generateMetadata()` for dynamic titles and descriptions.
 
-- [ ] **Step 4: Verify both pages**
+- [x] **Step 4: Verify both pages**
 
 Navigate to `/projects` and `/projects/test-slug`. Verify filter works, detail page renders, responsive across breakpoints.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add .
@@ -658,11 +658,11 @@ git commit -m "feat: add projects grid and project detail pages"
 **Files:**
 - Create: `src/app/about/page.tsx`
 
-- [ ] **Step 1: Create About page**
+- [x] **Step 1: Create About page**
 
 Server component. Fetches `about` table + `experiences` table (ordered by `sort_order`) + education data. Sections: Full bio, experience timeline (vertical, alternating sides desktop, single column mobile), education section, philosophy/approach, hobbies/interests. Each section with `<ScrollReveal />`.
 
-- [ ] **Step 2: Verify and commit**
+- [x] **Step 2: Verify and commit**
 
 ```bash
 git add .
@@ -683,7 +683,7 @@ git commit -m "feat: add about page with experience timeline"
 - Consumes: `createClient()` (server), Turnstile widget
 - Produces: `/contact` page, `POST /api/contact` endpoint
 
-- [ ] **Step 1: Get Cloudflare Turnstile keys**
+- [x] **Step 1: Get Cloudflare Turnstile keys**
 
 Go to [dash.cloudflare.com](https://dash.cloudflare.com) → Turnstile → Add Site. Get site key and secret key.
 
@@ -694,23 +694,23 @@ NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_site_key
 TURNSTILE_SECRET_KEY=your_secret_key
 ```
 
-- [ ] **Step 2: Create ContactForm component**
+- [x] **Step 2: Create ContactForm component**
 
 `src/components/contact-form.tsx` — `"use client"` component. Split layout: left = form (name, email, subject, message inputs using shadcn Form components), right = social links + email + CV download button. Turnstile widget embedded below the form. On submit: POST to `/api/contact`.
 
-- [ ] **Step 3: Create contact API route**
+- [x] **Step 3: Create contact API route**
 
 `src/app/api/contact/route.ts` — Validates Turnstile token server-side (POST to `https://challenges.cloudflare.com/turnstile/v0/siteverify`). On success: inserts message into Supabase `messages` table. Returns JSON response.
 
-- [ ] **Step 4: Create Contact page**
+- [x] **Step 4: Create Contact page**
 
 `src/app/contact/page.tsx` — Server component wrapper around `<ContactForm />`. SEO metadata.
 
-- [ ] **Step 5: Test form submission**
+- [x] **Step 5: Test form submission**
 
 Submit a test message. Verify: Turnstile widget appears, message lands in Supabase `messages` table, success toast shows.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add .
@@ -724,11 +724,11 @@ git commit -m "feat: add contact page with Turnstile spam protection"
 **Files:**
 - Create: `src/app/not-found.tsx`
 
-- [ ] **Step 1: Create 404 page**
+- [x] **Step 1: Create 404 page**
 
 Simple, on-brand 404 page with a headline, brief message, and link back to home.
 
-- [ ] **Step 2: Full responsive QA**
+- [x] **Step 2: Full responsive QA**
 
 Test all pages at: 375px, 768px, 1024px, 1440px. Check:
 - No horizontal scroll
@@ -738,14 +738,14 @@ Test all pages at: 375px, 768px, 1024px, 1440px. Check:
 - Touch targets ≥ 44px
 - Theme toggle works everywhere
 
-- [ ] **Step 3: Accessibility check**
+- [x] **Step 3: Accessibility check**
 
 - Tab through all pages — focus rings visible
 - Heading hierarchy (single h1 per page)
 - All interactive elements keyboard accessible
 - Form labels associated with inputs
 
-- [ ] **Step 4: Commit Phase 1 complete**
+- [x] **Step 4: Commit Phase 1 complete**
 
 ```bash
 git add .
@@ -770,39 +770,39 @@ git commit -m "feat: complete Phase 1 — portfolio frontend with all public pag
 - Login page with Supabase email/password auth
 - Admin layout shell with sidebar + header
 
-- [ ] **Step 1: Create admin user in Supabase**
+- [x] **Step 1: Create admin user in Supabase**
 
 Go to Supabase Dashboard → Authentication → Users → Invite User with your email. Set a password.
 
-- [ ] **Step 2: Create Next.js middleware**
+- [x] **Step 2: Create Next.js middleware**
 
 `src/middleware.ts` — uses `@supabase/ssr` to check auth on every `/admin/*` route (except `/admin/login`). Redirects unauthenticated users to `/admin/login`.
 
-- [ ] **Step 3: Create Login page**
+- [x] **Step 3: Create Login page**
 
 `src/app/admin/login/page.tsx` — `"use client"`. Email + password form using shadcn Input + Button. On submit: `supabase.auth.signInWithPassword()`. On success: redirect to `/admin`. On error: show error message.
 
-- [ ] **Step 4: Create Admin Sidebar**
+- [x] **Step 4: Create Admin Sidebar**
 
 `src/components/layout/admin-sidebar.tsx` — `"use client"`. Navigation links with Phosphor icons: Dashboard, Projects, Blog, About, Skills, Experience, Testimonials, Messages, Settings. Active link highlighted. Collapsible on tablet.
 
-- [ ] **Step 5: Create Admin Header**
+- [x] **Step 5: Create Admin Header**
 
 `src/components/layout/admin-header.tsx` — Shows current page title, theme toggle, logout button.
 
-- [ ] **Step 6: Create Admin Layout**
+- [x] **Step 6: Create Admin Layout**
 
 `src/app/admin/layout.tsx` — Sidebar + Header + main content area. Does NOT include the public navbar/footer.
 
-- [ ] **Step 7: Create Admin Dashboard overview page**
+- [x] **Step 7: Create Admin Dashboard overview page**
 
 `src/app/admin/page.tsx` — Server component. Fetches counts: total projects, published projects, total blog posts, unread messages. Displays as stat cards.
 
-- [ ] **Step 8: Verify auth flow**
+- [x] **Step 8: Verify auth flow**
 
 Login → see dashboard. Logout → redirected to login. Direct URL to `/admin/projects` while logged out → redirected to login.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add .
@@ -818,33 +818,33 @@ git commit -m "feat: add admin auth, layout, sidebar, and dashboard overview"
 - Create: `src/app/admin/projects/new/page.tsx`
 - Create: `src/app/admin/projects/[id]/edit/page.tsx`
 
-- [ ] **Step 1: Install shadcn/ui components for admin**
+- [x] **Step 1: Install shadcn/ui components for admin**
 
 ```bash
 npx shadcn@latest add table dialog alert-dialog input textarea select badge toast tabs card
 ```
 
-- [ ] **Step 2: Create Projects list page**
+- [x] **Step 2: Create Projects list page**
 
 Data table with columns: title, category, status (badge), featured (toggle), actions (edit, delete). Delete uses AlertDialog for confirmation. Uses shadcn Table component.
 
-- [ ] **Step 3: Create Project form (shared between new and edit)**
+- [x] **Step 3: Create Project form (shared between new and edit)**
 
 Form with: title, slug (auto-generated from title), description (Tiptap editor), role, category (select), tech_stack (multi-tag input), featured (toggle), status (draft/published), image upload (Cloudinary widget for multiple images with sort order).
 
-- [ ] **Step 4: Create New Project page**
+- [x] **Step 4: Create New Project page**
 
 Uses the shared form. On submit: insert into Supabase `projects` + `project_images` tables. Redirect to `/admin/projects`.
 
-- [ ] **Step 5: Create Edit Project page**
+- [x] **Step 5: Create Edit Project page**
 
 Fetches existing project by ID. Pre-fills the shared form. On submit: update in Supabase. Redirect to `/admin/projects`.
 
-- [ ] **Step 6: Verify CRUD**
+- [x] **Step 6: Verify CRUD**
 
 Create a test project, edit it, delete it. Check that public `/projects` page shows published projects only.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add .
@@ -862,31 +862,31 @@ git commit -m "feat: add projects CRUD in admin dashboard"
 - Create: `src/app/admin/experience/page.tsx`
 - Create: `src/app/admin/settings/page.tsx`
 
-- [ ] **Step 1: Messages inbox**
+- [x] **Step 1: Messages inbox**
 
 List of contact form submissions. Columns: name, email, subject, date, read/unread (badge). Click to expand message body. Mark as read/unread. Delete with confirmation.
 
-- [ ] **Step 2: About editor**
+- [x] **Step 2: About editor**
 
 Single-form page: bio (Tiptap), philosophy (Tiptap), hobbies (textarea), photo upload (Cloudinary). Fetches and updates the single row in `about` table.
 
-- [ ] **Step 3: Skills manager**
+- [x] **Step 3: Skills manager**
 
 List with drag-to-reorder (or manual sort_order input). Add/edit dialog: name, category (select), icon (text input for Phosphor icon name), proficiency (slider 0-100). Delete with confirmation.
 
-- [ ] **Step 4: Experience manager**
+- [x] **Step 4: Experience manager**
 
 List ordered by start_date desc. Add/edit dialog: company, role, description (textarea), start_date, end_date (or "is_current" toggle). Delete with confirmation.
 
-- [ ] **Step 5: Site Settings**
+- [x] **Step 5: Site Settings**
 
 Tabbed form: General (site title, tagline), Social Links (GitHub, LinkedIn, Twitter, email URLs), SEO (meta description, OG image upload), CV (PDF upload to Cloudinary). Reads/writes `site_settings` table key-value pairs.
 
-- [ ] **Step 6: Verify all admin pages**
+- [x] **Step 6: Verify all admin pages**
 
 Walk through every admin page. Create, edit, delete entries. Verify public pages reflect admin changes.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add .
@@ -902,11 +902,11 @@ git commit -m "feat: add messages, about, skills, experience, and settings admin
 **Files:**
 - Create: `src/components/tiptap-editor.tsx`
 
-- [ ] **Step 1: Create Tiptap editor component**
+- [x] **Step 1: Create Tiptap editor component**
 
 `"use client"` component. Props: `content` (initial HTML string), `onChange(html: string)`. Toolbar with: bold, italic, heading levels (H2, H3), bullet list, ordered list, code block (with syntax highlighting), link, image (Cloudinary upload), blockquote. Uses shadcn ToggleGroup for toolbar buttons.
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add .
@@ -925,23 +925,23 @@ git commit -m "feat: add Tiptap rich text editor component"
 - Create: `src/app/blog/[slug]/page.tsx`
 - Create: `src/components/blog-card.tsx`
 
-- [ ] **Step 1: Blog CRUD admin pages**
+- [x] **Step 1: Blog CRUD admin pages**
 
 Same pattern as Projects CRUD. Form: title, slug, excerpt, content (Tiptap editor), tags (multi-tag input), status, published_at (date picker).
 
-- [ ] **Step 2: Blog listing page (public)**
+- [x] **Step 2: Blog listing page (public)**
 
 `src/app/blog/page.tsx` — Server component. Fetches published blog posts ordered by `published_at` desc. Cards showing: title, excerpt, date, tags, estimated read time (word count / 200). Uses `<BlogCard />`.
 
-- [ ] **Step 3: Blog post page (public)**
+- [x] **Step 3: Blog post page (public)**
 
 `src/app/blog/[slug]/page.tsx` — Server component. Renders HTML content from Tiptap with proper styling (`prose` classes). Shows title, date, tags, read time. Back to blog link.
 
-- [ ] **Step 4: Verify blog flow**
+- [x] **Step 4: Verify blog flow**
 
 Create a blog post in admin → publish → verify it appears on `/blog` and `/blog/[slug]`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add .
@@ -957,19 +957,19 @@ git commit -m "feat: add blog CRUD and public blog pages"
 - Create: `src/components/sections/testimonials-section.tsx`
 - Modify: `src/app/page.tsx` (add testimonials section)
 
-- [ ] **Step 1: Testimonials admin page**
+- [x] **Step 1: Testimonials admin page**
 
 CRUD list. Add/edit dialog: name, role, company, quote (max 3 lines enforced), avatar upload (Cloudinary), is_visible toggle, sort_order.
 
-- [ ] **Step 2: Testimonials section on homepage**
+- [x] **Step 2: Testimonials section on homepage**
 
 `src/components/sections/testimonials-section.tsx` — Server component. Fetches visible testimonials. Displays as a single rotating quote with name + role + company attribution. Uses typographic quotes (" "). Only rendered if testimonials exist in DB.
 
-- [ ] **Step 3: Add to homepage**
+- [x] **Step 3: Add to homepage**
 
 Insert `<TestimonialsSection />` between SkillsSection and FooterCTA in `src/app/page.tsx`.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add .
@@ -988,23 +988,23 @@ git commit -m "feat: add testimonials CRUD and homepage section"
 - Modify: `src/app/layout.tsx` (add JSON-LD structured data)
 - Modify: all page files (add `generateMetadata()` where missing)
 
-- [ ] **Step 1: Create dynamic sitemap**
+- [x] **Step 1: Create dynamic sitemap**
 
 `src/app/sitemap.ts` — Fetches all published projects and blog posts from Supabase, generates sitemap entries. Excludes `/admin/*`.
 
-- [ ] **Step 2: Create robots.txt**
+- [x] **Step 2: Create robots.txt**
 
 `src/app/robots.ts` — Allows all crawlers. Disallows `/admin/*`. Points to sitemap.
 
-- [ ] **Step 3: Add JSON-LD structured data**
+- [x] **Step 3: Add JSON-LD structured data**
 
 Person schema in root layout with name, jobTitle, url, sameAs (social links).
 
-- [ ] **Step 4: Verify all pages have metadata**
+- [x] **Step 4: Verify all pages have metadata**
 
 Check every page exports `generateMetadata()` with unique title and description. Verify OG tags render (use [opengraph.xyz](https://opengraph.xyz)).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add .
@@ -1015,7 +1015,7 @@ git commit -m "feat: add SEO sitemap, robots.txt, and structured data"
 
 ### Task 17: Performance + Accessibility Audit + Final QA
 
-- [ ] **Step 1: Run Lighthouse audit**
+- [x] **Step 1: Run Lighthouse audit**
 
 ```bash
 npm run build
@@ -1024,11 +1024,11 @@ npx serve out
 
 Run Lighthouse on: Home, About, Projects, Blog, Contact. Target: Performance > 90, Accessibility > 95, SEO > 95.
 
-- [ ] **Step 2: Fix any Lighthouse issues**
+- [x] **Step 2: Fix any Lighthouse issues**
 
 Common fixes: image optimization (Next.js Image component), unused CSS, font loading, contrast.
 
-- [ ] **Step 3: Full accessibility pass**
+- [x] **Step 3: Full accessibility pass**
 
 - Skip-to-main-content link
 - Tab order on every page
@@ -1036,7 +1036,7 @@ Common fixes: image optimization (Next.js Image component), unused CSS, font loa
 - `prefers-reduced-motion` disables all animations
 - Color contrast check (all text 4.5:1 minimum)
 
-- [ ] **Step 4: Final responsive QA**
+- [x] **Step 4: Final responsive QA**
 
 All pages at: 360px, 390px, 768px, 1280px, 1440px+. Check:
 - No horizontal overflow
@@ -1044,7 +1044,7 @@ All pages at: 360px, 390px, 768px, 1280px, 1440px+. Check:
 - Touch targets ≥ 44px
 - Images don't break layout
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add .
@@ -1055,11 +1055,11 @@ git commit -m "chore: performance and accessibility audit fixes"
 
 ### Task 18: Production Deployment
 
-- [ ] **Step 1: Connect to Vercel**
+- [x] **Step 1: Connect to Vercel**
 
 Push to GitHub. Connect repo to Vercel. Set environment variables in Vercel dashboard (copy from `.env.local`, remove `NEXT_PUBLIC_` prefix where needed).
 
-- [ ] **Step 2: Verify production build**
+- [x] **Step 2: Verify production build**
 
 ```bash
 npm run build
@@ -1067,11 +1067,11 @@ npm run build
 
 Expected: Build succeeds with no errors.
 
-- [ ] **Step 3: Deploy**
+- [x] **Step 3: Deploy**
 
 Push to `main` branch. Vercel auto-deploys. Verify all pages work on the production URL.
 
-- [ ] **Step 4: Post-deploy smoke test**
+- [x] **Step 4: Post-deploy smoke test**
 
 - All public pages load
 - Contact form submits successfully
@@ -1080,7 +1080,7 @@ Push to `main` branch. Vercel auto-deploys. Verify all pages work on the product
 - Theme toggle works
 - Responsive on real mobile device
 
-- [ ] **Step 5: Final commit**
+- [x] **Step 5: Final commit**
 
 ```bash
 git add .
