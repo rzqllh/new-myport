@@ -152,7 +152,7 @@ export default async function ProjectDetailPage({ params }: Props) {
 
       {/* Additional Images / Gallery */}
       {galleryImages.length > 0 && (
-        <div className="mx-auto max-w-[1000px] px-6 space-y-12 md:space-y-24">
+        <div className="mx-auto max-w-[1000px] px-6 flex flex-col gap-12 md:gap-24">
           {galleryImages.map((img: { url: string; alt_text: string | null }, i: number) => (
             <ScrollReveal key={img.url} delay={0.1}>
               <div className="relative rounded-2xl overflow-hidden border border-border bg-muted shadow-sm">

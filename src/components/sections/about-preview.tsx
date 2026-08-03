@@ -28,19 +28,14 @@ export async function AboutPreview() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
           {/* Text side */}
           <div>
-            <ScrollReveal>
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-4">
-                About
-              </p>
-            </ScrollReveal>
+
 
             <ScrollReveal delay={0.05}>
               <h2
                 id="about-preview-heading"
                 className="font-display font-bold text-3xl md:text-4xl tracking-tighter text-foreground mb-6"
               >
-                The hybrid who bridges{" "}
-                <span className="text-gradient">strategy and execution</span>
+                The hybrid who bridges strategy and execution
               </h2>
             </ScrollReveal>
 
