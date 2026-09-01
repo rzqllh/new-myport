@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
-import { verifyChatSession, signChatSession, verifyTurnstileToken } from '@/lib/chat-auth';
+import { verifyChatSession, signChatSession } from '@/lib/chat-auth';
 import { getCachedGroundingData } from '@/lib/gemini-grounding';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });

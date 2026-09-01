@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function seed() {
-  const dbUrl = process.env.SUPABASE_DB_URL || '***REMOVED***';
+  const dbUrl = process.env.SUPABASE_DB_URL;
   
   if (!dbUrl) {
     console.error('Missing SUPABASE_DB_URL in environment');

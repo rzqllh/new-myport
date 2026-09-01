@@ -3,20 +3,36 @@ import { createClient } from "@/lib/supabase/server";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { ProjectsView } from "@/components/projects-view";
 import type { Project } from "@/components/project-card";
+import { FALLBACK_PROJECTS } from "@/lib/project-content";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: "Projects",
+  title: "Projects & Case Studies",
   description:
-    "Work by Hafizh Rizqullah Prasetya across software engineering, system architecture, tools, and UI/UX research.",
+    "Engineering projects, open-source developer tooling, and quantitative UI/UX research by Hafizh Rizqullah Prasetya.",
+  alternates: {
+    canonical: "/projects",
+  },
+  openGraph: {
+    title: "Projects & Case Studies | Hafizh Rizqullah Prasetya",
+    description:
+      "Engineering projects, open-source developer tooling, and quantitative UI/UX research by Hafizh Rizqullah Prasetya.",
+    url: "/projects",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Projects & Case Studies | Hafizh Rizqullah Prasetya",
+    description:
+      "Engineering projects, open-source developer tooling, and quantitative UI/UX research by Hafizh Rizqullah Prasetya.",
+  },
 };
 
 export default async function ProjectsPage() {
   const supabase = await createClient();
 
-  const { data: projects, error } = await supabase
+  const { data: dbProjects } = await supabase
     .from("projects")
     .select(
       `
@@ -27,35 +43,28 @@ export default async function ProjectsPage() {
     .order("sort_order")
     .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("Error fetching public projects:", error);
-  }
+  const projects = (dbProjects && dbProjects.length > 0)
+    ? dbProjects
+    : (FALLBACK_PROJECTS as Project[]);
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-24 md:py-32">
       {/* Header */}
       <ScrollReveal className="max-w-3xl mb-12 md:mb-16">
         <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">
-          Portfolio & Case Studies
+          Portfolio & Systems
         </p>
         <h1 className="font-display font-bold text-4xl md:text-5xl lg:text-6xl tracking-tighter text-foreground mb-6">
-          Projects & Code
+          Projects & Case Studies
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-          Open-source developer tools, production web applications, and system case studies. Each project includes technical breakdowns and repository sources.
+          Open-source developer tools, production web applications, and system case studies. Each project documents architecture choices, live demos, and source code.
         </p>
       </ScrollReveal>
 
       {/* Interactive Filter & Grid */}
-      {error ? (
-        <div className="py-24 text-center">
-          <p className="text-muted-foreground">
-            Something went wrong loading projects. Try refreshing the page.
-          </p>
-        </div>
-      ) : (
-        <ProjectsView initialProjects={(projects || []) as Project[]} />
-      )}
+      <ProjectsView initialProjects={projects as Project[]} />
     </div>
   );
 }
+

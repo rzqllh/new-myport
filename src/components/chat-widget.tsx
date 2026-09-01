@@ -19,6 +19,17 @@ export default function ChatWidget() {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
 
+  // Close on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
+
   const sendMessage = async (retryCount = 0) => {
     if (!input.trim() && retryCount === 0) return;
     const currentInput = input;
@@ -50,10 +61,6 @@ export default function ChatWidget() {
 
       if (res.status === 401 && data.code === 'SESSION_EXPIRED' && retryCount === 0) {
         setSessionToken(undefined);
-        // Wait for Turnstile to generate a new token via onSuccess, then the user has to click send again?
-        // Ponytail: To fully auto-retry without complex event listeners, we just fail gracefully and let the new token load, but the spec says "wait for new token, then auto-retry". 
-        // We will just show an error this time for simplicity, but wait, spec says "silent re-trigger".
-        // Let's just do a 2-second timeout and hope Turnstile is fast, or better: 
         setMessages(p => [...p, { role: 'model', parts: [{ text: 'Session expired. Retrying...' }] }]);
         setTimeout(() => sendMessage(1), 3000); 
         return;
@@ -67,7 +74,7 @@ export default function ChatWidget() {
       if (data.sessionToken) setSessionToken(data.sessionToken);
       setMessages(p => [...p, { role: 'model', parts: [{ text: data.message }] }]);
 
-        } catch {
+    } catch {
       setMessages(p => [...p, { role: 'model', parts: [{ text: 'Network error. Please try again.' }] }]);
     } finally {
       setIsLoading(false);
@@ -89,6 +96,7 @@ export default function ChatWidget() {
             <Button 
               className="rounded-full w-14 h-14 shadow-lg" 
               onClick={() => setIsOpen(true)}
+              aria-label="Open portfolio AI assistant"
             >
               <ChatCircle weight="fill" size={24} />
             </Button>
@@ -100,20 +108,23 @@ export default function ChatWidget() {
         {isOpen && (
           <motion.div
             key="chat-window"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="chat-heading"
             initial={{ opacity: 0, y: 20, scale: 0.9, originX: 1, originY: 1 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="fixed bottom-4 right-4 w-[350px] h-[500px] flex flex-col shadow-xl border border-border rounded-xl z-50 bg-background overflow-hidden"
+            className="fixed bottom-4 right-4 w-[350px] max-w-[calc(100vw-32px)] h-[500px] max-h-[calc(100dvh-32px)] flex flex-col shadow-xl border border-border rounded-xl z-50 bg-background overflow-hidden"
           >
             <div className="flex justify-between items-center p-4 border-b bg-muted/30">
-              <h3 className="font-semibold">Chat with AI</h3>
-              <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+              <h2 id="chat-heading" className="text-sm font-semibold text-foreground">Chat with AI</h2>
+              <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} aria-label="Close chat assistant">
                 <X weight="bold" size={20} />
               </Button>
             </div>
             
-            <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-4" ref={scrollRef}>
+            <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-4" ref={scrollRef} aria-live="polite">
               <AnimatePresence mode="popLayout">
                 {messages.map((m, i) => (
                   <motion.div 
@@ -161,12 +172,14 @@ export default function ChatWidget() {
                   placeholder="Type a message..." 
                   disabled={isLoading}
                   className="pr-10 rounded-full bg-muted/50 border-border"
+                  aria-label="Message input"
                 />
                 <Button 
                   type="submit" 
                   size="icon" 
                   className="absolute right-1 top-1 bottom-1 h-auto w-8 rounded-full"
                   disabled={isLoading || !input.trim()}
+                  aria-label="Send message"
                 >
                   <PaperPlaneRight weight="fill" size={14} />
                 </Button>
@@ -178,3 +191,4 @@ export default function ChatWidget() {
     </>
   );
 }
+

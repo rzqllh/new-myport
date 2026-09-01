@@ -1,22 +1,46 @@
 import Link from "next/link";
-
+import { ArrowRight, GraduationCap, Briefcase } from "@phosphor-icons/react/dist/ssr";
 import { createClient } from "@/lib/supabase/server";
 import { ScrollReveal } from "@/components/scroll-reveal";
-import { cn } from "@/lib/utils";
+
+interface ExperienceItem {
+  id: string;
+  company: string;
+  role: string;
+  start_date: string;
+  end_date: string | null;
+  is_current: boolean;
+}
+
+const DEFAULT_EXPERIENCES: ExperienceItem[] = [
+  {
+    id: "exp-1",
+    company: "Telkom Indonesia",
+    role: "Project Management Officer (IT & Strategy)",
+    start_date: "2024-03-01",
+    end_date: null,
+    is_current: true,
+  },
+  {
+    id: "exp-2",
+    company: "Ministry of Education, Culture, Research and Technology",
+    role: "Computer Operator",
+    start_date: "2023-03-01",
+    end_date: "2023-04-30",
+    is_current: false,
+  },
+];
+
 export async function AboutPreview() {
   const supabase = await createClient();
-  const { data: about } = await supabase
-    .from("about")
-    .select("bio, photo_url")
-    .single();
 
-  const { data: experiences } = await supabase
+  const { data: dbExperiences } = await supabase
     .from("experiences")
     .select("id, company, role, start_date, end_date, is_current")
     .order("start_date", { ascending: false })
-    .limit(3);
+    .limit(2);
 
-  const bio = about?.bio?.trim();
+  const experiences = (dbExperiences && dbExperiences.length > 0) ? dbExperiences : DEFAULT_EXPERIENCES;
 
   return (
     <section
@@ -25,80 +49,90 @@ export async function AboutPreview() {
       className="py-24 md:py-32 border-t border-border"
     >
       <div className="mx-auto max-w-[1400px] px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
-          {/* Text side */}
-          <div>
-
-
-            <ScrollReveal delay={0.05}>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+          {/* Left Text Column */}
+          <div className="lg:col-span-7 space-y-6">
+            <ScrollReveal>
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">
+                Background & Approach
+              </p>
               <h2
                 id="about-preview-heading"
-                className="font-display font-bold text-3xl md:text-4xl tracking-tighter text-foreground mb-6"
+                className="font-display font-bold text-3xl md:text-4xl lg:text-5xl tracking-tighter text-foreground"
               >
                 Building products from the ground up: strategy, design, and code.
               </h2>
             </ScrollReveal>
 
-            <ScrollReveal delay={0.1}>
-              <p className="text-muted-foreground leading-relaxed max-w-[65ch] mb-8 text-lg">
-                  {bio && bio.includes("Results-driven IT graduate") 
-                    ? "PMO, UI/UX Designer, and Web Developer based in Indonesia. I've shipped government-adjacent systems, fintech interfaces, and startup products across the full project lifecycle." 
-                    : bio || "PMO, UI/UX Designer, and Web Developer based in Indonesia. I've shipped government-adjacent systems, fintech interfaces, and startup products across the full project lifecycle."}
+            <ScrollReveal delay={0.08}>
+              <p className="text-muted-foreground leading-relaxed max-w-[65ch] text-lg">
+                Project Management Officer, UI/UX Designer, and Web Engineer based in Indonesia. I connect project management and hands-on technical execution, enterprise dashboards, and developer tooling across the full product lifecycle.
               </p>
             </ScrollReveal>
 
-            <ScrollReveal delay={0.15}>
+            <ScrollReveal delay={0.12}>
               <Link
                 href="/about"
-                className="inline-flex items-center gap-1.5 font-medium text-primary hover:underline underline-offset-4"
+                className="inline-flex items-center gap-2 font-medium text-primary hover:underline underline-offset-4 text-sm pt-2"
               >
-                Read more about me
+                <span>More about me</span>
+                <ArrowRight weight="bold" className="size-4" />
               </Link>
             </ScrollReveal>
           </div>
 
-          {/* Photo / decorative side */}
-          <ScrollReveal delay={0.1} className="hidden lg:block">
-            <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl shadow-black/5 ring-1 ring-border">
-              {about?.photo_url ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={about.photo_url}
-                  alt="Hafizh Rizqullah Prasetya"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full relative flex items-center justify-center bg-zinc-100/50 dark:bg-zinc-900/50 overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-zinc-200/50 via-transparent to-zinc-300/50 dark:from-zinc-800/50 dark:to-zinc-950/50" />
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] rounded-full bg-gradient-to-tr from-transparent via-zinc-400/20 to-transparent dark:via-zinc-600/10 blur-3xl opacity-60" />
+          {/* Right Card Column: Experience & Education snapshot */}
+          <div className="lg:col-span-5 space-y-4">
+            <ScrollReveal delay={0.15}>
+              <div className="p-6 md:p-8 rounded-3xl bg-card border border-border/80 shadow-xs space-y-6">
+                <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-muted-foreground font-semibold">
+                  <Briefcase weight="duotone" className="size-4 text-primary" />
+                  <span>Recent Experience</span>
                 </div>
-              )}
-            </div>
-          </ScrollReveal>
-        </div>
 
-        {/* ─── Experience Stack ─── */}
-        {experiences && experiences.length > 0 && (
-          <ScrollReveal delay={0.2} className="mt-20 pt-16 border-t border-border">
-            <h3 className="text-xs font-semibold mb-8 uppercase tracking-widest text-muted-foreground">
-              Experience
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {experiences.map((exp) => (
-                <div key={exp.id} className="group p-6 rounded-2xl bg-card/50 border border-border/50 hover:bg-card hover:border-border transition-all duration-300">
-                  <div className="flex justify-between items-start mb-4">
-                    <h4 className="font-semibold text-foreground tracking-tight text-lg group-hover:text-primary transition-colors">{exp.role}</h4>
-                    <span className="text-xs font-mono uppercase px-2 py-1 rounded-md bg-muted/50 text-muted-foreground">
-                      {new Date(exp.start_date).getFullYear()} — {exp.is_current ? "Present" : exp.end_date ? new Date(exp.end_date).getFullYear() : ""}
+                <div className="space-y-4">
+                  {experiences.map((exp) => {
+                    const startYear = new Date(exp.start_date).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+                    const endYear = exp.is_current ? "Present" : exp.end_date ? new Date(exp.end_date).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "";
+
+                    return (
+                      <div key={exp.id} className="space-y-1 pb-3 border-b border-border/50 last:border-0 last:pb-0">
+                        <div className="flex justify-between items-start gap-2">
+                          <h4 className="font-semibold text-foreground text-sm leading-snug">
+                            {exp.role}
+                          </h4>
+                          <span className="text-[11px] font-mono text-muted-foreground shrink-0">
+                            {startYear} — {endYear}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{exp.company}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Education snapshot */}
+                <div className="pt-4 border-t border-border/60">
+                  <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-muted-foreground font-semibold mb-2">
+                    <GraduationCap weight="duotone" className="size-4 text-primary" />
+                    <span>Education</span>
+                  </div>
+                  <div className="flex justify-between items-start gap-2">
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">Gunadarma University</p>
+                      <p className="text-xs text-muted-foreground">Bachelor of Informatics · GPA 3.54 / 4.00</p>
+                    </div>
+                    <span className="text-[11px] font-mono text-muted-foreground shrink-0">
+                      2020 — 2024
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{exp.company}</p>
                 </div>
-              ))}
-            </div>
-          </ScrollReveal>
-        )}
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
       </div>
     </section>
   );
 }
+

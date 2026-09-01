@@ -24,37 +24,48 @@ async function seed() {
   
   const { error: pError } = await supabase.from("projects").upsert([
     {
-      slug: "pos-system-hadzkashop",
-      title: "POS System (HadzkaShop)",
-      description: "A Point of Sale system built to streamline transactions and inventory management.",
+      slug: "lumina",
+      title: "Lumina",
+      description: "Personal project operating system for photographers and videographers -- manages a project from deposit through preparation, production, delivery, and payment, with project finance tracking, a structured brief builder, and public client status links.",
       role: "Full-Stack Developer",
-      category: "Web Application",
-      tech_stack: ["React", "Node.js", "Tailwind CSS"], // Assuming based on typical stack, but can be updated
+      category: "web-dev",
+      tech_stack: ["React", "TypeScript", "Vite", "Supabase", "Tailwind CSS"],
       status: "published",
       featured: true,
       sort_order: 1
     },
     {
-      slug: "yomirra",
-      title: "Yomirra",
-      description: "Web application development for Yomirra.",
-      role: "Frontend Developer",
-      category: "Web Application",
-      tech_stack: ["Next.js", "React", "Tailwind CSS"], 
+      slug: "mawmaw-interior",
+      title: "Mawmaw Interior Studio",
+      description: "Public site and admin CMS for a premium interior design and furniture studio -- manages projects, articles, services, and site settings, with a client consultation flow and published portfolio content.",
+      role: "Full-Stack Developer & Designer",
+      category: "web-dev",
+      tech_stack: ["Next.js", "TypeScript", "Prisma", "PostgreSQL", "Supabase Auth", "Tailwind CSS"],
       status: "published",
       featured: true,
       sort_order: 2
     },
     {
-      slug: "cultural-heritage-repository",
-      title: "Cultural Heritage Digital Asset Repository",
-      description: "Architected a massive digital asset repository containing over 100,395 multimedia items, optimizing data retrieval for cultural heritage websites. Cataloged 30,930 registered objects, buildings, sites, structures, and areas.",
-      role: "Computer Operator / IT Consultant",
-      category: "System Architecture",
-      tech_stack: ["SQL", "Database Management"],
+      slug: "summai",
+      title: "SummAI",
+      description: "Local-first meeting intelligence tool built for mixed Indonesian/English meetings -- transcribes audio with Groq Whisper and synthesizes structured summaries with Gemini. Bring-your-own-API-key, self-hostable, no hosted middleware or subscription.",
+      role: "Full-Stack Developer",
+      category: "web-dev",
+      tech_stack: ["Next.js", "FastAPI", "SQLite", "Groq Whisper", "Google Gemini"],
       status: "published",
       featured: true,
       sort_order: 3
+    },
+    {
+      slug: "rangkai",
+      title: "Rangkai",
+      description: 'AI tool that interviews you to clarify a raw software idea, then generates a structured, execution-ready "Build Pack" for coding agents like Claude Code, Gemini Antigravity, and OpenAI Codex.',
+      role: "Creator & Frontend Developer",
+      category: "tools",
+      tech_stack: ["TypeScript"],
+      status: "published",
+      featured: true,
+      sort_order: 4
     }
   ], { onConflict: "slug" });
   

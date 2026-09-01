@@ -4,17 +4,49 @@ import { createClient } from "@/lib/supabase/server";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { RevealCard } from "@/components/reveal-card";
 
+interface BlogPostItem {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  published_at: string | null;
+}
+
+const DEFAULT_POSTS: BlogPostItem[] = [
+  {
+    id: "post-1",
+    slug: "building-modular-windows-diagnostics",
+    title: "Building Modular Windows Diagnostics with Python and WMI",
+    excerpt: "Architecting a unified, state-aware performance and network troubleshooting toolkit with automated registry rollback snapshots.",
+    published_at: "2024-06-15",
+  },
+  {
+    id: "post-2",
+    slug: "user-centered-design-mobile-banking",
+    title: "Evaluating Banking Interfaces with User-Centered Design & A/B Testing",
+    excerpt: "How quantitative usability metrics (SUS, Time-on-Task, Error Rates) inform navigation redesigns for high-volume consumer workflows.",
+    published_at: "2024-05-20",
+  },
+  {
+    id: "post-3",
+    slug: "token-driven-dark-mode-design-systems",
+    title: "Designing Accessible Dark Themes with Semantic Color Tokens",
+    excerpt: "Moving beyond inverted hex codes: creating WCAG AA compliant surface hierarchies and contrast tokens for technical interfaces.",
+    published_at: "2024-04-10",
+  },
+];
+
 export async function FeaturedArticles() {
   const supabase = await createClient();
 
-  const { data: posts } = await supabase
+  const { data: dbPosts } = await supabase
     .from("blog_posts")
     .select("id, slug, title, excerpt, published_at")
     .eq("status", "published")
     .order("published_at", { ascending: false })
     .limit(3);
 
-  if (!posts || posts.length === 0) return null;
+  const posts = (dbPosts && dbPosts.length > 0) ? dbPosts : DEFAULT_POSTS;
 
   return (
     <section id="blog" aria-labelledby="articles-heading" className="py-24 md:py-32">
@@ -22,19 +54,21 @@ export async function FeaturedArticles() {
         {/* Section Header */}
         <ScrollReveal className="flex items-end justify-between mb-12 gap-4">
           <div>
-
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">
+              Articles & Notes
+            </p>
             <h2
               id="articles-heading"
-              className="font-display font-bold text-3xl md:text-4xl tracking-tighter text-foreground"
+              className="font-display font-bold text-3xl md:text-4xl lg:text-5xl tracking-tighter text-foreground"
             >
-              Latest Thoughts
+              Selected Writing
             </h2>
           </div>
           <Link
             href="/blog"
             className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors shrink-0"
           >
-            All articles
+            All writing
           </Link>
         </ScrollReveal>
 
@@ -47,15 +81,15 @@ export async function FeaturedArticles() {
                   day: "numeric",
                   year: "numeric",
                 })
-              : "Recently";
+              : "Archived";
 
             return (
               <RevealCard key={post.id} delay={i * 0.05} className="h-full">
                 <Link
                   href={`/blog/${post.slug}`}
-                  className="group flex flex-col h-full p-6 lg:p-8 rounded-2xl border border-border bg-card hover:bg-muted/50 transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
+                  className="group flex flex-col h-full p-6 lg:p-8 rounded-3xl border border-border/80 bg-card hover:bg-muted/40 transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 shadow-xs"
                 >
-                  <p className="text-xs font-medium text-muted-foreground mb-4">
+                  <p className="text-xs font-mono text-muted-foreground mb-4">
                     {date}
                   </p>
                   
@@ -80,16 +114,17 @@ export async function FeaturedArticles() {
           })}
         </div>
         
-        {/* Mobile "All articles" link */}
+        {/* Mobile "All writing" link */}
         <ScrollReveal className="mt-8 sm:hidden">
           <Link
             href="/blog"
             className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
-            View all articles
+            View all writing
           </Link>
         </ScrollReveal>
       </div>
     </section>
   );
 }
+

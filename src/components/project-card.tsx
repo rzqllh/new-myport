@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { ArrowUpRight, GithubLogo, Globe, Code } from "@phosphor-icons/react/dist/ssr";
+import { ArrowUpRight, ArrowRight, GithubLogo } from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
+import { PROJECT_DETAILS_DATA } from "@/lib/project-content";
 
 export interface Project {
   id: string;
@@ -28,7 +28,7 @@ interface ProjectCardProps {
 const CATEGORY_LABELS: Record<string, string> = {
   "web-dev": "Web Application",
   tools: "Tools & Systems",
-  "ui-ux": "UI/UX Research",
+  "ui-ux": "UI/UX & Research",
   "project-management": "Project Management",
 };
 
@@ -43,15 +43,17 @@ export function ProjectCard({
     project.category ||
     "Project";
 
+  const details = PROJECT_DETAILS_DATA[project.slug];
+
   return (
     <div
       className={cn(
-        "group relative flex flex-col h-full rounded-2xl overflow-hidden border border-border/80 bg-card/90",
-        "transition-all duration-300 ease-out hover:shadow-xl hover:shadow-primary/5 hover:border-foreground/20 hover:-translate-y-1.5",
+        "group relative flex flex-col h-full rounded-2xl overflow-hidden border border-border/80 bg-card",
+        "transition-all duration-300 ease-out hover:shadow-lg hover:shadow-primary/5 hover:border-foreground/20 hover:-translate-y-1",
         className
       )}
     >
-      {/* Visual Header / Cover */}
+      {/* Visual Header / Cover or Architectural Fallback */}
       <div
         className={cn(
           "relative overflow-hidden bg-muted/40 border-b border-border/60",
@@ -67,22 +69,29 @@ export function ProjectCard({
             loading="lazy"
           />
         ) : (
-          /* High-craft typography fallback */
-          <div className="absolute inset-0 flex flex-col justify-between p-6 bg-gradient-to-br from-card via-muted/30 to-muted/60">
-            <div className="flex items-center justify-between w-full">
-              <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+          /* High-craft typography & system fallback */
+          <div className="absolute inset-0 flex flex-col justify-between p-6 bg-gradient-to-br from-card via-muted/30 to-muted/60 font-mono">
+            <div className="flex items-center justify-between w-full text-[11px]">
+              <span className="uppercase tracking-widest text-primary font-semibold">
                 {categoryLabel}
               </span>
               {project.role && (
-                <span className="text-[11px] text-muted-foreground/80 truncate max-w-[180px]">
+                <span className="text-muted-foreground/80 font-sans text-xs">
                   {project.role}
                 </span>
               )}
             </div>
-            <div>
-              <p className="font-display font-bold text-2xl tracking-tight text-foreground/90 line-clamp-1">
-                {project.title}
+
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground font-sans leading-snug line-clamp-2">
+                {details?.tagline || project.description}
               </p>
+              {details?.metrics && details.metrics[0] && (
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-background/80 border border-border/60 text-[10px] text-foreground">
+                  <span className="text-muted-foreground">{details.metrics[0].label}:</span>
+                  <span className="font-semibold text-primary">{details.metrics[0].value}</span>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -133,7 +142,7 @@ export function ProjectCard({
                 aria-label={`Open live demo of ${project.title}`}
                 className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-medium transition-colors"
               >
-                <span>Live Demo</span>
+                <span>Live</span>
                 <ArrowUpRight weight="bold" className="size-3" />
               </a>
             )}
@@ -146,6 +155,17 @@ export function ProjectCard({
             {project.description}
           </p>
         )}
+
+        {/* Action Link to Case Study */}
+        <div className="pt-2">
+          <Link
+            href={`/projects/${project.slug}`}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline underline-offset-4"
+          >
+            <span>Case study</span>
+            <ArrowRight weight="bold" className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        </div>
 
         {/* Tech stack tags */}
         {project.tech_stack && project.tech_stack.length > 0 && (
@@ -169,3 +189,4 @@ export function ProjectCard({
     </div>
   );
 }
+

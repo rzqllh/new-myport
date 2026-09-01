@@ -1,10 +1,10 @@
 // ─── Site Metadata ────────────────────────────────────────────────────────────
 export const SITE_NAME = "Hafizh Rizqullah Prasetya";
-export const SITE_TAGLINE = "PMO · Designer · Developer";
+export const SITE_TAGLINE = "Project Management · Product Design · Web Engineering";
 export const SITE_DESCRIPTION =
-  "Hafizh Rizqullah Prasetya. PMO, UI/UX Designer, and Web Developer based in Indonesia. I manage projects, design interfaces, and write code.";
+  "Hafizh Rizqullah Prasetya. Project management, product design, and web engineering. Bridging project delivery and technical implementation.";
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://hafizhrizqullah.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://rzqllh-port.vercel.app";
 
 // ─── Social Links ─────────────────────────────────────────────────────────────
 export const SOCIAL_LINKS = {
@@ -18,7 +18,7 @@ export const SOCIAL_LINKS = {
 export const NAV_ITEMS = [
   { label: "About", href: "/about", sectionId: "about" },
   { label: "Projects", href: "/projects", sectionId: "projects" },
-  { label: "Blog", href: "/blog", sectionId: "blog" },
+  { label: "Writing", href: "/blog", sectionId: "blog" },
   { label: "Contact", href: "/contact", sectionId: "contact" },
 ] as const;
 
@@ -37,10 +37,10 @@ export const ADMIN_NAV_ITEMS = [
 
 // ─── Project Categories ───────────────────────────────────────────────────────
 export const PROJECT_CATEGORIES = [
-  { label: "All", value: "all" },
-  { label: "Web Dev", value: "web-dev" },
-  { label: "UI/UX", value: "ui-ux" },
-  { label: "Project Management", value: "project-management" },
+  { label: "All Projects", value: "all" },
+  { label: "Web Applications", value: "web-dev" },
+  { label: "Tools & Systems", value: "tools" },
+  { label: "UI/UX & Research", value: "ui-ux" },
 ] as const;
 
 // ─── Skill Categories ─────────────────────────────────────────────────────────
@@ -50,3 +50,4 @@ export const SKILL_CATEGORIES = [
   { label: "Design", value: "design" },
   { label: "Tools", value: "tools" },
 ] as const;
+

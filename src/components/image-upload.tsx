@@ -195,7 +195,6 @@ export function ImageUpload({
     <div className={cn("space-y-2", className)}>
       {value ? (
         <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-border">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={value}
             alt="Uploaded image"
@@ -310,7 +309,6 @@ export function ImageUpload({
                 aspect={aspectRatio}
                 className="max-h-full"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   ref={imgRef}
                   alt="Crop me"

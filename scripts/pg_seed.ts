@@ -19,9 +19,10 @@ async function main() {
     await client.query(`
       INSERT INTO projects (slug, title, description, category, tech_stack, featured, sort_order, status)
       VALUES 
-      ('project-alpha', 'Project Alpha', 'A revolutionary new platform for real-time collaboration.', 'Web Application', ARRAY['Next.js', 'Supabase', 'Tailwind CSS'], true, 1, 'published'),
-      ('project-beta', 'Design System', 'A comprehensive UI kit and design system built from the ground up.', 'UI/UX Design', ARRAY['Figma', 'React', 'Storybook'], true, 2, 'published'),
-      ('project-gamma', 'E-Commerce Replatforming', 'Migrated a legacy monolithic storefront to a headless commerce architecture.', 'E-Commerce', ARRAY['Shopify Plus', 'Hydrogen', 'Remix'], true, 3, 'published')
+      ('lumina', 'Lumina', 'Personal project operating system for photographers and videographers.', 'web-dev', ARRAY['React', 'TypeScript', 'Vite', 'Supabase', 'Tailwind CSS'], true, 1, 'published'),
+      ('mawmaw-interior', 'Mawmaw Interior Studio', 'Public site and admin CMS for a premium interior design and furniture studio.', 'web-dev', ARRAY['Next.js', 'TypeScript', 'Prisma', 'PostgreSQL', 'Supabase Auth', 'Tailwind CSS'], true, 2, 'published'),
+      ('summai', 'SummAI', 'Local-first meeting intelligence tool for mixed Indonesian/English meetings.', 'web-dev', ARRAY['Next.js', 'FastAPI', 'SQLite', 'Groq Whisper', 'Google Gemini'], true, 3, 'published'),
+      ('rangkai', 'Rangkai', 'AI specification builder generating execution-ready Build Packs.', 'tools', ARRAY['TypeScript'], true, 4, 'published')
       ON CONFLICT (slug) DO UPDATE SET 
         title = EXCLUDED.title,
         description = EXCLUDED.description,

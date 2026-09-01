@@ -1,17 +1,21 @@
 import type { MetadataRoute } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { FALLBACK_PROJECTS } from "@/lib/project-content";
+
+const FALLBACK_POST_SLUGS = [
+  "building-modular-windows-diagnostics",
+  "user-centered-design-mobile-banking",
+  "token-driven-dark-mode-design-systems",
+];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient();
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://rzqllh-port.vercel.app/"
-  const { data: projects } = await supabase
-    .from("projects")
-    .select("slug, updated_at");
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://rzqllh-port.vercel.app";
 
-  const { data: posts } = await supabase
-    .from("blog_posts")
-    .select("slug, updated_at, status")
-    .eq("status", "published");
+  const [{ data: dbProjects }, { data: dbPosts }] = await Promise.all([
+    supabase.from("projects").select("slug, updated_at"),
+    supabase.from("blog_posts").select("slug, updated_at, status").eq("status", "published"),
+  ]);
 
   const staticRoutes = ["", "/about", "/contact", "/projects", "/blog"].map((route) => ({
     url: `${baseUrl}${route}`,
@@ -20,14 +24,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route === "" ? 1 : 0.8,
   }));
 
-  const projectRoutes = (projects ?? []).map((project) => ({
+  const projects = (dbProjects && dbProjects.length > 0)
+    ? dbProjects
+    : FALLBACK_PROJECTS.map((p) => ({ slug: p.slug, updated_at: new Date().toISOString() }));
+
+  const projectRoutes = projects.map((project) => ({
     url: `${baseUrl}/projects/${project.slug}`,
     lastModified: new Date(project.updated_at ?? new Date()),
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
 
-  const postRoutes = (posts ?? []).map((post) => ({
+  const posts = (dbPosts && dbPosts.length > 0)
+    ? dbPosts
+    : FALLBACK_POST_SLUGS.map((slug) => ({ slug, updated_at: new Date().toISOString() }));
+
+  const postRoutes = posts.map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,
     lastModified: new Date(post.updated_at ?? new Date()),
     changeFrequency: "monthly" as const,

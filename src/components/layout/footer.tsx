@@ -4,11 +4,12 @@ import { Separator } from "@/components/ui/separator";
 import { NAV_ITEMS, SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 import { FooterContact } from "./footer-contact";
+import { GitHubActivityBadge } from "@/components/github-activity-badge";
 
 export async function Footer() {
   const year = new Date().getFullYear();
   const supabase = await createClient();
-  
+
   const { data: settings } = await supabase
     .from("site_settings")
     .select("key, value")
@@ -16,7 +17,7 @@ export async function Footer() {
 
   const social = (settings?.find(s => s.key === "social")?.value as Record<string, string>) || {};
   const general = (settings?.find(s => s.key === "general")?.value as Record<string, string>) || {};
-  
+
   const siteName = general.site_title || SITE_NAME;
   const siteTagline = general.tagline || SITE_TAGLINE;
 
@@ -87,18 +88,29 @@ export async function Footer() {
 
         <Separator className="my-8" />
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
-          <p>
-            © {year} {siteName}. Built with Next.js and Supabase.
-          </p>
-          <Link
-            href="/admin"
-            className="hover:text-foreground transition-colors"
-          >
-            Admin
-          </Link>
+        <div className="flex flex-col gap-4 border-t border-border/60 pt-6 sm:flex-row sm:items-end sm:justify-between">
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-foreground">
+              {siteName}
+            </p>
+
+            <p className="text-xs text-muted-foreground">
+              Designing systems. Shipping things. Occasionally breaking both.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <GitHubActivityBadge />
+
+            <span className="hidden h-3 w-px bg-border sm:block" />
+
+            <span className="text-xs tabular-nums text-muted-foreground">
+              © {year}
+            </span>
+          </div>
         </div>
       </div>
     </footer>
   );
 }
+

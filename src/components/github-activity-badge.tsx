@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { GithubLogo, ArrowUpRight, GitCommit } from "@phosphor-icons/react";
+import { GithubLogo, ArrowUpRight } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 interface GitHubStatus {

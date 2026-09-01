@@ -12,10 +12,6 @@ export interface ProjectDetailContent {
     tech: string;
     reason: string;
   }[];
-  terminalSnippet?: {
-    command: string;
-    output: string[];
-  };
   metrics?: {
     label: string;
     value: string;
@@ -34,7 +30,7 @@ export const PROJECT_DETAILS_DATA: Record<string, ProjectDetailContent> = {
       {
         title: "Hardware & Telemetry Engine",
         description:
-          "Directly interfaces with Windows Management Instrumentation (WMI) and Win32 APIs to extract real-time CPU states, memory usage, disk fragmentation, and thermal profiles.",
+          "Directly interfaces with Windows Management Instrumentation (WMI) and Win32 APIs to extract CPU states, memory usage, disk status, and thermal profiles.",
       },
       {
         title: "Network Socket & Latency Diagnostics",
@@ -44,7 +40,7 @@ export const PROJECT_DETAILS_DATA: Record<string, ProjectDetailContent> = {
       {
         title: "Reversible Tuning & Registry Sandbox",
         description:
-          "All system tweaks create automated restore snapshots before modification, guaranteeing zero risk of bricking system configurations.",
+          "All system tweaks create automated restore snapshots before modification, guaranteeing safe rollback of system configurations.",
       },
       {
         title: "Modular Maintenance Pipeline",
@@ -53,15 +49,15 @@ export const PROJECT_DETAILS_DATA: Record<string, ProjectDetailContent> = {
       },
     ],
     keyFeatures: [
-      "Hardware telemetry & thermal sensor monitoring",
+      "Hardware telemetry and thermal sensor monitoring",
       "Automated DISM/SFC system integrity verification",
-      "TCP/IP socket buffer & DNS benchmark optimizer",
+      "TCP/IP socket buffer and DNS benchmark optimizer",
       "Zero-dependency modular Python CLI architecture",
-      "Automatic registry backup & 1-click restore snapshots",
+      "Automatic registry backup and 1-click restore snapshots",
     ],
     techChoices: [
       {
-        tech: "Python 3.11+",
+        tech: "Python",
         reason: "Fast development of cross-subsystem orchestration and structured data parsing.",
       },
       {
@@ -69,26 +65,9 @@ export const PROJECT_DETAILS_DATA: Record<string, ProjectDetailContent> = {
         reason: "Low-level access to kernel objects, performance counters, and device drivers.",
       },
       {
-        tech: "PowerShell Core",
+        tech: "PowerShell",
         reason: "Execution of native elevated administrative commands and service management.",
       },
-    ],
-    terminalSnippet: {
-      command: "voltune --diagnose --all --verbose",
-      output: [
-        "[+] Initializing Voltune Kernel Subsystem v1.2.0...",
-        "[✓] WMI Hardware Monitor: AMD Ryzen 7 5800H (8C/16T) - Normal Temp: 48°C",
-        "[✓] RAM Status: 16.0 GB Total | 6.2 GB In-Use (38.7%)",
-        "[✓] Storage Check: NVMe SSD 1TB (Health: 99%, Trim: Active)",
-        "[✓] Network Latency Test: 12ms avg (Packet Loss: 0.0%)",
-        "[✓] Windows Component Store: Health verified (0 corrupted packages)",
-        "[★] System State: OPTIMAL. Tuning profile 'performance-v2' active.",
-      ],
-    },
-    metrics: [
-      { label: "Execution Speed", value: "< 1.2s" },
-      { label: "Rollback Safety", value: "100%" },
-      { label: "Supported Windows", value: "10 & 11" },
     ],
   },
 
@@ -108,7 +87,7 @@ export const PROJECT_DETAILS_DATA: Record<string, ProjectDetailContent> = {
       {
         title: "Hardware-Accelerated Canvas Engine",
         description:
-          "Renders multi-layer watermarks, typography overlays, and custom blend modes with 60 FPS viewport zooming and pan controls.",
+          "Renders multi-layer watermarks, typography overlays, and custom blend modes with viewport zooming and pan controls.",
       },
       {
         title: "Batch Web Worker Pipeline",
@@ -119,13 +98,13 @@ export const PROJECT_DETAILS_DATA: Record<string, ProjectDetailContent> = {
     keyFeatures: [
       "100% Client-Side zero-cloud image processing",
       "Instant EXIF and GPS geolocation metadata scrubbing",
-      "Dynamic typography & logo watermarking presets",
+      "Dynamic typography and logo watermarking presets",
       "Batch WebP / AVIF export with lossless compression",
-      "Adaptive aspect ratio & social preset resizing",
+      "Adaptive aspect ratio and social preset resizing",
     ],
     techChoices: [
       {
-        tech: "React 19 & TypeScript",
+        tech: "TypeScript & React",
         reason: "Declarative state management for multi-layer canvas composition.",
       },
       {
@@ -133,14 +112,9 @@ export const PROJECT_DETAILS_DATA: Record<string, ProjectDetailContent> = {
         reason: "Pixel manipulation, sub-sampling, and image rasterization in memory.",
       },
       {
-        tech: "Web Workers",
-        reason: "Asynchronous parallel compression without blocking the UI thread.",
+        tech: "Tailwind CSS",
+        reason: "Responsive finishing tools and high-contrast control panels.",
       },
-    ],
-    metrics: [
-      { label: "Data Uploaded", value: "0 KB (Local)" },
-      { label: "Format Support", value: "PNG, JPG, WebP" },
-      { label: "Export Latency", value: "< 250ms" },
     ],
   },
 
@@ -170,10 +144,10 @@ export const PROJECT_DETAILS_DATA: Record<string, ProjectDetailContent> = {
     ],
     keyFeatures: [
       "Shot breakdown by scene, lens, and lighting setup",
-      "Real-time shoot progress & deliverable milestones",
-      "Client asset approval & revision tracking",
+      "Real-time shoot progress and deliverable milestones",
+      "Client asset approval and revision tracking",
       "Mobile-optimized touch interface for field production",
-      "Production budget & crew gear inventory tracker",
+      "Production budget and crew gear inventory tracker",
     ],
     techChoices: [
       {
@@ -185,14 +159,9 @@ export const PROJECT_DETAILS_DATA: Record<string, ProjectDetailContent> = {
         reason: "Rapid development of sleek, high-contrast dark mode interfaces.",
       },
       {
-        tech: "Vercel Edge Platform",
-        reason: "Low-latency worldwide deployment and instant previews.",
+        tech: "Vercel",
+        reason: "Worldwide edge deployment and automated previews.",
       },
-    ],
-    metrics: [
-      { label: "Live Deployment", value: "Vercel Production" },
-      { label: "Mobile Responsive", value: "100%" },
-      { label: "Workflow Efficiency", value: "+40%" },
     ],
   },
 
@@ -202,7 +171,7 @@ export const PROJECT_DETAILS_DATA: Record<string, ProjectDetailContent> = {
     problem:
       "Online reading platforms often suffer from heavy ads, sluggish image pagination, poor vertical scrolling on mobile devices, and lack of offline reading persistence.",
     solution:
-      "Yomirra delivers a distraction-free, lightning-fast reading experience with adaptive image pre-fetching, smooth continuous vertical webtoon mode, customizable layout themes, and local chapter caching.",
+      "Yomirra delivers a distraction-free reading experience with adaptive image pre-fetching, smooth continuous vertical webtoon mode, customizable layout themes, and local chapter caching.",
     architecture: [
       {
         title: "Intelligent Pre-fetch Pipeline",
@@ -217,34 +186,29 @@ export const PROJECT_DETAILS_DATA: Record<string, ProjectDetailContent> = {
       {
         title: "Local Reading State & Offline Cache",
         description:
-          "Saves reading history, bookmark positions, and chapter progress in IndexedDB for instant reload.",
+          "Saves reading history, bookmark positions, and chapter progress in local storage for instant reload.",
       },
     ],
     keyFeatures: [
-      "Zero-interruption continuous vertical webtoon scroll",
+      "Continuous vertical webtoon scroll",
       "Smart image pre-fetching based on viewport velocity",
       "Adaptive dark / OLED reading themes to reduce eye strain",
-      "IndexedDB local reading progress synchronization",
+      "Local reading progress synchronization",
       "Keyboard shortcut navigation (Arrow keys, J/K scrolling)",
     ],
     techChoices: [
       {
-        tech: "Next.js App Router",
+        tech: "Next.js & React",
         reason: "Optimized route caching and fast dynamic page rendering.",
       },
       {
-        tech: "React 19 & TypeScript",
+        tech: "TypeScript",
         reason: "Predictable state management for complex zoom and scroll behaviors.",
       },
       {
-        tech: "IndexedDB API",
-        reason: "Client-side storage of reading history and offline chapters.",
+        tech: "Tailwind CSS",
+        reason: "Minimalist reading controls with distraction-free layout styling.",
       },
-    ],
-    metrics: [
-      { label: "Page Load Time", value: "< 300ms" },
-      { label: "Pre-fetch Buffer", value: "5 Pages Ahead" },
-      { label: "License", value: "Apache-2.0" },
     ],
   },
 
@@ -259,24 +223,24 @@ export const PROJECT_DETAILS_DATA: Record<string, ProjectDetailContent> = {
       {
         title: "Editorial Spatial Layout",
         description:
-          "Carefully calibrated typography pairings and whitespace grids inspired by contemporary Swiss architectural monographs.",
+          "Carefully calibrated typography pairings and whitespace grids inspired by contemporary architectural monographs.",
       },
       {
         title: "Fluid Micro-Interactions",
         description:
-          "Hardware-accelerated layout transitions that guide the viewer through interior projects without visual noise.",
+          "Layout transitions that guide the viewer through interior projects without visual noise.",
       },
       {
         title: "Responsive Image Grid",
         description:
-          "Adaptive picture elements serving WebP/AVIF formats tailored to desktop 4K displays and mobile screens.",
+          "Adaptive picture elements serving responsive formats tailored to high-resolution desktop and mobile screens.",
       },
     ],
     keyFeatures: [
       "Editorial typography hierarchy and spacious margins",
       "High-resolution project photography gallery",
       "Studio philosophy and spatial design methodology breakdown",
-      "Client inquiry & project consultation contact flow",
+      "Client inquiry and project consultation contact flow",
     ],
     techChoices: [
       {
@@ -291,11 +255,6 @@ export const PROJECT_DETAILS_DATA: Record<string, ProjectDetailContent> = {
         tech: "Framer Motion",
         reason: "Subtle page transitions and scroll-triggered narrative reveals.",
       },
-    ],
-    metrics: [
-      { label: "Visual Aesthetic", value: "Cold Luxury" },
-      { label: "Lighthouse Score", value: "98/100" },
-      { label: "Live Demo", value: "Active" },
     ],
   },
 
@@ -324,8 +283,8 @@ export const PROJECT_DETAILS_DATA: Record<string, ProjectDetailContent> = {
       },
     ],
     keyFeatures: [
-      "Instant barcode scan & keyboard-driven checkout",
-      "Real-time inventory deduction & low-stock triggers",
+      "Instant barcode scan and keyboard-driven checkout",
+      "Real-time inventory deduction and low-stock triggers",
       "Multi-payment calculation (Cash, QRIS, Card)",
       "Daily profit/loss reconciliation dashboards",
       "Thermal printer receipt generation",
@@ -333,7 +292,7 @@ export const PROJECT_DETAILS_DATA: Record<string, ProjectDetailContent> = {
     techChoices: [
       {
         tech: "React & Tailwind CSS",
-        reason: "Fast, responsive cashier user interface with zero input lag.",
+        reason: "Fast, responsive cashier user interface with low input latency.",
       },
       {
         tech: "Node.js & Express",
@@ -344,61 +303,90 @@ export const PROJECT_DETAILS_DATA: Record<string, ProjectDetailContent> = {
         reason: "ACID compliance ensuring accurate financial transaction integrity.",
       },
     ],
-    metrics: [
-      { label: "Checkout Time", value: "< 5s / transaction" },
-      { label: "Inventory Accuracy", value: "100%" },
-      { label: "Status", value: "Deployed" },
-    ],
   },
 
-  "cultural-heritage-repository": {
-    slug: "cultural-heritage-repository",
-    tagline: "National multimedia digital asset repository managing 100,395+ cultural treasures across 451 museums.",
+  "summai": {
+    slug: "summai",
+    tagline: "Local-first meeting intelligence tool for mixed Indonesian/English meetings.",
     problem:
-      "Indonesian cultural heritage records were scattered across hundreds of regional institutions with disparate data formats, hindering public research, national cataloging, and preservation efforts.",
+      "Modern multilingual meetings (Indonesian & English) lack private, subscription-free summarization tools that work directly on local hardware without sending proprietary recordings to third-party cloud aggregators.",
     solution:
-      "Architected and standardized a centralized digital asset repository consolidating 100,395 multimedia items and 30,930 registered cultural structures, enabling fast query retrieval for nationwide portals.",
+      "SummAI provides a local-first meeting intelligence tool transcribing audio with Groq Whisper and synthesizing structured action items with Gemini, featuring bring-your-own-key privacy and zero cloud lock-in.",
     architecture: [
       {
-        title: "Unified Metadata Taxonomy",
+        title: "High-Speed Audio Transcription",
         description:
-          "Established standardized schema definitions for cultural properties, decrees (SK), archaeological zones, and artifacts.",
+          "Processes multi-speaker audio recordings via Groq Whisper for near-instant multilingual transcription.",
       },
       {
-        title: "High-Volume Query Optimization",
+        title: "Contextual Meeting Synthesis",
         description:
-          "Optimized relational SQL indexing and caching layers to support search indexing across 451 museum inventories.",
+          "Extracts structured decisions, action items, assignees, and key discussion points with Google Gemini.",
       },
       {
-        title: "Decree (SK) & Approval Workflow",
+        title: "Local-First Storage Engine",
         description:
-          "Digital workflow for tracking pending, verified, and approved cultural preservation legal decrees.",
+          "Stores meeting transcripts, search indexes, and summaries locally in SQLite with zero telemetry.",
       },
     ],
     keyFeatures: [
-      "Centralized management of 100,395+ multimedia heritage assets",
-      "Catalog of 30,930 registered objects, buildings, and sites",
-      "Nationwide data consolidation across 451 museum institutions",
-      "100% data integrity verified for government research portals",
+      "Optimized for mixed Indonesian and English meeting audio",
+      "Near-instant Groq Whisper transcription pipeline",
+      "Structured meeting minutes and action item synthesis via Gemini",
+      "Bring-Your-Own-API-Key with zero subscription lock-in",
+      "Local SQLite storage with exportable Markdown reports",
     ],
     techChoices: [
       {
-        tech: "PHP & MySQL",
-        reason: "Enterprise database stability for high-volume relational cataloging.",
+        tech: "Next.js & React",
+        reason: "Clean desktop and web interface for recording playback and review.",
       },
       {
-        tech: "SQL Architecture & Indexing",
-        reason: "Optimized complex join queries across multi-institution datasets.",
+        tech: "FastAPI & Python",
+        reason: "Lightweight backend orchestration for audio ingestion and LLM calls.",
       },
       {
-        tech: "Data Verification Scripts",
-        reason: "Automated deduplication and asset integrity checks.",
+        tech: "SQLite",
+        reason: "Zero-configuration local-first persistence.",
       },
     ],
-    metrics: [
-      { label: "Total Assets", value: "100,395+" },
-      { label: "Museums Connected", value: "451 Nationwide" },
-      { label: "Registered Sites", value: "30,930" },
+  },
+
+  "rangkai": {
+    slug: "rangkai",
+    tagline: "Interactive AI specification builder turning raw software ideas into execution-ready Build Packs.",
+    problem:
+      "Developers and founders frequently struggle to provide comprehensive context, architecture boundaries, and file plans when prompting AI coding agents, leading to hallucinations and generic boilerplate.",
+    solution:
+      "Rangkai conducts a structured interactive interview to clarify scope, tech stack choices, and non-goals, generating an execution-ready Build Pack tailored for agents like Claude Code, Gemini Antigravity, and Codex.",
+    architecture: [
+      {
+        title: "Adaptive Requirement Interview",
+        description:
+          "Dynamically probes underspecified requirements, system boundaries, and technology trade-offs.",
+      },
+      {
+        title: "Build Pack Specification Generator",
+        description:
+          "Compiles architectural blueprints, design token rules, API contracts, and implementation step matrices.",
+      },
+      {
+        title: "Agent Context Optimizer",
+        description:
+          "Formats output specifications to maximize prompt comprehension for autonomous coding agents.",
+      },
+    ],
+    keyFeatures: [
+      "Guided interactive requirement discovery interview",
+      "Structured Build Pack generation ready for coding agents",
+      "Architecture, tech stack, and constraint hardening",
+      "Modular Markdown and JSON export options",
+    ],
+    techChoices: [
+      {
+        tech: "TypeScript",
+        reason: "Strict typing for interview state machines and schema validators.",
+      },
     ],
   },
 
@@ -406,24 +394,24 @@ export const PROJECT_DETAILS_DATA: Record<string, ProjectDetailContent> = {
     slug: "bca-mobile-ui-analysis",
     tagline: "Usability research and interface redesign for mobile banking using User-Centered Design and A/B Testing.",
     problem:
-      "Legacy mobile banking interfaces frequently exhibit dense navigation menus, confusing transaction verification steps, and high cognitive load for both novice and power users.",
+      "Mobile banking interfaces frequently exhibit dense navigation menus, confusing transaction verification steps, and high cognitive load for novice and power users.",
     solution:
-      "Conducted structured quantitative usability research, developed user task models, and redesigned the mobile banking UI using iterative User-Centered Design (UCD) and statistical A/B testing.",
+      "Conducted structured quantitative usability research, developed user task models, and redesigned the mobile banking UI using iterative User-Centered Design (UCD) and statistical A/B testing methodologies.",
     architecture: [
       {
         title: "Quantitative Usability Benchmarking",
         description:
-          "Measured Time-on-Task (ToT), System Usability Scale (SUS), and Error Rate across core financial workflows.",
+          "Measured Time-on-Task, System Usability Scale (SUS), and Error Rate across core financial workflows.",
       },
       {
-        title: "User-Centered Design (UCD) Iteration",
+        title: "User-Centered Design Iteration",
         description:
           "Redesigned navigation hierarchies, biometric confirmation flows, and balance disclosure privacy toggles.",
       },
       {
         title: "A/B Usability Experimentation",
         description:
-          "Statistically compared task completion speed and error reduction between baseline and redesigned prototypes.",
+          "Compared task completion efficiency and error reduction between baseline and redesigned prototypes.",
       },
     ],
     keyFeatures: [
@@ -443,13 +431,144 @@ export const PROJECT_DETAILS_DATA: Record<string, ProjectDetailContent> = {
       },
       {
         tech: "A/B Testing & SUS Metrics",
-        reason: "Objective data validation of usability and satisfaction improvements.",
+        reason: "Objective validation of usability and user satisfaction improvements.",
       },
     ],
     metrics: [
       { label: "Research Framework", value: "UCD & A/B Testing" },
-      { label: "User Satisfaction", value: "+35% SUS Score" },
-      { label: "Task Completion", value: "+28% Faster" },
+      { label: "Degree", value: "Bachelor of Informatics" },
+      { label: "Academic Standing", value: "GPA 3.54 / 4.00" },
     ],
   },
 };
+
+export const FALLBACK_PROJECTS = [
+  {
+    id: "p-lumina",
+    slug: "lumina",
+    title: "Lumina",
+    description: "Personal project operating system for photographers and videographers -- manages a project from deposit through preparation, production, delivery, and payment, with project finance tracking, a structured brief builder, and public client status links.",
+    role: "Full-Stack Developer",
+    category: "web-dev",
+    tech_stack: ["React", "TypeScript", "Vite", "Supabase", "Tailwind CSS"],
+    status: "published",
+    featured: true,
+    github_url: "https://github.com/rzqllh/Lumina",
+    demo_url: "https://lumina-azure-beta.vercel.app",
+    cover_url: null,
+  },
+  {
+    id: "p-mawmaw",
+    slug: "mawmaw-interior",
+    title: "Mawmaw Interior Studio",
+    description: "Public site and admin CMS for a premium interior design and furniture studio -- manages projects, articles, services, and site settings, with a client consultation flow and published portfolio content.",
+    role: "Full-Stack Developer & Designer",
+    category: "web-dev",
+    tech_stack: ["Next.js", "TypeScript", "Prisma", "PostgreSQL", "Supabase Auth", "Tailwind CSS"],
+    status: "published",
+    featured: true,
+    github_url: "https://github.com/rzqllh/Mawmaw-landing",
+    demo_url: "https://mawmaw-interior.vercel.app",
+    cover_url: null,
+  },
+  {
+    id: "p-summai",
+    slug: "summai",
+    title: "SummAI",
+    description: "Local-first meeting intelligence tool built for mixed Indonesian/English meetings -- transcribes audio with Groq Whisper and synthesizes structured summaries with Gemini. Bring-your-own-API-key, self-hostable, no hosted middleware or subscription.",
+    role: "Full-Stack Developer",
+    category: "web-dev",
+    tech_stack: ["Next.js", "FastAPI", "SQLite", "Groq Whisper", "Google Gemini"],
+    status: "published",
+    featured: true,
+    github_url: "https://github.com/rzqllh/SummAI",
+    demo_url: null,
+    cover_url: null,
+  },
+  {
+    id: "p-rangkai",
+    slug: "rangkai",
+    title: "Rangkai",
+    description: 'AI tool that interviews you to clarify a raw software idea, then generates a structured, execution-ready "Build Pack" for coding agents like Claude Code, Gemini Antigravity, and OpenAI Codex.',
+    role: "Creator & Frontend Developer",
+    category: "tools",
+    tech_stack: ["TypeScript"],
+    status: "published",
+    featured: true,
+    github_url: "https://github.com/rzqllh/Rangkai",
+    demo_url: null,
+    cover_url: null,
+  },
+  {
+    id: "p-hadzkashop",
+    slug: "hadzkashop-pos",
+    title: "HadzkaShop Point of Sale",
+    description: "Full-stack retail Point of Sale system for a small shop -- dynamic product catalog, cash and QRIS (Midtrans) payments, an automatic stock-movement ledger, and role-based access for owner and cashier.",
+    role: "Full-Stack Developer",
+    category: "web-dev",
+    tech_stack: ["Next.js", "TypeScript", "Prisma", "PostgreSQL", "Midtrans", "shadcn/ui"],
+    status: "published",
+    featured: false,
+    github_url: "https://github.com/rzqllh/HadzkaShop_PoS",
+    demo_url: "https://hadzka-shop.vercel.app",
+    cover_url: null,
+  },
+  {
+    id: "p-yomirra",
+    slug: "yomirra",
+    title: "Yomirra",
+    description: "Mobile-first Progressive Web App for manga, comics, and webtoons with multi-source search across several built-in adapters, a local library with reading history and collections, offline chapter downloads, and Firebase-backed cloud sync.",
+    role: "Full-Stack Developer",
+    category: "web-dev",
+    tech_stack: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Zustand", "Firebase"],
+    status: "published",
+    featured: false,
+    github_url: "https://github.com/rzqllh/Yomirra",
+    demo_url: "https://yomirra.vercel.app",
+    cover_url: null,
+  },
+  {
+    id: "p-forma",
+    slug: "forma",
+    title: "Forma",
+    description: "Privacy-first visual finishing workspace for designers, built initially around interior design workflows. Local-first browser processing to clean metadata, apply logo watermarks, resize/compress, batch process, and export finished assets without touching the original design.",
+    role: "Creator & Frontend Developer",
+    category: "tools",
+    tech_stack: ["Next.js", "TypeScript", "Canvas API", "Cloudflare D1", "Tailwind CSS"],
+    status: "published",
+    featured: false,
+    github_url: "https://github.com/rzqllh/Forma",
+    demo_url: null,
+    cover_url: null,
+  },
+  {
+    id: "p-voltune",
+    slug: "voltune",
+    title: "Voltune",
+    description: "A state-aware Windows performance, maintenance, network diagnostics, and recovery toolkit built as a Python CLI for Windows 11 -- safe by default, reversible by design, with verified mutations and audit logging for every session.",
+    role: "Creator & Lead Developer",
+    category: "tools",
+    tech_stack: ["Python", "PowerShell", "Windows API"],
+    status: "published",
+    featured: false,
+    github_url: "https://github.com/rzqllh/Voltune",
+    demo_url: null,
+    cover_url: null,
+  },
+  {
+    id: "p-bca-mobile",
+    slug: "bca-mobile-ui-analysis",
+    title: "BCA Mobile Banking UI Usability Research",
+    description: "Comprehensive usability analysis and interface redesign for mobile banking using User-Centered Design (UCD) and quantitative A/B testing methodology to streamline transactions.",
+    role: "UX Researcher & UI Designer",
+    category: "ui-ux",
+    tech_stack: ["Figma", "User-Centered Design", "A/B Testing", "Usability Metrics"],
+    status: "published",
+    featured: false,
+    github_url: null,
+    demo_url: null,
+    cover_url: null,
+  },
+];
+
+

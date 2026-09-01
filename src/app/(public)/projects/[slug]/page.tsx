@@ -7,18 +7,15 @@ import {
   ArrowUpRight,
   GithubLogo,
   Globe,
-  Terminal,
   CheckCircle,
-  Cpu,
   ShieldCheck,
   Browser,
-  GitBranch,
 } from "@phosphor-icons/react/dist/ssr";
 import { createClient } from "@/lib/supabase/server";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { PROJECT_DETAILS_DATA } from "@/lib/project-content";
+import { PROJECT_DETAILS_DATA, FALLBACK_PROJECTS } from "@/lib/project-content";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -34,11 +31,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .eq("slug", slug)
     .single();
 
-  if (!project) return {};
+  const fallback = FALLBACK_PROJECTS.find((p) => p.slug === slug);
+
+  const title = project?.title || fallback?.title || "Project";
+  const description = project?.description || fallback?.description || "";
 
   return {
-    title: project.title,
-    description: project.description,
+    title,
+    description,
+    alternates: {
+      canonical: `/projects/${slug}`,
+    },
+    openGraph: {
+      title: `${title} | Hafizh Rizqullah Prasetya`,
+      description,
+      url: `/projects/${slug}`,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | Hafizh Rizqullah Prasetya`,
+      description,
+    },
   };
 }
 
@@ -53,7 +66,9 @@ export default async function ProjectDetailPage({ params }: Props) {
     .eq("status", "published")
     .order("sort_order");
 
-  const { data: project } = await supabase
+  const projectList = (allProjects && allProjects.length > 0) ? allProjects : FALLBACK_PROJECTS;
+
+  const { data: dbProject } = await supabase
     .from("projects")
     .select(
       `
@@ -64,16 +79,19 @@ export default async function ProjectDetailPage({ params }: Props) {
     .eq("slug", slug)
     .single();
 
-  if (!project || project.status !== "published") {
+  const project = dbProject || FALLBACK_PROJECTS.find((p) => p.slug === slug);
+
+  if (!project) {
     notFound();
   }
 
   // Find next project for bottom navigation
-  const currentIndex = allProjects?.findIndex((p) => p.slug === slug) ?? -1;
+  const currentIndex = projectList?.findIndex((p) => p.slug === slug) ?? -1;
   const nextProject =
-    currentIndex >= 0 && allProjects && allProjects.length > 1
-      ? allProjects[(currentIndex + 1) % allProjects.length]
+    currentIndex >= 0 && projectList && projectList.length > 1
+      ? projectList[(currentIndex + 1) % projectList.length]
       : null;
+
 
   // Rich content details
   const details = PROJECT_DETAILS_DATA[slug];
@@ -232,36 +250,7 @@ export default async function ProjectDetailPage({ params }: Props) {
       {/* ── Interactive Preview / Visual Showcase ── */}
       <section className="mx-auto max-w-[1400px] px-6 mb-20">
         <ScrollReveal delay={0.2}>
-          {details?.terminalSnippet ? (
-            /* Terminal Simulation Frame */
-            <div className="rounded-3xl border border-border bg-zinc-950 text-zinc-100 shadow-2xl overflow-hidden font-mono text-sm">
-              <div className="flex items-center justify-between px-6 py-4 bg-zinc-900/90 border-b border-zinc-800">
-                <div className="flex items-center gap-2">
-                  <span className="size-3 rounded-full bg-red-500/80" />
-                  <span className="size-3 rounded-full bg-amber-500/80" />
-                  <span className="size-3 rounded-full bg-emerald-500/80" />
-                </div>
-                <div className="flex items-center gap-2 text-xs text-zinc-400">
-                  <Terminal weight="bold" className="size-3.5" />
-                  <span>voltune-cli — interactive session</span>
-                </div>
-                <div className="w-12" />
-              </div>
-              <div className="p-6 md:p-8 space-y-3 leading-relaxed">
-                <div className="flex items-center gap-2 text-emerald-400 font-semibold">
-                  <span>❯</span>
-                  <span>{details.terminalSnippet.command}</span>
-                </div>
-                <div className="space-y-1 text-zinc-300 pt-2 text-xs md:text-sm">
-                  {details.terminalSnippet.output.map((line, idx) => (
-                    <p key={idx} className={line.startsWith("[+]") ? "text-primary" : line.startsWith("[★]") ? "text-amber-400 font-semibold" : ""}>
-                      {line}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : project.demo_url ? (
+          {project.demo_url ? (
             /* Browser Mockup Frame */
             <div className="rounded-3xl border border-border bg-card shadow-2xl overflow-hidden">
               <div className="flex items-center justify-between px-6 py-4 bg-muted/60 border-b border-border text-xs text-muted-foreground">
@@ -315,7 +304,7 @@ export default async function ProjectDetailPage({ params }: Props) {
               <div className="space-y-3 max-w-2xl">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-mono font-medium">
                   <ShieldCheck weight="bold" className="size-4" />
-                  <span>Verified Case Study</span>
+                  <span>Case Study Overview</span>
                 </div>
                 <h3 className="font-display font-bold text-2xl md:text-3xl text-foreground">
                   System Architecture & Implementation
@@ -328,7 +317,7 @@ export default async function ProjectDetailPage({ params }: Props) {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="rounded-xl px-6 bg-background shrink-0"
+                  className="rounded-xl shrink-0"
                   render={
                     <a
                       href={project.github_url}
@@ -338,8 +327,8 @@ export default async function ProjectDetailPage({ params }: Props) {
                   }
                   nativeButton={false}
                 >
-                  <GithubLogo weight="fill" className="size-5 mr-2" />
-                  View GitHub Source
+                  <GithubLogo weight="bold" className="mr-2 size-5" />
+                  View Repository
                 </Button>
               )}
             </div>

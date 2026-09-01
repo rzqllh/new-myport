@@ -7,7 +7,20 @@ import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Get in touch for freelance projects, startup roles, and collaborations.",
+  description: "Get in touch with Hafizh Rizqullah Prasetya for IT project management, product design, and web engineering collaborations.",
+  alternates: {
+    canonical: "/contact",
+  },
+  openGraph: {
+    title: "Contact | Hafizh Rizqullah Prasetya",
+    description: "Get in touch with Hafizh Rizqullah Prasetya for IT project management, product design, and web engineering collaborations.",
+    url: "/contact",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Contact | Hafizh Rizqullah Prasetya",
+    description: "Get in touch with Hafizh Rizqullah Prasetya for IT project management, product design, and web engineering collaborations.",
+  },
 };
 
 export default async function ContactPage() {
@@ -30,8 +43,8 @@ export default async function ContactPage() {
 
             <ScrollReveal delay={0.05}>
               <p className="text-lg text-muted-foreground leading-relaxed mb-10">
-                I'm open to full-time roles, freelance projects, and startup collaboration.
-                Reach out directly, I respond within a day.
+                I&apos;m open to technical project management, UI/UX design systems, and web engineering collaborations.
+                Reach out directly, I respond within 24 hours.
               </p>
             </ScrollReveal>
 
