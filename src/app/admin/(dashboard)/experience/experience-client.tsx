@@ -9,12 +9,22 @@ import { Switch } from "@/components/ui/switch";
 import { Trash, PencilSimple, CalendarBlank } from "@phosphor-icons/react";
 import { CrudList } from "@/components/admin/crud-list";
 import { AdminCardItem } from "@/components/admin/admin-card";
+import { EvidenceEditor } from "@/components/admin/evidence-editor";
+import type { EvidenceItem } from "@/types";
 
 interface Experience {
   id: string;
   company: string;
   role: string;
   description: string | null;
+  description_id: string | null;
+  context: string | null;
+  context_id: string | null;
+  decision: string | null;
+  decision_id: string | null;
+  outcome: string | null;
+  outcome_id: string | null;
+  evidence_items: EvidenceItem[];
   start_date: string;
   end_date: string | null;
   is_current: boolean;
@@ -25,6 +35,14 @@ const BLANK_DRAFT = {
   company: "",
   role: "",
   description: "",
+  description_id: "",
+  context: "",
+  context_id: "",
+  decision: "",
+  decision_id: "",
+  outcome: "",
+  outcome_id: "",
+  evidence_items: [],
   start_date: "",
   end_date: "",
   is_current: false,
@@ -116,6 +134,21 @@ export function ExperienceClient({ initialItems }: { initialItems: Experience[] 
             <div className="space-y-1 sm:col-span-2">
               <Label className="text-xs">Description</Label>
               <Textarea value={draft.description || ""} onChange={(e) => onChange({ description: e.target.value })} placeholder="Brief description..." className="h-20 resize-none text-sm" />
+            </div>
+            <div className="space-y-1 sm:col-span-2">
+              <Label className="text-xs">Description (Indonesian)</Label>
+              <Textarea value={draft.description_id || ""} onChange={(e) => onChange({ description_id: e.target.value })} className="h-20 resize-none text-sm" />
+            </div>
+            <div className="grid gap-4 border-y border-border py-5 sm:col-span-2 sm:grid-cols-2">
+              <div className="space-y-1"><Label className="text-xs">Context</Label><Textarea value={draft.context || ""} onChange={(e) => onChange({ context: e.target.value })} className="min-h-28 text-sm" /></div>
+              <div className="space-y-1"><Label className="text-xs">Context (Indonesian)</Label><Textarea value={draft.context_id || ""} onChange={(e) => onChange({ context_id: e.target.value })} className="min-h-28 text-sm" /></div>
+              <div className="space-y-1 border-l-2 border-primary pl-3"><Label className="text-xs">Decision</Label><Textarea value={draft.decision || ""} onChange={(e) => onChange({ decision: e.target.value })} className="min-h-28 text-sm" /></div>
+              <div className="space-y-1 border-l-2 border-primary pl-3"><Label className="text-xs">Decision (Indonesian)</Label><Textarea value={draft.decision_id || ""} onChange={(e) => onChange({ decision_id: e.target.value })} className="min-h-28 text-sm" /></div>
+              <div className="space-y-1"><Label className="text-xs">Outcome</Label><Textarea value={draft.outcome || ""} onChange={(e) => onChange({ outcome: e.target.value })} className="min-h-28 text-sm" /></div>
+              <div className="space-y-1"><Label className="text-xs">Outcome (Indonesian)</Label><Textarea value={draft.outcome_id || ""} onChange={(e) => onChange({ outcome_id: e.target.value })} className="min-h-28 text-sm" /></div>
+            </div>
+            <div className="sm:col-span-2">
+              <EvidenceEditor value={draft.evidence_items || []} onChange={(evidence_items) => onChange({ evidence_items })} />
             </div>
           </div>
         )}

@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
+import { EXPERIENCE_CASES, FEATURED_CASES } from "../src/lib/case-files";
 
 dotenv.config();
 
@@ -22,41 +23,28 @@ async function seed() {
   
   console.log("Seeding verified projects...");
   
-  const { error: pError } = await supabase.from("projects").upsert([
-    {
-      slug: "pos-system-hadzkashop",
-      title: "POS System (HadzkaShop)",
-      description: "A Point of Sale system built to streamline transactions and inventory management.",
-      role: "Full-Stack Developer",
-      category: "Web Application",
-      tech_stack: ["React", "Node.js", "Tailwind CSS"], // Assuming based on typical stack, but can be updated
-      status: "published",
-      featured: true,
-      sort_order: 1
-    },
-    {
-      slug: "yomirra",
-      title: "Yomirra",
-      description: "Web application development for Yomirra.",
-      role: "Frontend Developer",
-      category: "Web Application",
-      tech_stack: ["Next.js", "React", "Tailwind CSS"], 
-      status: "published",
-      featured: true,
-      sort_order: 2
-    },
-    {
-      slug: "cultural-heritage-repository",
-      title: "Cultural Heritage Digital Asset Repository",
-      description: "Architected a massive digital asset repository containing over 100,395 multimedia items, optimizing data retrieval for cultural heritage websites. Cataloged 30,930 registered objects, buildings, sites, structures, and areas.",
-      role: "Computer Operator / IT Consultant",
-      category: "System Architecture",
-      tech_stack: ["SQL", "Database Management"],
-      status: "published",
-      featured: true,
-      sort_order: 3
-    }
-  ], { onConflict: "slug" });
+  const { error: pError } = await supabase.from("projects").upsert(
+    FEATURED_CASES.map((project) => ({
+      slug: project.slug,
+      title: project.title,
+      description: project.description,
+      description_id: project.description_id,
+      role: project.role,
+      category: project.category,
+      tech_stack: project.tech_stack,
+      featured: project.featured,
+      sort_order: project.sort_order,
+      status: project.status,
+      context: project.context,
+      context_id: project.context_id,
+      decision: project.decision,
+      decision_id: project.decision_id,
+      outcome: project.outcome,
+      outcome_id: project.outcome_id,
+      evidence_items: project.evidence_items,
+    })),
+    { onConflict: "slug" }
+  );
   
   if (pError) console.error("Error seeding projects:", pError);
   else console.log("Projects seeded successfully.");
@@ -148,25 +136,22 @@ async function seed() {
 
   console.log("Seeding experiences...");
   
-  const experiencesToSeed = [
-    {
-      company: "Telkom Indonesia",
-      role: "Project Management Officer (IT & Strategy)",
-      description: "I support IT project coordination and tracking across multiple teams, ensuring alignment with project timelines and deliverables. My daily responsibilities include monitoring project progress, identifying bottlenecks, and assisting in resolving workflow issues. I also facilitate communication between technical and non-technical stakeholders to maintain project clarity, assist in documentation and task tracking, and monitor daily device health and system performance utilizing Grafana to ensure optimal infrastructure reliability and proactive issue resolution.",
-      start_date: "2024-03-01",
-      is_current: true,
-      sort_order: 1
-    },
-    {
-      company: "Ministry of Education, Culture, Research and Technology",
-      role: "Computer Operator",
-      description: "During my time here, I documented and inventoried Indonesian cultural treasures across 451 museums nationwide. I managed and architected a massive digital asset repository containing over 100,395 multimedia items, optimizing data retrieval for cultural heritage websites. I oversaw the management of cultural reserves, cataloging 30,930 registered objects, buildings, sites, structures, and areas. Additionally, I directed SK (Approval/Decree) processes, tracked approved and pending items, contributed to Cultural Heritage recapitulation, and ensured 100% data accuracy on cultural heritage websites as the primary IT consultant.",
-      start_date: "2023-03-01",
-      end_date: "2023-04-30",
-      is_current: false,
-      sort_order: 2
-    }
-  ];
+  const experiencesToSeed = EXPERIENCE_CASES.map((experience) => ({
+    company: experience.company,
+    role: experience.role,
+    description: experience.description,
+    start_date: experience.start_date,
+    end_date: experience.end_date,
+    is_current: experience.is_current,
+    sort_order: experience.sort_order,
+    context: experience.context,
+    context_id: experience.context_id,
+    decision: experience.decision,
+    decision_id: experience.decision_id,
+    outcome: experience.outcome,
+    outcome_id: experience.outcome_id,
+    evidence_items: experience.evidence_items,
+  }));
   
   const { error: eError } = await supabase.from("experiences").insert(experiencesToSeed);
   if (eError) console.error("Error seeding experiences:", eError);

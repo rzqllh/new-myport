@@ -3,11 +3,30 @@
 export type ProjectStatus = "draft" | "published";
 export type SkillCategory = "frontend" | "backend" | "design" | "tools";
 
+export interface EvidenceItem {
+  kind: "repository" | "screenshot" | "redacted_excerpt" | "document";
+  label: string;
+  label_id?: string;
+  url?: string;
+  caption?: string;
+  caption_id?: string;
+  redacted?: boolean;
+  status?: "available" | "pending";
+}
+
 export interface Project {
   id: string;
   slug: string;
   title: string;
   description: string | null;
+  description_id: string | null;
+  context: string | null;
+  decision: string | null;
+  outcome: string | null;
+  context_id: string | null;
+  decision_id: string | null;
+  outcome_id: string | null;
+  evidence_items: EvidenceItem[];
   role: string | null;
   category: string | null;
   tech_stack: string[];
@@ -48,6 +67,14 @@ export interface Experience {
   company: string;
   role: string;
   description: string | null;
+  description_id: string | null;
+  context: string | null;
+  decision: string | null;
+  outcome: string | null;
+  context_id: string | null;
+  decision_id: string | null;
+  outcome_id: string | null;
+  evidence_items: EvidenceItem[];
   start_date: string;
   end_date: string | null;
   is_current: boolean;

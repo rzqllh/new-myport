@@ -1,76 +1,52 @@
 import type { Metadata } from "next";
-import { createClient } from "@/lib/supabase/server";
-import { ScrollReveal } from "@/components/scroll-reveal";
-import { RevealCard } from "@/components/reveal-card";
-import { ProjectCard } from "@/components/project-card";
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { getAllProjects } from "@/lib/portfolio-data";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: "Projects",
-  description: "A selection of my recent work, side projects, and experiments.",
+  title: "Case files",
+  description: "Project case files documenting context, decisions, artifacts, and outcomes.",
 };
 
 export default async function ProjectsPage() {
-  const supabase = await createClient();
-
-  const { data: projects, error } = await supabase
-    .from("projects")
-    .select(
-      `
-      id, slug, title, description, category, tech_stack, status, featured, sort_order, cover_url, cover_public_id
-    `
-    )
-    .eq("status", "published")
-    .order("sort_order")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("Error fetching public projects:", error);
-  }
+  const cookieStore = await cookies();
+  const locale = cookieStore.get("portfolio_locale")?.value === "id" ? "id" : "en";
+  const projects = await getAllProjects(locale);
+  const copy = locale === "id" ? {
+    label: "Indeks pekerjaan",
+    title: "Case file produk",
+    intro: "Bukan galeri screenshot. Setiap entri menjelaskan masalah yang dihadapi, keputusan yang diambil, bukti yang tersedia, dan hasil yang dapat dipertanggungjawabkan.",
+    context: "Konteks",
+    decision: "Keputusan",
+    read: "Buka case file",
+  } : {
+    label: "Work index",
+    title: "Product case files",
+    intro: "Not a screenshot gallery. Each entry documents the problem, the decision made, the evidence available, and the outcome that can be supported.",
+    context: "Context",
+    decision: "Decision",
+    read: "Open case file",
+  };
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-24 md:py-32">
-      {/* Header */}
-      <ScrollReveal className="max-w-2xl mb-16 md:mb-24">
-        <h1 className="font-display font-bold text-4xl md:text-5xl lg:text-6xl tracking-tighter text-foreground mb-6">
-          Projects & Work
-        </h1>
-        <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-          A selection of my recent work across product management, UI/UX design,
-          and web development.
-        </p>
-      </ScrollReveal>
+    <div className="mx-auto max-w-[1400px] px-6 py-20 md:py-28">
+      <header className="grid gap-8 border-b border-foreground pb-14 lg:grid-cols-12">
+        <div className="lg:col-span-7"><p className="text-sm font-semibold text-primary">{copy.label}</p><h1 className="mt-5 text-5xl font-medium tracking-[-0.05em] md:text-7xl">{copy.title}</h1></div>
+        <p className="max-w-[52ch] self-end text-base leading-7 text-muted-foreground lg:col-span-5">{copy.intro}</p>
+      </header>
 
-      {/* Grid */}
-      {error ? (
-        <div className="py-24 text-center border-2 border-red-500 rounded-2xl bg-red-50">
-          <p className="text-red-500 font-bold mb-4">Error fetching projects (Supabase):</p>
-          <pre className="text-xs text-left inline-block max-w-[800px] whitespace-pre-wrap p-4 bg-red-100 rounded-md text-red-900">
-            {JSON.stringify(error, null, 2)}
-          </pre>
-        </div>
-      ) : projects && projects.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {projects.map((project, i) => (
-            <RevealCard key={project.id} delay={i * 0.05} className="h-full">
-              <ProjectCard
-                project={project as Parameters<typeof ProjectCard>[0]["project"]}
-                className="h-full"
-              />
-            </RevealCard>
-          ))}
-        </div>
-      ) : (
-        <ScrollReveal>
-          <div className="py-24 text-center border-2 border-dashed border-border rounded-2xl">
-            <p className="text-muted-foreground">
-              No projects published yet. Check back soon!
-            </p>
-          </div>
-        </ScrollReveal>
-      )}
+      <div>
+        {projects.map((project, index) => (
+          <article key={project.id} className="grid gap-8 border-b border-border py-10 lg:grid-cols-12 lg:py-14">
+            <div className="lg:col-span-3"><p className="text-xs font-semibold text-muted-foreground">CASE {String(index + 1).padStart(2, "0")}</p><h2 className="mt-4 text-3xl font-semibold tracking-[-0.035em]">{project.title}</h2><p className="mt-2 text-sm text-muted-foreground">{project.category}</p></div>
+            <div className="lg:col-span-4"><p className="text-xs font-semibold text-muted-foreground">{copy.context}</p><p className="mt-3 text-sm leading-7 text-foreground/80">{project.context}</p></div>
+            <div className="border-l-2 border-primary pl-5 lg:col-span-4"><p className="text-xs font-semibold text-primary">{copy.decision}</p><p className="mt-3 text-sm leading-7 text-foreground/80">{project.decision}</p></div>
+            <div className="flex items-end lg:col-span-1 lg:justify-end"><Link href={`/projects/${project.slug}`} className="border-b border-foreground pb-1 text-sm font-semibold hover:border-primary hover:text-primary">{copy.read}</Link></div>
+          </article>
+        ))}
+      </div>
     </div>
   );
 }

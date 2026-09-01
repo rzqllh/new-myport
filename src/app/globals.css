@@ -51,47 +51,47 @@
 /* ─── Light mode tokens (Merged from tokens.css) ─────────────────────────── */
 :root {
   /* Surfaces */
-  --background: #FAFAFA;
-  --foreground: #111111;
+  --background: #F7F7F5;
+  --foreground: #111318;
 
   --card: #FFFFFF;
-  --card-foreground: #111111;
+  --card-foreground: #111318;
 
   --popover: #FFFFFF;
-  --popover-foreground: #111111;
+  --popover-foreground: #111318;
 
   /* Primary */
-  --primary: #111111;
-  --primary-foreground: #FAFAFA;
+  --primary: #2563EB;
+  --primary-foreground: #FFFFFF;
 
   /* Secondary */
   --secondary: #F4F4F5;
-  --secondary-foreground: #111111;
+  --secondary-foreground: #111318;
 
   /* Muted */
   --muted: #F4F4F5;
-  --muted-foreground: #71717A;
+  --muted-foreground: #656A74;
 
   /* Accent */
   --accent: #F4F4F5;
-  --accent-foreground: #111111;
+  --accent-foreground: #111318;
 
   /* Semantic */
   --destructive: #EF4444;
   --border: #E4E4E7;
   --input: #E4E4E7;
-  --ring: #111111;
+  --ring: #2563EB;
 
   /* Radius */
-  --radius: 0.5rem;                  /* square-rounded */
+  --radius: 0.375rem;
 
   /* Sidebar */
   --sidebar: #FAFAFA;
-  --sidebar-foreground: #111111;
-  --sidebar-primary: #111111;
+  --sidebar-foreground: #111318;
+  --sidebar-primary: #2563EB;
   --sidebar-primary-foreground: #FAFAFA;
   --sidebar-accent: #F4F4F5;
-  --sidebar-accent-foreground: #111111;
+  --sidebar-accent-foreground: #111318;
   --sidebar-border: #E4E4E7;
   --sidebar-ring: #111111;
 }
@@ -107,8 +107,8 @@
   --popover: #09090B;
   --popover-foreground: #FAFAFA;
 
-  --primary: #FAFAFA;
-  --primary-foreground: #09090B;
+  --primary: #60A5FA;
+  --primary-foreground: #07111F;
 
   --secondary: #27272A;
   --secondary-foreground: #FAFAFA;
@@ -122,13 +122,13 @@
   --destructive: #7F1D1D;
   --border: #27272A;
   --input: #27272A;
-  --ring: #FAFAFA;
+  --ring: #60A5FA;
 
   /* Sidebar */
   --sidebar: #09090B;
   --sidebar-foreground: #FAFAFA;
-  --sidebar-primary: #FAFAFA;
-  --sidebar-primary-foreground: #09090B;
+  --sidebar-primary: #60A5FA;
+  --sidebar-primary-foreground: #07111F;
   --sidebar-accent: #27272A;
   --sidebar-accent-foreground: #FAFAFA;
   --sidebar-border: #27272A;
@@ -142,6 +142,9 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
+    background-image: linear-gradient(to right, color-mix(in srgb, var(--border) 44%, transparent) 1px, transparent 1px);
+    background-size: max(72px, calc((100vw - 48px) / 12)) 100%;
+    background-position: center top;
   }
   html {
     @apply scroll-smooth;
@@ -153,6 +156,10 @@
     font-weight: 700;
     letter-spacing: -0.025em;
     line-height: 1.1;
+  }
+
+  a, button {
+    cursor: pointer;
   }
 
   code, pre, kbd, samp {

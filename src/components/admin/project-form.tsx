@@ -18,7 +18,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ImageUpload } from "@/components/image-upload";
+import { EvidenceEditor } from "@/components/admin/evidence-editor";
 import { createClient } from "@/lib/supabase/client";
+import type { EvidenceItem } from "@/types";
 import { X, DotsSixVertical, Image as ImageIcon } from "@phosphor-icons/react";
 
 // ─── Schema ────────────────────────────────────────────────────────────────────
@@ -33,6 +35,13 @@ const projectSchema = z.object({
       "Slug can only contain lowercase letters, numbers, and hyphens"
     ),
   description: z.string().optional(),
+  description_id: z.string().optional(),
+  context: z.string().optional(),
+  context_id: z.string().optional(),
+  decision: z.string().optional(),
+  decision_id: z.string().optional(),
+  outcome: z.string().optional(),
+  outcome_id: z.string().optional(),
   role: z.string().optional(),
   category: z.string().optional(),
   tech_stack: z.string().optional(),
@@ -82,6 +91,9 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   // IDs of images that were already in DB and the user has removed
   const [deletedImageIds, setDeletedImageIds] = useState<string[]>([]);
+  const [evidenceItems, setEvidenceItems] = useState<EvidenceItem[]>(
+    Array.isArray(initialData?.evidence_items) ? initialData.evidence_items : []
+  );
 
   // ── Load existing gallery images on edit ──────────────────────────────────
   useEffect(() => {
@@ -120,6 +132,13 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       title: initialData?.title ?? "",
       slug: initialData?.slug ?? "",
       description: initialData?.description ?? "",
+      description_id: initialData?.description_id ?? "",
+      context: initialData?.context ?? "",
+      context_id: initialData?.context_id ?? "",
+      decision: initialData?.decision ?? "",
+      decision_id: initialData?.decision_id ?? "",
+      outcome: initialData?.outcome ?? "",
+      outcome_id: initialData?.outcome_id ?? "",
       role: initialData?.role ?? "",
       category: initialData?.category ?? "",
       tech_stack: initialData?.tech_stack
@@ -195,6 +214,14 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       title: values.title,
       slug: values.slug,
       description: values.description ?? null,
+      description_id: values.description_id ?? null,
+      context: values.context ?? null,
+      context_id: values.context_id ?? null,
+      decision: values.decision ?? null,
+      decision_id: values.decision_id ?? null,
+      outcome: values.outcome ?? null,
+      outcome_id: values.outcome_id ?? null,
+      evidence_items: evidenceItems,
       role: values.role ?? null,
       category: values.category ?? null,
       tech_stack: techStackArray,
@@ -340,6 +367,24 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
           placeholder="Brief overview of the project..."
           className="h-24 resize-none"
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="description_id">Description (Indonesian)</Label>
+        <Textarea id="description_id" {...form.register("description_id")} placeholder="Ringkasan singkat proyek..." className="h-24 resize-none" />
+      </div>
+
+      <div className="space-y-5 border-y border-border py-6">
+        <div><h2 className="font-display text-lg font-semibold">Case file</h2><p className="mt-1 text-xs text-muted-foreground">Context, decision, and outcome are deliberately separate. Do not merge them into a generic project description.</p></div>
+        <div className="grid gap-5 md:grid-cols-2">
+          <div className="space-y-2"><Label htmlFor="context">Context</Label><Textarea id="context" {...form.register("context")} className="min-h-32" /></div>
+          <div className="space-y-2"><Label htmlFor="context_id">Context (Indonesian)</Label><Textarea id="context_id" {...form.register("context_id")} className="min-h-32" /></div>
+          <div className="space-y-2 border-l-2 border-primary pl-4"><Label htmlFor="decision">Decision</Label><Textarea id="decision" {...form.register("decision")} className="min-h-32" /></div>
+          <div className="space-y-2 border-l-2 border-primary pl-4"><Label htmlFor="decision_id">Decision (Indonesian)</Label><Textarea id="decision_id" {...form.register("decision_id")} className="min-h-32" /></div>
+          <div className="space-y-2"><Label htmlFor="outcome">Outcome</Label><Textarea id="outcome" {...form.register("outcome")} className="min-h-32" /></div>
+          <div className="space-y-2"><Label htmlFor="outcome_id">Outcome (Indonesian)</Label><Textarea id="outcome_id" {...form.register("outcome_id")} className="min-h-32" /></div>
+        </div>
+        <EvidenceEditor value={evidenceItems} onChange={setEvidenceItems} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

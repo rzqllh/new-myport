@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 
 export const metadata = {
   title: "Blog",
@@ -8,32 +7,30 @@ export const metadata = {
 };
 
 export default async function BlogPage() {
-  const supabase = await createClient();
-  const { data: posts } = await supabase
-    .from("blog_posts")
-    .select("id, slug, title, excerpt, tags, published_at")
-    .eq("status", "published")
-    .order("published_at", { ascending: false });
+  let posts: { id: string; slug: string; title: string; excerpt: string | null; tags: string[]; published_at: string | null }[] = [];
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const supabase = await createClient();
+    const { data } = await supabase.from("blog_posts").select("id, slug, title, excerpt, tags, published_at").eq("status", "published").order("published_at", { ascending: false });
+    posts = data || [];
+  }
 
   return (
-    <main className="mx-auto max-w-[720px] px-6 py-24 md:py-32">
-      <header className="mb-16">
-        <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Writing</p>
-        <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter">Blog</h1>
-        <p className="text-muted-foreground mt-3">
-          Thoughts on design, development, and product.
-        </p>
+    <main className="mx-auto max-w-[1000px] px-6 py-20 md:py-28">
+      <header className="mb-16 border-b border-foreground pb-12">
+        <p className="mb-4 text-sm font-semibold text-primary">Working notes</p>
+        <h1 className="font-display text-5xl font-medium tracking-[-0.05em] md:text-7xl">Notes from the work</h1>
+        <p className="mt-5 max-w-[60ch] text-muted-foreground">Project control, systems thinking, and practical lessons from building tools around operational work.</p>
       </header>
 
       {!posts || posts.length === 0 ? (
-        <p className="text-muted-foreground">No posts published yet.</p>
+        <div className="border-b border-border py-10"><p className="font-medium">No public notes yet.</p><p className="mt-2 text-sm text-muted-foreground">Drafts remain private until the evidence and examples are ready to support them.</p></div>
       ) : (
         <div className="space-y-0 divide-y divide-border">
           {posts.map((post) => (
             <Link
               key={post.id}
               href={`/blog/${post.slug}`}
-              className="group flex items-start justify-between gap-6 py-7 hover:bg-muted/30 -mx-4 px-4 rounded-lg transition-colors"
+              className="group grid gap-4 border-b border-border py-7 transition-colors hover:border-primary md:grid-cols-[10rem_1fr]"
             >
               <div className="space-y-1.5 min-w-0">
                 <p className="text-xs text-muted-foreground">
@@ -57,10 +54,6 @@ export default async function BlogPage() {
                   </div>
                 )}
               </div>
-              <ArrowUpRight
-                weight="bold"
-                className="size-4 shrink-0 mt-1.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
-              />
             </Link>
           ))}
         </div>

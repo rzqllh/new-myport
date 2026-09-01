@@ -7,7 +7,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
     <>
       <Navbar />
       <PageTransition>
-        <main className="flex-1 pt-[72px]">{children}</main>
+        <main className="flex-1">{children}</main>
       </PageTransition>
       <Footer />
     </>

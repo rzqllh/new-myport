@@ -1,8 +1,8 @@
 // ─── Site Metadata ────────────────────────────────────────────────────────────
 export const SITE_NAME = "Hafizh Rizqullah Prasetya";
-export const SITE_TAGLINE = "PMO · Designer · Developer";
+export const SITE_TAGLINE = "Project Management Officer · IT & Strategy";
 export const SITE_DESCRIPTION =
-  "Personal portfolio of Hafizh Rizqullah Prasetya — PMO, UI/UX Designer, and Developer. From raw ideas to releases, I build things that work.";
+  "A case-file portfolio focused on IT delivery, project control, and the systems behind the work.";
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://hafizhrizqullah.vercel.app";
 
@@ -16,10 +16,10 @@ export const SOCIAL_LINKS = {
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 export const NAV_ITEMS = [
-  { label: "About", href: "/#about" },
-  { label: "Projects", href: "/#projects" },
-  { label: "Blog", href: "/#blog" },
-  { label: "Contact", href: "/#contact" },
+  { label: "Case files", href: "/#case-register" },
+  { label: "Experience", href: "/#experience-register" },
+  { label: "Notes", href: "/blog" },
+  { label: "Contact", href: "/contact" },
 ] as const;
 
 // ─── Admin Navigation ─────────────────────────────────────────────────────────
