@@ -1,31 +1,17 @@
-# Hafizh Rizqullah Prasetya
+# Hafizh Rizqullah — Portfolio
 
-Personal portfolio and web resume.
+A responsive, accessible portfolio for Hafizh Rizqullah Prasetya, built from the latest CV and selected public GitHub projects.
 
-## Tech Stack
+## Preview locally
 
-- **Framework**: Next.js (App Router)
-- **Styling**: Tailwind CSS
-- **Database**: Supabase
-- **Icons**: Phosphor Icons
+No build step is required. Open `index.html` directly, or serve the directory:
 
-## Local Development
+```bash
+python -m http.server 4173
+```
 
-1. Install dependencies:
-   ```bash
-   pnpm install
-   ```
+Then open `http://localhost:4173`.
 
-2. Configure environment variables:
-   Create a `.env.local` file in the root directory and add your Supabase credentials:
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=
-   ```
+## Deploy
 
-3. Run the development server:
-   ```bash
-   pnpm run dev
-   ```
-
-Open [http://localhost:3000](http://localhost:3000) to view the application.
+The site is plain HTML, CSS, and JavaScript, so it can be deployed to GitHub Pages, Vercel, Netlify, or Cloudflare Pages without a framework-specific build command.
