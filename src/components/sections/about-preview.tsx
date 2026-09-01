@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
+
 import { createClient } from "@/lib/supabase/server";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { cn } from "@/lib/utils";
@@ -12,7 +12,7 @@ export async function AboutPreview() {
 
   const { data: experiences } = await supabase
     .from("experiences")
-    .select("id, company, position, start_date, end_date, current")
+    .select("id, company, role, start_date, end_date, is_current")
     .order("start_date", { ascending: false })
     .limit(3);
 
@@ -35,15 +35,15 @@ export async function AboutPreview() {
                 id="about-preview-heading"
                 className="font-display font-bold text-3xl md:text-4xl tracking-tighter text-foreground mb-6"
               >
-                Bridging business goals and technical reality.
+                Building products from the ground up: strategy, design, and code.
               </h2>
             </ScrollReveal>
 
             <ScrollReveal delay={0.1}>
               <p className="text-muted-foreground leading-relaxed max-w-[65ch] mb-8 text-lg">
-                {bio && bio.includes("Results-driven IT graduate") 
-                  ? "PMO · UI/UX Designer · Web Developer. Based in Indonesia, I manage projects, design interfaces, and write code. I've shipped everything from government-adjacent systems to fintech interfaces." 
-                  : bio || "PMO · UI/UX Designer · Web Developer. Based in Indonesia, I manage projects, design interfaces, and write code. I've shipped everything from government-adjacent systems to fintech interfaces."}
+                  {bio && bio.includes("Results-driven IT graduate") 
+                    ? "PMO, UI/UX Designer, and Web Developer based in Indonesia. I've shipped government-adjacent systems, fintech interfaces, and startup products across the full project lifecycle." 
+                    : bio || "PMO, UI/UX Designer, and Web Developer based in Indonesia. I've shipped government-adjacent systems, fintech interfaces, and startup products across the full project lifecycle."}
               </p>
             </ScrollReveal>
 
@@ -53,7 +53,6 @@ export async function AboutPreview() {
                 className="inline-flex items-center gap-1.5 font-medium text-primary hover:underline underline-offset-4"
               >
                 Read more about me
-                <ArrowRight weight="bold" className="size-4" />
               </Link>
             </ScrollReveal>
           </div>
@@ -70,10 +69,6 @@ export async function AboutPreview() {
                 />
               ) : (
                 <div className="w-full h-full relative flex items-center justify-center bg-zinc-100/50 dark:bg-zinc-900/50 overflow-hidden">
-                  {/* Subtle Grid Pattern */}
-                  <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" 
-                       style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)', backgroundSize: '24px 24px' }} />
-                  {/* Abstract Mesh Gradients */}
                   <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-zinc-200/50 via-transparent to-zinc-300/50 dark:from-zinc-800/50 dark:to-zinc-950/50" />
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] rounded-full bg-gradient-to-tr from-transparent via-zinc-400/20 to-transparent dark:via-zinc-600/10 blur-3xl opacity-60" />
                 </div>
@@ -92,9 +87,9 @@ export async function AboutPreview() {
               {experiences.map((exp) => (
                 <div key={exp.id} className="group p-6 rounded-2xl bg-card/50 border border-border/50 hover:bg-card hover:border-border transition-all duration-300">
                   <div className="flex justify-between items-start mb-4">
-                    <h4 className="font-semibold text-foreground tracking-tight text-lg group-hover:text-primary transition-colors">{exp.position}</h4>
+                    <h4 className="font-semibold text-foreground tracking-tight text-lg group-hover:text-primary transition-colors">{exp.role}</h4>
                     <span className="text-xs font-mono uppercase px-2 py-1 rounded-md bg-muted/50 text-muted-foreground">
-                      {new Date(exp.start_date).getFullYear()} — {exp.current ? "Present" : exp.end_date ? new Date(exp.end_date).getFullYear() : ""}
+                      {new Date(exp.start_date).getFullYear()} — {exp.is_current ? "Present" : exp.end_date ? new Date(exp.end_date).getFullYear() : ""}
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground">{exp.company}</p>

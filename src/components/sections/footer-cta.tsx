@@ -19,7 +19,7 @@ export function FooterCTA({ cvUrl }: { cvUrl?: string }) {
                 Have a project in mind?
               </h2>
               <p className="text-primary-foreground/80 text-lg mb-10 max-w-[480px]">
-                Available for full-time roles and freelance projects. Let&apos;s build something good.
+                Available for full-time and freelance work. Based in Indonesia, working remote.
               </p>
               
               <div className="flex flex-wrap items-center justify-center gap-3">

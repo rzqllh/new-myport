@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Learn more about Hafizh Rizqullah Prasetya's background and professional experience.",
+    "Hafizh Rizqullah Prasetya. PMO, UI/UX Designer, and Web Developer based in Indonesia. Work history, background, and what I've shipped.",
 };
 
 export default async function AboutPage() {

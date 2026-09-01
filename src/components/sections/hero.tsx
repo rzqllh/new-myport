@@ -5,10 +5,11 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 import { 
   ArrowRight, DownloadSimple, 
-  GithubLogo, LinkedinLogo, InstagramLogo, EnvelopeSimple,
-  TrendUp, Star, CheckCircle, Code, UsersThree, Rocket, GlobeHemisphereWest
+  GithubLogo, LinkedinLogo, InstagramLogo, EnvelopeSimple
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
+import { GitHubActivityBadge } from "@/components/github-activity-badge";
+import { CopyEmailButton } from "@/components/copy-email-button";
 
 interface HeroProps {
   photoUrl?: string;
@@ -55,21 +56,10 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 0, her
       };
 
   return (
-    <section id="home" aria-label="Hero" className="relative min-h-[100dvh] flex flex-col justify-center pt-20 pb-8 overflow-hidden">
-      {/* Subtle background grid */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
-        style={{
-          backgroundImage:
-            "linear-gradient(var(--foreground) 1px, transparent 1px), linear-gradient(90deg, var(--foreground) 1px, transparent 1px)",
-          backgroundSize: "64px 64px",
-        }}
-        aria-hidden="true"
-      />
-
+    <section id="home" aria-label="Hero" className="relative min-h-[100dvh] flex flex-col justify-center pt-24 pb-12 overflow-hidden">
       {/* Main Content Container */}
       <div className="relative mx-auto w-full max-w-[1400px] px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center">
           
           {/* ─── Left Column (Text & CTAs) ─── */}
           <motion.div
@@ -78,12 +68,16 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 0, her
             animate="visible"
             className="max-w-[640px] z-10"
           >
-            {/* Eyebrow */}
-            <motion.div variants={itemVariants} className="mb-8">
+            {/* Live Status & Availability Row */}
+            <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-2.5 mb-6">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-xs font-semibold text-primary tracking-widest uppercase">
-                <span className="size-1.5 rounded-full bg-primary animate-pulse" />
+                <span
+                  className="size-1.5 rounded-full bg-primary"
+                  style={{ animation: "pulse 2.4s ease-in-out infinite" }}
+                />
                 Available for opportunities
               </div>
+              <GitHubActivityBadge />
             </motion.div>
 
             {/* Headline */}
@@ -117,7 +111,7 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 0, her
               variants={itemVariants}
               className="text-lg text-muted-foreground leading-relaxed max-w-[540px] mb-10"
             >
-              I manage projects, design interfaces, and write code. From raw idea to final release, I build things that work.
+              I manage projects, design interfaces, and write code. Based in Indonesia, I build open-source tools, production web applications, and system case studies.
             </motion.p>
 
             {/* CTAs and Socials */}
@@ -136,28 +130,45 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 0, her
                 </Button>
               )}
 
-              {/* Social Links Row */}
-              <div className="flex items-center gap-3">
+              {/* Social Links & Copy Email */}
+              <div className="flex items-center gap-2.5">
                 {socialLinks.github && (
-                  <a href={socialLinks.github} target="_blank" rel="noopener noreferrer" className="size-11 flex items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shadow-sm">
+                  <a 
+                    href={socialLinks.github} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    title="GitHub @rzqllh"
+                    className="size-11 flex items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shadow-sm"
+                  >
                     <GithubLogo weight="fill" size={20} />
                   </a>
                 )}
                 {socialLinks.linkedin && (
-                  <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="size-11 flex items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shadow-sm">
+                  <a 
+                    href={socialLinks.linkedin} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    title="LinkedIn"
+                    className="size-11 flex items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shadow-sm"
+                  >
                     <LinkedinLogo weight="fill" size={20} />
                   </a>
                 )}
                 {socialLinks.instagram && (
-                  <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="size-11 flex items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shadow-sm">
+                  <a 
+                    href={socialLinks.instagram} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    title="Instagram"
+                    className="size-11 flex items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shadow-sm"
+                  >
                     <InstagramLogo weight="fill" size={20} />
                   </a>
                 )}
-                {socialLinks.email && (
-                  <a href={socialLinks.email} target="_blank" rel="noopener noreferrer" className="size-11 flex items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shadow-sm">
-                    <EnvelopeSimple weight="fill" size={20} />
-                  </a>
-                )}
+                <CopyEmailButton 
+                  email={socialLinks.email ? socialLinks.email.replace("mailto:", "") : "hrizqullah484@gmail.com"} 
+                  variant="icon" 
+                />
               </div>
             </motion.div>
           </motion.div>
@@ -167,13 +178,13 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 0, her
             variants={rightColVariants}
             initial="hidden"
             animate="visible"
-            className="relative w-full aspect-square md:aspect-auto md:h-[420px] flex items-center justify-center lg:justify-center mt-4 lg:mt-0"
+            className="relative w-full aspect-square md:aspect-auto md:h-[440px] flex items-center justify-center lg:justify-center mt-4 lg:mt-0"
           >
             {/* Photo Container */}
             <motion.div 
-              whileHover={!prefersReducedMotion ? { scale: 1.02, rotate: 1 } : {}}
+              whileHover={!prefersReducedMotion ? { scale: 1.02, rotate: 0.5 } : {}}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="relative w-full max-w-[340px] h-[340px] lg:max-w-[400px] lg:h-[400px] rounded-[2rem] bg-gradient-to-b from-foreground/5 to-transparent border border-border overflow-hidden shadow-2xl cursor-pointer"
+              className="relative w-full max-w-[360px] h-[360px] lg:max-w-[420px] lg:h-[420px] rounded-[2rem] bg-gradient-to-b from-foreground/5 to-transparent border border-border/80 overflow-hidden shadow-2xl"
             >
               {photoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -184,10 +195,6 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 0, her
                 />
               ) : (
                 <div className="w-full h-full relative flex items-center justify-center bg-zinc-100/50 dark:bg-zinc-900/50 overflow-hidden">
-                  {/* Subtle Grid Pattern */}
-                  <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" 
-                       style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)', backgroundSize: '24px 24px' }} />
-                  {/* Abstract Mesh Gradients */}
                   <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-zinc-200/50 via-transparent to-zinc-300/50 dark:from-zinc-800/50 dark:to-zinc-950/50" />
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] rounded-full bg-gradient-to-tr from-transparent via-zinc-400/20 to-transparent dark:via-zinc-600/10 blur-3xl opacity-60" />
                 </div>
@@ -200,4 +207,3 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 0, her
     </section>
   );
 }
-

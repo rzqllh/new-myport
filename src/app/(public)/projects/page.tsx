@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { ScrollReveal } from "@/components/scroll-reveal";
-import { RevealCard } from "@/components/reveal-card";
-import { ProjectCard } from "@/components/project-card";
+import { ProjectsView } from "@/components/projects-view";
+import type { Project } from "@/components/project-card";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "Projects",
-  description: "A selection of my recent work, side projects, and experiments.",
+  description:
+    "Work by Hafizh Rizqullah Prasetya across software engineering, system architecture, tools, and UI/UX research.",
 };
 
 export default async function ProjectsPage() {
@@ -19,7 +20,7 @@ export default async function ProjectsPage() {
     .from("projects")
     .select(
       `
-      id, slug, title, description, category, tech_stack, status, featured, sort_order, cover_url, cover_public_id
+      id, slug, title, description, role, category, tech_stack, status, featured, sort_order, github_url, demo_url, cover_url, cover_public_id
     `
     )
     .eq("status", "published")
@@ -33,43 +34,27 @@ export default async function ProjectsPage() {
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-24 md:py-32">
       {/* Header */}
-      <ScrollReveal className="max-w-2xl mb-16 md:mb-24">
+      <ScrollReveal className="max-w-3xl mb-12 md:mb-16">
+        <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">
+          Portfolio & Case Studies
+        </p>
         <h1 className="font-display font-bold text-4xl md:text-5xl lg:text-6xl tracking-tighter text-foreground mb-6">
-          Projects & Work
+          Projects & Code
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-          A selection of my recent work across product management, UI/UX design,
-          and web development.
+          Open-source developer tools, production web applications, and system case studies. Each project includes technical breakdowns and repository sources.
         </p>
       </ScrollReveal>
 
-      {/* Grid */}
+      {/* Interactive Filter & Grid */}
       {error ? (
-        <div className="py-24 text-center border-2 border-red-500 rounded-2xl bg-red-50">
-          <p className="text-red-500 font-bold mb-4">Error fetching projects (Supabase):</p>
-          <pre className="text-xs text-left inline-block max-w-[800px] whitespace-pre-wrap p-4 bg-red-100 rounded-md text-red-900">
-            {JSON.stringify(error, null, 2)}
-          </pre>
-        </div>
-      ) : projects && projects.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {projects.map((project, i) => (
-            <RevealCard key={project.id} delay={i * 0.05} className="h-full">
-              <ProjectCard
-                project={project as Parameters<typeof ProjectCard>[0]["project"]}
-                className="h-full"
-              />
-            </RevealCard>
-          ))}
+        <div className="py-24 text-center">
+          <p className="text-muted-foreground">
+            Something went wrong loading projects. Try refreshing the page.
+          </p>
         </div>
       ) : (
-        <ScrollReveal>
-          <div className="py-24 text-center border-2 border-dashed border-border rounded-2xl">
-            <p className="text-muted-foreground">
-              No projects published yet. Check back soon!
-            </p>
-          </div>
-        </ScrollReveal>
+        <ProjectsView initialProjects={(projects || []) as Project[]} />
       )}
     </div>
   );

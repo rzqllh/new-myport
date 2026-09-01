@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "motion/react";
 import { List, X } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
@@ -28,37 +28,78 @@ export function Navbar() {
     setIsScrolled(latest > 20);
   });
 
-  useEffect(() => {
+  // Accurate Scroll-Spy for Landing Page
+  const updateActiveSectionOnScroll = useCallback(() => {
     if (pathname !== "/") return;
 
-    const observers: IntersectionObserver[] = [];
-    const handleIntersect = (entries: IntersectionObserverEntry[]) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          setActiveSection(`/#${entry.target.id}`);
+    const sections = NAV_ITEMS.map((item) => item.sectionId);
+    const scrollPosition = window.scrollY + 200;
+
+    // If near the very bottom, highlight contact
+    const documentHeight = document.documentElement.scrollHeight;
+    const windowHeight = window.innerHeight;
+    if (window.scrollY + windowHeight >= documentHeight - 50) {
+      setActiveSection("contact");
+      return;
+    }
+
+    // If at the very top (Hero section), no nav item is active
+    if (window.scrollY < 250) {
+      setActiveSection("");
+      return;
+    }
+
+    let currentSection = "";
+    for (const id of sections) {
+      const el = document.getElementById(id);
+      if (el) {
+        const top = el.offsetTop;
+        const height = el.offsetHeight;
+        if (scrollPosition >= top && scrollPosition < top + height) {
+          currentSection = id;
+          break;
         }
-      });
-    };
+      }
+    }
 
-    const observer = new IntersectionObserver(handleIntersect, {
-      rootMargin: "-40% 0px -40% 0px",
-      threshold: 0,
-    });
-
-    const sections = ["home", "about", "projects", "blog", "contact"];
-    sections.forEach((id) => {
-      const element = document.getElementById(id);
-      if (element) observer.observe(element);
-    });
-
-    return () => observer.disconnect();
+    if (currentSection) {
+      setActiveSection(currentSection);
+    }
   }, [pathname]);
+
+  useEffect(() => {
+    if (pathname !== "/") {
+      setActiveSection("");
+      return;
+    }
+
+    updateActiveSectionOnScroll();
+    window.addEventListener("scroll", updateActiveSectionOnScroll, { passive: true });
+    return () => window.removeEventListener("scroll", updateActiveSectionOnScroll);
+  }, [pathname, updateActiveSectionOnScroll]);
+
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    sectionId: string,
+    href: string
+  ) => {
+    if (pathname === "/") {
+      e.preventDefault();
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+        setActiveSection(sectionId);
+      } else {
+        window.location.href = href;
+      }
+    }
+  };
 
   const scrollToTop = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (pathname === "/") {
       e.preventDefault();
       window.scrollTo({ top: 0, behavior: "smooth" });
-      setActiveSection("/#home");
+      setActiveSection("");
     }
   };
 
@@ -92,18 +133,18 @@ export function Navbar() {
           {NAV_ITEMS.map((item) => {
             let isActive = false;
             if (pathname === "/") {
-              const activeMapped = activeSection === "/#home" || activeSection === "" ? "/" : activeSection;
-              // We cast item.href to string to avoid TS narrowing errors since we removed '/' from NAV_ITEMS
-              isActive = activeMapped === (item.href as string);
+              isActive = activeSection === item.sectionId;
             } else {
-              isActive = pathname.startsWith(item.href as string);
+              isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             }
+
             return (
               <li key={item.href}>
                 <Link
                   href={item.href}
+                  onClick={(e) => handleNavClick(e, item.sectionId, item.href)}
                   className={cn(
-                    "relative px-3 py-1.5 text-sm rounded-lg transition-colors",
+                    "relative px-3.5 py-1.5 text-sm rounded-lg transition-colors",
                     "hover:text-foreground",
                     isActive
                       ? "text-foreground font-medium"
@@ -132,7 +173,7 @@ export function Navbar() {
         <div className="flex items-center gap-1">
           <ThemeToggle />
 
-          {/* Mobile hamburger — base-ui Sheet uses render= not asChild */}
+          {/* Mobile hamburger */}
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger
               render={
@@ -178,12 +219,11 @@ export function Navbar() {
                   {NAV_ITEMS.map((item, i) => {
                     let isActive = false;
                     if (pathname === "/") {
-                      const activeMapped = activeSection === "/#home" || activeSection === "" ? "/" : activeSection;
-                      // We cast item.href to string to avoid TS narrowing errors since we removed '/' from NAV_ITEMS
-                      isActive = activeMapped === (item.href as string);
+                      isActive = activeSection === item.sectionId;
                     } else {
-                      isActive = pathname.startsWith(item.href as string);
+                      isActive = pathname === item.href || pathname.startsWith(item.href + "/");
                     }
+
                     return (
                       <motion.li
                         key={item.href}
@@ -193,7 +233,10 @@ export function Navbar() {
                       >
                         <Link
                           href={item.href}
-                          onClick={() => setOpen(false)}
+                          onClick={(e) => {
+                            setOpen(false);
+                            handleNavClick(e, item.sectionId, item.href);
+                          }}
                           className={cn(
                             "flex items-center px-4 py-3 rounded-xl text-base transition-colors",
                             isActive

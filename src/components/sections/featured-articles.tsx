@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
+import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 import { createClient } from "@/lib/supabase/server";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { RevealCard } from "@/components/reveal-card";
@@ -35,7 +35,6 @@ export async function FeaturedArticles() {
             className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors shrink-0"
           >
             All articles
-            <ArrowRight weight="bold" className="size-3.5" />
           </Link>
         </ScrollReveal>
 
@@ -88,7 +87,6 @@ export async function FeaturedArticles() {
             className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             View all articles
-            <ArrowRight weight="bold" className="size-3.5" />
           </Link>
         </ScrollReveal>
       </div>

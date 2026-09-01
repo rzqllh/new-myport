@@ -36,6 +36,8 @@ const projectSchema = z.object({
   role: z.string().optional(),
   category: z.string().optional(),
   tech_stack: z.string().optional(),
+  demo_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  github_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   featured: z.boolean(),
   status: z.enum(["draft", "published"]),
   sort_order: z.number().int(),
@@ -125,6 +127,8 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       tech_stack: initialData?.tech_stack
         ? (initialData.tech_stack as string[]).join(", ")
         : "",
+      demo_url: initialData?.demo_url ?? "",
+      github_url: initialData?.github_url ?? "",
       featured: initialData?.featured ?? false,
       status: initialData?.status ?? "draft",
       sort_order: initialData?.sort_order ?? 0,
@@ -198,6 +202,8 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       role: values.role ?? null,
       category: values.category ?? null,
       tech_stack: techStackArray,
+      demo_url: values.demo_url?.trim() || null,
+      github_url: values.github_url?.trim() || null,
       featured: values.featured,
       status: values.status,
       sort_order: values.sort_order,
@@ -369,6 +375,26 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
           {...form.register("tech_stack")}
           placeholder="Next.js, Tailwind CSS, Supabase"
         />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="demo_url">Live Demo URL</Label>
+          <Input
+            id="demo_url"
+            {...form.register("demo_url")}
+            placeholder="https://example.vercel.app"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="github_url">GitHub Repository URL</Label>
+          <Input
+            id="github_url"
+            {...form.register("github_url")}
+            placeholder="https://github.com/rzqllh/repo"
+          />
+        </div>
       </div>
 
       {/* ── Cover image ───────────────────────────────────────────────────── */}

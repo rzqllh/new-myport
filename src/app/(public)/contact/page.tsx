@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Envelope, MapPin } from "@phosphor-icons/react/dist/ssr";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { ContactForm } from "@/components/contact-form";
+import { CopyEmailButton } from "@/components/copy-email-button";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -13,6 +14,7 @@ export default async function ContactPage() {
   const supabase = await createClient();
   const { data } = await supabase.from("site_settings").select("value").eq("key", "social").single();
   const social = (data?.value as Record<string, string>) || {};
+  const emailClean = social.email ? social.email.replace("mailto:", "") : "hrizqullah484@gmail.com";
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-24 md:py-32">
@@ -27,37 +29,39 @@ export default async function ContactPage() {
             </ScrollReveal>
 
             <ScrollReveal delay={0.05}>
-              <p className="text-lg text-muted-foreground leading-relaxed mb-12">
-                Whether you have a project in mind, need a hybrid PMO/Designer/Dev,
-                or just want to say hi — I&apos;m always open to discussing new
-                opportunities.
+              <p className="text-lg text-muted-foreground leading-relaxed mb-10">
+                I'm open to full-time roles, freelance projects, and startup collaboration.
+                Reach out directly, I respond within a day.
               </p>
             </ScrollReveal>
 
             <ScrollReveal delay={0.1}>
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
-                  <div className="mt-1 p-2 rounded-xl bg-primary/10 text-primary">
+                  <div className="mt-1 p-2.5 rounded-xl bg-primary/10 text-primary">
                     <Envelope weight="duotone" className="size-5" />
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground mb-1">Email</p>
-                    <a
-                      href={social.email || "#"}
-                      className="text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      {social.email ? social.email.replace("mailto:", "") : "hello@example.com"}
-                    </a>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-foreground">Email</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <a
+                        href={social.email || `mailto:${emailClean}`}
+                        className="text-muted-foreground hover:text-primary transition-colors text-sm font-mono"
+                      >
+                        {emailClean}
+                      </a>
+                      <CopyEmailButton email={emailClean} />
+                    </div>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="mt-1 p-2 rounded-xl bg-primary/10 text-primary">
+                  <div className="mt-1 p-2.5 rounded-xl bg-primary/10 text-primary">
                     <MapPin weight="duotone" className="size-5" />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-foreground mb-1">Location</p>
-                    <p className="text-muted-foreground">Indonesia (Remote / Hybrid)</p>
+                    <p className="text-muted-foreground text-sm">Indonesia (Remote / Hybrid)</p>
                   </div>
                 </div>
               </div>

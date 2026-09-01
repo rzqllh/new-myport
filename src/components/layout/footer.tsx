@@ -89,7 +89,7 @@ export async function Footer() {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
           <p>
-            © {year} {siteName}. Built with Next.js, Supabase, and ☕.
+            © {year} {siteName}. Built with Next.js and Supabase.
           </p>
           <Link
             href="/admin"

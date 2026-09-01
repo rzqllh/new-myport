@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { createClient } from "@/lib/supabase/server";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { RevealCard } from "@/components/reveal-card";
-import { ProjectCard } from "@/components/project-card";
+import { ProjectCard, type Project } from "@/components/project-card";
 
 export async function FeaturedProjects() {
   const supabase = await createClient();
@@ -12,7 +11,7 @@ export async function FeaturedProjects() {
     .from("projects")
     .select(
       `
-      id, slug, title, description, category, tech_stack, status, featured, cover_url, cover_public_id
+      id, slug, title, description, role, category, tech_stack, status, featured, demo_url, github_url, cover_url, cover_public_id
     `
     )
     .eq("featured", true)
@@ -20,22 +19,12 @@ export async function FeaturedProjects() {
     .order("sort_order")
     .limit(3);
 
-  // If there's an error, show it prominently instead of silently hiding
   if (error) {
-    return (
-      <section className="py-24 md:py-32 bg-red-50 text-red-600 font-mono text-xs">
-        <div className="mx-auto max-w-[1400px] px-6">
-          <p className="font-bold text-base mb-2">Error fetching featured projects:</p>
-          <pre>{JSON.stringify(error, null, 2)}</pre>
-        </div>
-      </section>
-    );
+    console.error("[FeaturedProjects]", error.message);
+    return null;
   }
 
-  // If no featured projects yet, section is hidden (not rendered)
   if (!projects || projects.length === 0) return null;
-
-  const [primary, ...secondary] = projects;
 
   return (
     <section
@@ -48,32 +37,30 @@ export async function FeaturedProjects() {
         <ScrollReveal className="flex items-end justify-between mb-12 gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-2">
-              Selected Work
+              Featured Systems & Applications
             </p>
             <h2
               id="featured-projects-heading"
               className="font-display font-bold text-3xl md:text-4xl tracking-tighter text-foreground"
             >
-              What I&apos;ve Built
+              Selected Work
             </h2>
           </div>
           <Link
             href="/projects"
             className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors shrink-0"
           >
-            All projects
-            <ArrowRight weight="bold" className="size-3.5" />
+            View all projects (8)
           </Link>
         </ScrollReveal>
 
-        {/* Responsive Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Responsive Grid Layout: Exactly 3 featured projects */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project, i) => (
             <RevealCard key={project.id} delay={0.05 + i * 0.05} className="h-full">
               <ProjectCard
-                project={project as Parameters<typeof ProjectCard>[0]["project"]}
+                project={project as Project}
                 className="h-full"
-                featured={i === 0 && projects.length % 2 !== 0} // Feature the first if odd number of projects to balance, or just leave it
               />
             </RevealCard>
           ))}
@@ -85,8 +72,7 @@ export async function FeaturedProjects() {
             href="/projects"
             className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
-            View all projects
-            <ArrowRight weight="bold" className="size-3.5" />
+            View all projects (8)
           </Link>
         </ScrollReveal>
       </div>

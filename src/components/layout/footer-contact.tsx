@@ -23,7 +23,7 @@ export function FooterContact() {
         href="/contact"
         className="inline-flex items-center text-sm font-medium text-primary hover:underline underline-offset-4"
       >
-        Send a message →
+        Send a message
       </Link>
     </div>
   );
