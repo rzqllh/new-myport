@@ -16,8 +16,8 @@ export const SOCIAL_LINKS = {
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 export const NAV_ITEMS = [
+  { label: "Work", href: "/projects", sectionId: "projects" },
   { label: "About", href: "/about", sectionId: "about" },
-  { label: "Projects", href: "/projects", sectionId: "projects" },
   { label: "Writing", href: "/blog", sectionId: "blog" },
   { label: "Contact", href: "/contact", sectionId: "contact" },
 ] as const;

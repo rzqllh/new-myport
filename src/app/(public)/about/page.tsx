@@ -104,7 +104,7 @@ export default async function AboutPage() {
                   <div className="space-y-2 text-muted-foreground font-sans">
                     <div className="flex items-center gap-2 text-foreground font-medium">
                       <MapPin weight="duotone" className="size-4 text-primary shrink-0" />
-                      <span>Indonesia · UTC+7</span>
+                      <span>Indonesia</span>
                     </div>
                     <div className="flex items-center gap-2 text-foreground font-medium">
                       <Briefcase weight="duotone" className="size-4 text-primary shrink-0" />

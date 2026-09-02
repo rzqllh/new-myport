@@ -10,12 +10,32 @@ import {
 import { Button } from "@/components/ui/button";
 import { CopyEmailButton } from "@/components/copy-email-button";
 
+export interface HeroProject {
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  tech_stack: string[];
+  github_url?: string | null;
+  demo_url?: string | null;
+}
+
+export interface LiveGitHubData {
+  available: boolean;
+  repoName?: string;
+  commitMessage?: string;
+  createdAt?: string;
+  publicRepos?: number;
+}
+
 interface HeroProps {
   photoUrl?: string;
   cvUrl?: string;
   socialLinks?: Record<string, string>;
   projectsCount?: number;
   heroStats?: Record<string, string>;
+  selectedProjects?: HeroProject[];
+  liveGitHub?: LiveGitHubData | null;
 }
 
 const CAPABILITIES = [
@@ -24,8 +44,56 @@ const CAPABILITIES = [
   { label: "Web Engineering", icon: Terminal },
 ];
 
-export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 8 }: HeroProps) {
+const DEFAULT_SELECTED_SYSTEMS: HeroProject[] = [
+  {
+    slug: "lumina",
+    title: "Lumina",
+    description: "Personal project OS for creative studios: brief builder, client status & receivable finances.",
+    category: "web-dev",
+    tech_stack: ["React", "TypeScript", "Vite", "Supabase"],
+    github_url: "https://github.com/rzqllh/Lumina",
+    demo_url: "https://lumina-azure-beta.vercel.app",
+  },
+  {
+    slug: "summai",
+    title: "SummAI",
+    description: "Local-first meeting intelligence engine with Groq Whisper transcription & Gemini synthesis.",
+    category: "web-dev",
+    tech_stack: ["Next.js", "FastAPI", "Groq Whisper", "Google Gemini"],
+    github_url: "https://github.com/rzqllh/SummAI",
+    demo_url: null,
+  },
+  {
+    slug: "rangkai",
+    title: "Rangkai",
+    description: "AI specification builder generating execution-ready Build Packs for coding agents.",
+    category: "tools",
+    tech_stack: ["TypeScript", "Claude", "Gemini", "Codex"],
+    github_url: "https://github.com/rzqllh/Rangkai",
+    demo_url: null,
+  },
+  {
+    slug: "voltune",
+    title: "Voltune",
+    description: "State-aware Windows performance, network diagnostics, and recovery toolkit with auto-restore.",
+    category: "tools",
+    tech_stack: ["Python", "PowerShell", "Win32"],
+    github_url: "https://github.com/rzqllh/Voltune",
+    demo_url: null,
+  },
+];
+
+export function Hero({
+  photoUrl,
+  cvUrl,
+  socialLinks = {},
+  projectsCount = 8,
+  selectedProjects = DEFAULT_SELECTED_SYSTEMS,
+  liveGitHub,
+}: HeroProps) {
   const prefersReducedMotion = useReducedMotion();
+
+  const systems = selectedProjects && selectedProjects.length > 0 ? selectedProjects.slice(0, 3) : DEFAULT_SELECTED_SYSTEMS.slice(0, 3);
 
   const containerVariants = {
     hidden: {},
@@ -180,7 +248,7 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 8 }: H
             </motion.div>
           </motion.div>
 
-          {/* ─── Right Column (Photo OR Factual Selected Index) ─── */}
+          {/* ─── Right Column (Photo OR Realtime Selected Systems Card) ─── */}
           <motion.div
             variants={rightColVariants}
             initial="hidden"
@@ -197,11 +265,11 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 8 }: H
                 />
               </div>
             ) : (
-              /* Factual Project Index Overview (No fabricated telemetry) */
-              <div className="w-full max-w-[440px] rounded-3xl border border-border/80 bg-card p-6 shadow-xl space-y-5">
+              /* Realtime Git/Database Selected Systems Overview */
+              <div className="w-full max-w-[460px] rounded-3xl border border-border/80 bg-card p-6 shadow-xl space-y-5">
                 <div className="flex items-center justify-between border-b border-border/60 pb-4">
                   <div className="flex items-center gap-2">
-                    <span className="size-2 rounded-full bg-primary" />
+                    <span className="size-2 rounded-full bg-primary animate-pulse" />
                     <span className="text-xs font-mono font-semibold uppercase tracking-wider text-foreground">
                       Selected Systems
                     </span>
@@ -211,42 +279,46 @@ export function Hero({ photoUrl, cvUrl, socialLinks = {}, projectsCount = 8 }: H
                   </span>
                 </div>
 
+                {liveGitHub?.repoName && (
+                  <div className="px-3.5 py-2 rounded-xl bg-primary/5 border border-primary/15 flex items-center justify-between text-[11px] font-mono">
+                    <span className="text-muted-foreground truncate max-w-[200px]">
+                      git push: <span className="text-foreground font-semibold">{liveGitHub.repoName}</span>
+                    </span>
+                    <span className="text-primary font-semibold shrink-0">Live GitHub</span>
+                  </div>
+                )}
+
                 <div className="space-y-3 font-mono text-xs">
-                  <Link href="/projects/voltune" className="block p-3.5 rounded-2xl bg-muted/40 border border-border/60 space-y-1 hover:border-foreground/20 hover:bg-muted/60 transition-colors">
-                    <div className="flex justify-between items-center text-foreground font-semibold">
-                      <span>Voltune</span>
-                      <span className="text-muted-foreground font-mono text-[10px]">Python · Win32</span>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground font-sans leading-normal">
-                      State-aware Windows performance and system recovery toolkit.
-                    </p>
-                  </Link>
+                  {systems.map((proj) => {
+                    const stackTag = proj.tech_stack.slice(0, 3).join(" · ");
 
-                  <Link href="/projects/cultural-heritage-repository" className="block p-3.5 rounded-2xl bg-muted/40 border border-border/60 space-y-1 hover:border-foreground/20 hover:bg-muted/60 transition-colors">
-                    <div className="flex justify-between items-center text-foreground font-semibold">
-                      <span>Cultural Heritage Repo</span>
-                      <span className="text-muted-foreground font-mono text-[10px]">PHP · MySQL</span>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground font-sans leading-normal">
-                      Digital asset repository managing 100,395+ items across 451 museums.
-                    </p>
-                  </Link>
-
-                  <Link href="/projects/bca-mobile-ui-analysis" className="block p-3.5 rounded-2xl bg-muted/40 border border-border/60 space-y-1 hover:border-foreground/20 hover:bg-muted/60 transition-colors">
-                    <div className="flex justify-between items-center text-foreground font-semibold">
-                      <span>BCA Mobile Usability</span>
-                      <span className="text-muted-foreground font-mono text-[10px]">Figma · UCD</span>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground font-sans leading-normal">
-                      Interface usability research using User-Centered Design and A/B testing.
-                    </p>
-                  </Link>
+                    return (
+                      <Link
+                        key={proj.slug}
+                        href={`/projects/${proj.slug}`}
+                        className="group block p-3.5 rounded-2xl bg-muted/40 border border-border/60 space-y-1.5 hover:border-foreground/25 hover:bg-muted/70 transition-all shadow-xs"
+                      >
+                        <div className="flex justify-between items-center text-foreground font-semibold">
+                          <span className="group-hover:text-primary transition-colors flex items-center gap-1.5">
+                            {proj.title}
+                            <ArrowRight className="size-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </span>
+                          <span className="text-muted-foreground font-mono text-[10px] font-normal truncate max-w-[150px]">
+                            {stackTag}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground font-sans leading-relaxed line-clamp-2">
+                          {proj.description}
+                        </p>
+                      </Link>
+                    );
+                  })}
                 </div>
 
                 <div className="pt-2 border-t border-border/60 flex items-center justify-between text-[11px] font-mono text-muted-foreground">
-                  <span>Stack: TS · Next.js · Python · SQL</span>
-                  <Link href="/projects" className="text-primary font-semibold hover:underline inline-flex items-center gap-1">
-                    <span>View all</span>
+                  <span className="truncate max-w-[240px]">Stack: React · Next.js · Python · Supabase</span>
+                  <Link href="/projects" className="text-primary font-semibold hover:underline inline-flex items-center gap-1 shrink-0">
+                    <span>View all ({projectsCount})</span>
                     <ArrowRight className="size-3" />
                   </Link>
                 </div>

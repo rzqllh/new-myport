@@ -20,7 +20,7 @@ export function FooterCTA({ cvUrl }: { cvUrl?: string }) {
                 Looking for technical leadership or hands-on delivery?
               </h2>
               <p className="text-primary-foreground/85 text-base md:text-lg mb-10 max-w-[540px] leading-relaxed">
-                Available for project management, UI/UX design systems, and web engineering. Based in Indonesia (UTC+7), collaborating worldwide.
+                Available for project management, UI/UX design systems, and web engineering. Based in Indonesia, collaborating worldwide.
               </p>
               
               <div className="flex flex-wrap items-center justify-center gap-3.5">
