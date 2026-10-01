@@ -3,7 +3,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { SkipLink } from "@/components/layout/skip-link";
 import { PageTransition } from "@/components/layout/page-transition";
-import ChatWidget from "@/components/chat-widget";
+import { DeferredChatWidget } from "@/components/deferred-chat-widget";
 import { SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
 import { getPublicSettings } from "@/lib/content/public-content";
 
@@ -66,7 +66,7 @@ export default async function PublicLayout({
         social={social}
       />
       <div data-print-hidden>
-        <ChatWidget />
+        <DeferredChatWidget />
       </div>
     </>
   );

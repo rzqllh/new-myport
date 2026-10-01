@@ -17,6 +17,7 @@ import {
   publicPath,
 } from "@/lib/content/public-routes";
 import type { Locale } from "@/types/content";
+import { responsiveImageProps } from "@/lib/content/public-image";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -41,11 +42,17 @@ function formatPeriod(
 }
 
 function MediaFigure({ media }: { media: PublicMedia }) {
+  const image = responsiveImageProps(media.url, [640, 960, 1280, 1600]);
+
   return (
     <figure className="my-10 lg:-mx-20">
       <img
-        src={media.url}
+        src={image.src}
+        srcSet={image.srcSet}
+        sizes="(min-width: 1024px) 920px, 100vw"
         alt={media.alt}
+        loading="lazy"
+        decoding="async"
         className="h-auto w-full border border-border object-contain"
       />
       {media.caption ? (
@@ -65,6 +72,9 @@ function EvidenceFigure({
   locale: Locale;
 }) {
   const ui = PUBLIC_UI[locale];
+  const image = evidence.media
+    ? responsiveImageProps(evidence.media.url, [640, 960, 1280, 1600])
+    : null;
 
   return (
     <figure className="my-10 border-y border-border py-6 lg:-mx-20 lg:px-20">
@@ -82,10 +92,14 @@ function EvidenceFigure({
         ) : null}
       </div>
 
-      {evidence.media ? (
+      {evidence.media && image ? (
         <img
-          src={evidence.media.url}
+          src={image.src}
+          srcSet={image.srcSet}
+          sizes="(min-width: 1024px) 920px, 100vw"
           alt={evidence.media.alt}
+          loading="lazy"
+          decoding="async"
           className="mt-5 h-auto w-full object-contain"
         />
       ) : null}
@@ -253,6 +267,9 @@ export default async function ProjectDetailPage({
     work.media.find((item) => item.role === "hero") ??
     work.media[0] ??
     null;
+  const primaryImage = primaryMedia
+    ? responsiveImageProps(primaryMedia.url, [640, 960, 1280, 1600])
+    : null;
   const additionalMedia = work.media.filter(
     (item) => item.id !== primaryMedia?.id && item.role !== "cover"
   );
@@ -353,12 +370,16 @@ export default async function ProjectDetailPage({
         </div>
       </header>
 
-      {primaryMedia ? (
+      {primaryMedia && primaryImage ? (
         <div className="editorial-container pb-16">
           <figure>
             <img
-              src={primaryMedia.url}
+              src={primaryImage.src}
+              srcSet={primaryImage.srcSet}
+              sizes="(min-width: 1440px) 1344px, (min-width: 1024px) 92vw, 100vw"
               alt={primaryMedia.alt}
+              fetchPriority="high"
+              decoding="async"
               className="h-auto max-h-[760px] w-full border border-border object-contain"
             />
             {primaryMedia.caption ? (

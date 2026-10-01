@@ -67,6 +67,11 @@ All notable changes to this project are documented here.
 - Added tagged five-minute caching for public Work, Insights, profile, settings, capabilities, experience, redirects, and Site Content reads.
 - Consolidated root/public-layout site-settings reads onto the shared cached accessor.
 - Added an authenticated admin cache-revalidation endpoint and wired public-content mutations to invalidate cached reads after save/delete.
+- Rebuilt AI grounding from published CMS data only and removed stale hardcoded biography, project, metric, and proficiency fallbacks.
+- Changed optional GitHub activity to a five-minute static/revalidated endpoint and removed its redundant profile request.
+- Added provider-safe responsive Cloudinary delivery for public profile and Work evidence media.
+- Deferred the optional portfolio assistant until browser idle time so it does not compete with the first useful render.
+- Added an explicit performance/reliability contract with degraded-state rules and production measurement targets.
 
 ### Engineering
 - Standardized the repository on pnpm and added lint/typecheck/test/build CI.
@@ -78,3 +83,4 @@ All notable changes to this project are documented here.
 - Added the portfolio redesign PRD and supporting design/editorial/content contracts.
 - Added dedicated visitor-facing UI/UX contracts for Work and Insight detail pages.
 - Added phased implementation and v2 schema migration documentation.
+- Added performance and reliability documentation covering caching, optional integrations, media delivery, AI grounding, and field-measurement targets.

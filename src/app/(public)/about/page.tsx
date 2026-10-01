@@ -16,6 +16,7 @@ import {
   publicPath,
 } from "@/lib/content/public-routes";
 import type { Locale } from "@/types/content";
+import { responsiveImageProps } from "@/lib/content/public-image";
 import { Button } from "@/components/ui/button";
 
 interface Props {
@@ -73,6 +74,9 @@ export default async function AboutPage({ searchParams }: Props) {
     null;
   const cvUrl = settings.cv.url;
   const linkedin = settings.social.linkedin;
+  const profileImage = about.photoUrl
+    ? responsiveImageProps(about.photoUrl, [320, 480, 640, 800])
+    : null;
 
   return (
     <div className="editorial-container py-16 md:py-24">
@@ -140,11 +144,15 @@ export default async function AboutPage({ searchParams }: Props) {
           </div>
         </div>
 
-        {about.photoUrl ? (
+        {about.photoUrl && profileImage ? (
           <figure className="self-start">
             <img
-              src={about.photoUrl}
+              src={profileImage.src}
+              srcSet={profileImage.srcSet}
+              sizes="(min-width: 1024px) 320px, 80vw"
               alt="Hafizh Rizqullah Prasetya"
+              fetchPriority="high"
+              decoding="async"
               className="aspect-[4/5] w-full border border-border object-cover"
             />
           </figure>

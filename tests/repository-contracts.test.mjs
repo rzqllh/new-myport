@@ -310,3 +310,53 @@ test("admin content mutations invalidate the tagged public cache through an auth
     assert.match(read(path), /revalidatePublicContent/);
   }
 });
+
+
+test("AI grounding contains no hardcoded portfolio fallback facts", () => {
+  const grounding = read("src/lib/gemini-grounding.ts");
+
+  assert.doesNotMatch(
+    grounding,
+    /FALLBACK_PROJECTS|DEFAULT_GROUNDING_EXPERIENCE|proficiency/
+  );
+  assert.match(grounding, /getPublicWork/);
+  assert.match(grounding, /PUBLIC_CONTENT_CACHE_TAG/);
+  assert.match(grounding, /source:\/work\//);
+});
+
+test("optional GitHub activity is cacheable and not a core dynamic dependency", () => {
+  const route = read("src/app/api/github-status/route.ts");
+
+  assert.match(route, /force-static/);
+  assert.doesNotMatch(route, /force-dynamic/);
+  assert.match(route, /revalidate = 300/);
+  assert.doesNotMatch(route, /public_repos/);
+});
+
+test("public media uses responsive provider-safe transformations", () => {
+  const helper = read("src/lib/content/public-image.ts");
+  const work = read("src/app/(public)/projects/[slug]/page.tsx");
+  const about = read("src/app/(public)/about/page.tsx");
+
+  assert.match(helper, /f_auto,q_auto,c_limit/);
+  assert.match(work, /responsiveImageProps/);
+  assert.match(work, /srcSet/);
+  assert.match(about, /responsiveImageProps/);
+});
+
+test("portfolio assistant is deferred from the initial public render", () => {
+  const layout = read("src/app/(public)/layout.tsx");
+  const deferred = read("src/components/deferred-chat-widget.tsx");
+
+  assert.match(layout, /DeferredChatWidget/);
+  assert.match(deferred, /dynamic\(/);
+  assert.match(deferred, /requestIdleCallback|setTimeout/);
+});
+
+test("performance documentation distinguishes targets from measured claims", () => {
+  const performance = read("docs/PERFORMANCE.md");
+
+  assert.match(performance, /targets, not measured claims/i);
+  assert.match(performance, /LCP <= 2\.5 s/);
+  assert.match(performance, /CI build success is not a substitute/);
+});

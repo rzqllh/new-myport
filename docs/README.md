@@ -1,6 +1,6 @@
 # Portfolio Redesign Documentation
 
-This directory is the source of truth for the next portfolio architecture and redesign. Implementation must follow these documents unless a later approved decision explicitly supersedes them.
+This directory is the source of truth for the portfolio architecture and redesign. Implementation must follow these documents unless a later approved decision explicitly supersedes them.
 
 ## Documents
 
@@ -13,8 +13,9 @@ This directory is the source of truth for the next portfolio architecture and re
 7. [PUBLIC_PAGE_ARCHITECTURE.md](./PUBLIC_PAGE_ARCHITECTURE.md) — hierarchy and content contracts for public pages.
 8. [DETAIL_PAGE_UIUX.md](./DETAIL_PAGE_UIUX.md) — visitor-facing UI/UX, layout, hierarchy, evidence, and responsive contracts for Work and Insight slug/detail pages.
 9. [DECISIONS.md](./DECISIONS.md) — approved decisions that implementation must not silently reinterpret.
-10. [BASELINE_AUDIT.md](./BASELINE_AUDIT.md) — current repository debt mapped to the redesign phases.
+10. [BASELINE_AUDIT.md](./BASELINE_AUDIT.md) — repository debt mapped to the redesign phases.
 11. [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) — phased execution plan and verification gates.
+12. [PERFORMANCE.md](./PERFORMANCE.md) — public caching, degraded-state behavior, media delivery, AI grounding, and measurable production performance targets.
 
 ## Governing principles
 
@@ -27,6 +28,7 @@ This directory is the source of truth for the next portfolio architecture and re
 - A page must have a clear primary task and visual hierarchy. Equal visual weight everywhere is a defect.
 - Existing routes must remain reachable through permanent redirects during migrations.
 - A slug/detail route is not considered designed merely because routing, permalink, and editor UX exist; the visitor-facing page composition is a separate required contract.
+- Optional integrations must degrade independently from core portfolio browsing.
 - No implementation phase may silently reinterpret the contracts in these documents.
 
 ## Reference direction
