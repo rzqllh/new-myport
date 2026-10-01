@@ -9,6 +9,13 @@ All notable changes to this project are documented here.
 - Removed hardcoded project/article fallback content from Home, Work index, and Insights index rendering.
 - Rebuilt Home around professional positioning, selected Work, a capability/experience bridge, selected Insights, and a restrained contact closure.
 - Rebuilt Work and Insights indexes as editorial collections rather than card-heavy galleries.
+- Rebuilt Work detail around title/summary hierarchy, quiet metadata, optional evidence/media, conditional narrative sections, and next-work navigation.
+- Rebuilt Insight detail around article reading measure, tertiary metadata, and contextual related Work.
+- Rebuilt About from CMS-managed profile, experience, and qualitative capability data without hardcoded career fallbacks.
+- Simplified Contact and removed unsupported response-time and hardcoded-email claims.
+- Added a printable web Resume sourced from the same profile, experience, capability, Work, and operational settings data.
+- Removed hardcoded employer, education, and skill claims from root structured data.
+- Default availability copy is empty until intentionally configured.
 
 ### Design system
 - Replaced the neutral default palette with the tracked warm-paper, ink, and oxblood semantic tokens in light and dark modes.
@@ -16,6 +23,7 @@ All notable changes to this project are documented here.
 - Rebuilt the footer around Site Content, operational settings, and direct navigation instead of decorative activity telemetry.
 - Moved the portfolio assistant out of the root application shell so it no longer appears in admin.
 - Changed the default theme to follow the operating-system preference while retaining explicit theme control.
+- Added print-specific resume behavior.
 
 ### Admin
 - Rebuilt the admin shell around grouped information architecture and responsive navigation.

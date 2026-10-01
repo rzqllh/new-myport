@@ -69,7 +69,7 @@ export default async function PublicLayout({
         social={social}
         cvUrl={cvUrl}
       />
-      <ChatWidget />
+      <div data-print-hidden>\n        <ChatWidget />\n      </div>
     </>
   );
 }

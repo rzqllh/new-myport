@@ -100,3 +100,63 @@ test("public index pages use the CMS compatibility layer instead of hardcoded po
   assert.match(work, /getPublicWork/);
   assert.match(insights, /getPublicInsights/);
 });
+
+
+test("public detail and profile pages avoid hardcoded portfolio fallbacks", () => {
+  const paths = [
+    "src/app/(public)/projects/[slug]/page.tsx",
+    "src/app/(public)/blog/[slug]/page.tsx",
+    "src/app/(public)/about/page.tsx",
+  ];
+
+  for (const path of paths) {
+    const source = read(path);
+    assert.doesNotMatch(
+      source,
+      /FALLBACK_PROJECTS|DEFAULT_POSTS|DEFAULT_EXPERIENCES|PROJECT_DETAILS_DATA|FALLBACK_ARTICLES/
+    );
+  }
+});
+
+test("detail pages follow the editorial hierarchy instead of the old specification template", () => {
+  const workDetail = read("src/app/(public)/projects/[slug]/page.tsx");
+  const insightDetail = read("src/app/(public)/blog/[slug]/page.tsx");
+
+  assert.doesNotMatch(
+    workDetail,
+    /Project Specifications|01 \/|02 \/|Metrics Banner|fake browser/i
+  );
+  assert.match(workDetail, /EvidenceFigure/);
+  assert.match(workDetail, /Next work/);
+  assert.match(insightDetail, /Related work/);
+});
+
+test("public factual profile data is not duplicated in root structured data", () => {
+  const root = read("src/app/layout.tsx");
+  const contact = read("src/app/(public)/contact/page.tsx");
+  const about = read("src/app/(public)/about/page.tsx");
+
+  assert.doesNotMatch(
+    root,
+    /Telkom Indonesia|Gunadarma University|worksFor|alumniOf/
+  );
+  assert.doesNotMatch(contact, /hrizqullah484@gmail\.com|within 24 hours/i);
+  assert.doesNotMatch(about, /DEFAULT_EXPERIENCES/);
+});
+
+test("resume is a tracked printable public route", () => {
+  assert.equal(
+    existsSync(new URL("../src/app/(public)/resume/page.tsx", import.meta.url)),
+    true
+  );
+  assert.match(read("src/app/(public)/resume/page.tsx"), /print-resume/);
+  assert.match(read("src/app/globals.css"), /@media print/);
+});
+
+test("default site copy does not claim availability unless intentionally configured", () => {
+  const copy = read("src/lib/content/site-copy.ts");
+  assert.doesNotMatch(
+    copy,
+    /Open to relevant opportunities|Terbuka untuk peluang yang relevan/
+  );
+});

@@ -191,3 +191,27 @@
     max-width: 46rem;
   }
 }
+
+
+@media print {
+  [data-print-hidden] {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #111111 !important;
+  }
+
+  .print-resume {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  .print-resume a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+}

@@ -136,7 +136,7 @@ const en: SiteCopyBundle = {
     resume: "Resume",
   },
   "home.hero": {
-    status: "Open to relevant opportunities",
+    status: "",
     name: "Hafizh Rizqullah Prasetya",
     positioning:
       "IT project management with hands-on experience in product development and technical implementation.",
@@ -198,7 +198,7 @@ const id: SiteCopyBundle = {
     resume: "CV",
   },
   "home.hero": {
-    status: "Terbuka untuk peluang yang relevan",
+    status: "",
     name: "Hafizh Rizqullah Prasetya",
     positioning:
       "Berfokus di pengelolaan proyek IT, dengan pengalaman langsung di pengembangan produk dan implementasi teknis.",

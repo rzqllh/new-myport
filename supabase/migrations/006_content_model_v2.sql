@@ -495,13 +495,13 @@ INSERT INTO site_content (namespace, locale, status, content) VALUES
     'home.hero',
     'en',
     'published',
-    '{"status":"Open to relevant opportunities","name":"Hafizh Rizqullah Prasetya","positioning":"IT project management with hands-on experience in product development and technical implementation.","primary_cta":"View work","secondary_cta":"Resume"}'
+    '{"status":"","name":"Hafizh Rizqullah Prasetya","positioning":"IT project management with hands-on experience in product development and technical implementation.","primary_cta":"View work","secondary_cta":"Resume"}'
   ),
   (
     'home.hero',
     'id',
     'published',
-    '{"status":"Terbuka untuk peluang yang relevan","name":"Hafizh Rizqullah Prasetya","positioning":"Pengelolaan proyek IT dengan pengalaman langsung di pengembangan produk dan implementasi teknis.","primary_cta":"Lihat karya","secondary_cta":"CV"}'
+    '{"status":"","name":"Hafizh Rizqullah Prasetya","positioning":"Pengelolaan proyek IT dengan pengalaman langsung di pengembangan produk dan implementasi teknis.","primary_cta":"Lihat karya","secondary_cta":"CV"}'
   ),
   (
     'work.index',

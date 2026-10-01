@@ -47,7 +47,7 @@ export function Navbar({
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90">
+    <header data-print-hidden className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90">
       <nav
         className="editorial-container flex h-16 items-center justify-between gap-6"
         aria-label="Main navigation"

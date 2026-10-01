@@ -85,7 +85,11 @@ export default async function RootLayout({
   const siteName = settings.general?.site_title || SITE_NAME;
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://rzqllh-port.vercel.app/";
-  const github = settings.social?.github;
+  const sameAs = [
+    settings.social?.github,
+    settings.social?.linkedin,
+    settings.social?.instagram,
+  ].filter((value): value is string => Boolean(value));
 
   return (
     <html
@@ -103,25 +107,7 @@ export default async function RootLayout({
                 "@type": "Person",
                 name: siteName,
                 url: baseUrl,
-                jobTitle: "Project Management Officer",
-                worksFor: {
-                  "@type": "Organization",
-                  name: "Telkom Indonesia",
-                },
-                alumniOf: {
-                  "@type": "CollegeOrUniversity",
-                  name: "Gunadarma University",
-                },
-                knowsAbout: [
-                  "IT Project Management",
-                  "Product Development",
-                  "Web Engineering",
-                  "Next.js",
-                  "TypeScript",
-                  "Python",
-                  "SQL",
-                ],
-                sameAs: github ? [github] : [],
+                sameAs,
               },
               {
                 "@context": "https://schema.org",

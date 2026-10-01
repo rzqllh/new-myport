@@ -43,7 +43,7 @@ export function Footer({
   ].filter((item): item is [string, string] => Boolean(item[1]));
 
   return (
-    <footer className="border-t border-border">
+    <footer data-print-hidden className="border-t border-border">
       <div className="editorial-container py-14 md:py-18">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_.8fr_.8fr]">
           <div className="max-w-xl">
