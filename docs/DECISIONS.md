@@ -59,12 +59,18 @@ These decisions are approved for the redesign foundation. An implementation task
 34. Evidence is a first-class content type.
 35. Metrics are rendered only when sourced and relevant.
 36. Insights are not SEO filler; every article must come from real work, research, practice, or documented exploration.
+37. The UI/UX of `/work/[slug]` and `/insights/[slug]` is a first-class design deliverable separate from routing/permalink and admin-editor UX.
+38. Work detail opening uses title/summary hierarchy plus quiet metadata; a generic specifications card is not the default composition.
+39. Detail-page media/evidence may break beyond the narrative reading column and must be integrated into the story rather than appended as a generic gallery.
+40. Mobile detail pages have an explicit one-column reading order; desktop side rails do not survive as squeezed sidebars.
+41. Every detail-page family requires desktop and mobile composition review before implementation is accepted.
+42. A fixed Challenge/Solution/Architecture/Features sequence may not be imposed on every Work type.
 
 ## Engineering and delivery
 
-37. pnpm is the canonical package manager.
-38. Core public browsing must remain useful if GitHub, AI, analytics, or another optional integration fails.
-39. Unnecessary force-dynamic rendering should be removed in favor of appropriate caching/ISR and on-demand revalidation.
-40. Minimum merge gates are lint, typecheck, tests, and production build once Phase 1 establishes CI.
-41. Large redesign work must be split into scoped PRs by phase/task.
-42. A contract change requires updating the relevant documentation in the same change.
+43. pnpm is the canonical package manager.
+44. Core public browsing must remain useful if GitHub, AI, analytics, or another optional integration fails.
+45. Unnecessary force-dynamic rendering should be removed in favor of appropriate caching/ISR and on-demand revalidation.
+46. Minimum merge gates are lint, typecheck, tests, and production build once Phase 1 establishes CI.
+47. Large redesign work must be split into scoped PRs by phase/task.
+48. A contract change requires updating the relevant documentation in the same change.
