@@ -1,8 +1,6 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowUpRight,
-  Briefcase,
-} from "@phosphor-icons/react/dist/ssr";
+import { Briefcase } from "@phosphor-icons/react/dist/ssr";
 import { getSiteCopy } from "@/lib/content/site-content-server";
 import {
   getPublicAbout,
@@ -12,16 +10,54 @@ import {
   getPublicSettings,
   getPublicWork,
 } from "@/lib/content/public-content";
+import {
+  PUBLIC_UI,
+  alternateLanguages,
+  localeFromValue,
+  publicPath,
+} from "@/lib/content/public-routes";
 import { Button } from "@/components/ui/button";
 
-function formatMonthYear(value: string) {
-  return new Intl.DateTimeFormat("en", {
+interface Props {
+  searchParams: Promise<{ locale?: string }>;
+}
+
+function formatMonthYear(value: string, locale: "en" | "id") {
+  return new Intl.DateTimeFormat(locale === "id" ? "id-ID" : "en-US", {
     month: "short",
     year: "numeric",
   }).format(new Date(value));
 }
 
-export default async function HomePage() {
+export async function generateMetadata({
+  searchParams,
+}: Props): Promise<Metadata> {
+  const { locale: rawLocale } = await searchParams;
+  const locale = localeFromValue(rawLocale);
+  const copy = await getSiteCopy(locale);
+  const canonical = publicPath(locale, "/");
+
+  return {
+    title: copy["home.hero"].name,
+    description: copy["home.hero"].positioning,
+    alternates: {
+      canonical,
+      languages: alternateLanguages("/"),
+    },
+    openGraph: {
+      locale: locale === "id" ? "id_ID" : "en_US",
+      url: canonical,
+      title: copy["home.hero"].name,
+      description: copy["home.hero"].positioning,
+    },
+  };
+}
+
+export default async function HomePage({ searchParams }: Props) {
+  const { locale: rawLocale } = await searchParams;
+  const locale = localeFromValue(rawLocale);
+  const ui = PUBLIC_UI[locale];
+
   const [
     copy,
     work,
@@ -31,21 +67,20 @@ export default async function HomePage() {
     settings,
     about,
   ] = await Promise.all([
-    getSiteCopy("en"),
-    getPublicWork("en"),
-    getPublicInsights("en"),
-    getPublicExperiences("en"),
-    getPublicCapabilities("en"),
+    getSiteCopy(locale),
+    getPublicWork(locale),
+    getPublicInsights(locale),
+    getPublicExperiences(locale),
+    getPublicCapabilities(locale),
     getPublicSettings(),
-    getPublicAbout(),
+    getPublicAbout(locale),
   ]);
 
   const selectedWork = work.slice(0, 4);
   const selectedInsights = insights.slice(0, 3);
   const currentExperience = experiences[0];
   const visibleCapabilities = capabilities.slice(0, 8);
-  const availability =
-    settings.profile.availability || copy["home.hero"].status;
+  const availability = settings.profile.availability;
   const cvUrl = settings.cv.url;
 
   return (
@@ -53,9 +88,7 @@ export default async function HomePage() {
       <section className="editorial-container grid min-h-[72vh] items-center gap-12 py-20 lg:grid-cols-[minmax(0,1.25fr)_minmax(260px,.75fr)] lg:py-28">
         <div className="max-w-4xl">
           {availability ? (
-            <p className="mb-5 text-sm text-muted-foreground">
-              {availability}
-            </p>
+            <p className="mb-5 text-sm text-muted-foreground">{availability}</p>
           ) : null}
 
           <h1 className="font-display text-5xl font-semibold tracking-[-0.05em] sm:text-6xl lg:text-7xl">
@@ -69,37 +102,31 @@ export default async function HomePage() {
           <div className="mt-9 flex flex-wrap items-center gap-3">
             <Button
               size="lg"
-              render={<Link href="/projects" />}
+              render={<Link href={publicPath(locale, "/work")} />}
               nativeButton={false}
             >
               {copy["home.hero"].primary_cta}
             </Button>
 
+            <Button
+              variant="outline"
+              size="lg"
+              render={<Link href={publicPath(locale, "/resume")} />}
+              nativeButton={false}
+            >
+              {copy["home.hero"].secondary_cta}
+            </Button>
+
             {cvUrl ? (
-              <Button
-                variant="outline"
-                size="lg"
-                render={
-                  <a
-                    href={cvUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  />
-                }
-                nativeButton={false}
+              <a
+                href={cvUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-muted-foreground hover:text-foreground"
               >
-                {copy["home.hero"].secondary_cta}
-              </Button>
-            ) : (
-              <Button
-                variant="outline"
-                size="lg"
-                render={<Link href="/contact" />}
-                nativeButton={false}
-              >
-                Contact
-              </Button>
-            )}
+                {ui.downloadFile}
+              </a>
+            ) : null}
           </div>
         </div>
 
@@ -108,7 +135,7 @@ export default async function HomePage() {
             <div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Briefcase className="size-4" />
-                Current focus
+                {ui.currentFocus}
               </div>
               <p className="mt-3 font-display text-xl font-semibold">
                 {currentExperience.role}
@@ -117,16 +144,17 @@ export default async function HomePage() {
                 {currentExperience.company}
               </p>
               <p className="mt-3 text-xs text-muted-foreground">
-                Since {formatMonthYear(currentExperience.startDate)}
+                {locale === "id" ? "Sejak" : "Since"}{" "}
+                {formatMonthYear(currentExperience.startDate, locale)}
               </p>
             </div>
           ) : about.bio ? (
-            <p className="text-sm leading-6 text-muted-foreground">
-              {about.bio}
-            </p>
+            <p className="text-sm leading-6 text-muted-foreground">{about.bio}</p>
           ) : (
             <p className="text-sm leading-6 text-muted-foreground">
-              Portfolio content is being prepared.
+              {locale === "id"
+                ? "Detail profil sedang disiapkan."
+                : "Portfolio content is being prepared."}
             </p>
           )}
         </aside>
@@ -144,7 +172,7 @@ export default async function HomePage() {
               </p>
             </div>
             <Link
-              href="/projects"
+              href={publicPath(locale, "/work")}
               className="text-sm font-medium text-primary hover:underline"
             >
               {copy["home.work"].cta}
@@ -165,7 +193,7 @@ export default async function HomePage() {
                     <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                       <h3 className="font-display text-2xl font-semibold">
                         <Link
-                          href={`/projects/${item.slug}`}
+                          href={publicPath(locale, `/work/${item.slug}`)}
                           className="hover:text-primary"
                         >
                           {item.title}
@@ -184,11 +212,10 @@ export default async function HomePage() {
                   <div className="text-sm text-muted-foreground md:text-right">
                     {item.role ? <p>{item.role}</p> : null}
                     <Link
-                      href={`/projects/${item.slug}`}
+                      href={publicPath(locale, `/work/${item.slug}`)}
                       className="mt-2 inline-flex items-center gap-1 text-primary hover:underline"
                     >
-                      Read case study
-                      <ArrowUpRight className="size-3.5" />
+                      {ui.readCaseStudy}
                     </Link>
                   </div>
                 </article>
@@ -196,7 +223,7 @@ export default async function HomePage() {
             </div>
           ) : (
             <p className="mt-10 border-y border-dashed border-border py-8 text-sm text-muted-foreground">
-              Published Work will appear here when it is available.
+              {ui.noWork}
             </p>
           )}
         </div>
@@ -212,20 +239,17 @@ export default async function HomePage() {
               {copy["home.capabilities"].intro}
             </p>
             <Link
-              href="/about"
+              href={publicPath(locale, "/about")}
               className="mt-6 inline-block text-sm font-medium text-primary hover:underline"
             >
-              About my background
+              {ui.aboutBackground}
             </Link>
           </div>
 
           {visibleCapabilities.length ? (
             <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
               {visibleCapabilities.map((capability) => (
-                <div
-                  key={capability.id}
-                  className="border-t border-border pt-4"
-                >
+                <div key={capability.id} className="border-t border-border pt-4">
                   <p className="text-sm font-medium">{capability.name}</p>
                   <p className="mt-1 text-xs capitalize text-muted-foreground">
                     {capability.category.replace("-", " ")}
@@ -239,9 +263,7 @@ export default async function HomePage() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">
-              Capability details are being prepared.
-            </p>
+            <p className="text-sm text-muted-foreground">{ui.capabilitiesPending}</p>
           )}
         </div>
       </section>
@@ -258,7 +280,7 @@ export default async function HomePage() {
               </p>
             </div>
             <Link
-              href="/blog"
+              href={publicPath(locale, "/insights")}
               className="text-sm font-medium text-primary hover:underline"
             >
               {copy["home.insights"].cta}
@@ -274,17 +296,16 @@ export default async function HomePage() {
                 >
                   <p className="text-xs text-muted-foreground">
                     {insight.publishedAt
-                      ? new Intl.DateTimeFormat("en", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        }).format(new Date(insight.publishedAt))
-                      : "Published"}
+                      ? new Intl.DateTimeFormat(
+                          locale === "id" ? "id-ID" : "en-US",
+                          { month: "short", day: "numeric", year: "numeric" }
+                        ).format(new Date(insight.publishedAt))
+                      : ui.published}
                   </p>
                   <div>
                     <h3 className="font-display text-xl font-semibold">
                       <Link
-                        href={`/blog/${insight.slug}`}
+                        href={publicPath(locale, `/insights/${insight.slug}`)}
                         className="hover:text-primary"
                       >
                         {insight.title}
@@ -301,7 +322,7 @@ export default async function HomePage() {
             </div>
           ) : (
             <p className="mt-10 border-y border-dashed border-border py-8 text-sm text-muted-foreground">
-              Published Insights will appear here when they are available.
+              {ui.noInsights}
             </p>
           )}
         </div>
@@ -311,18 +332,18 @@ export default async function HomePage() {
         <div className="editorial-container flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="font-display text-2xl font-semibold">
-              Have a relevant project or role in mind?
+              {copy.footer.heading}
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-              The contact page includes direct email and a secure message form.
+              {copy.footer.body}
             </p>
           </div>
           <Button
             variant="outline"
-            render={<Link href="/contact" />}
+            render={<Link href={publicPath(locale, "/contact")} />}
             nativeButton={false}
           >
-            Contact
+            {copy.footer.contact_cta || ui.contact}
           </Button>
         </div>
       </section>

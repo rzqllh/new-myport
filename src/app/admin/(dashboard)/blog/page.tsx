@@ -133,7 +133,7 @@ export default async function AdminBlogPage({ searchParams }: Props) {
                     size="icon"
                     render={
                       <Link
-                        href={`/blog/${post.slug}`}
+                        href={`/insights/${post.slug}`}
                         target="_blank"
                         aria-label={`Open ${post.title}`}
                       />

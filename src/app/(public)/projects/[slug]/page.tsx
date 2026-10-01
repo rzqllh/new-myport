@@ -1,27 +1,42 @@
 /* eslint-disable @next/next/no-img-element */
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowLeft, ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 import {
+  getContentRedirect,
   getPublicWork,
   getPublicWorkDetail,
   type PublicEvidence,
   type PublicMedia,
 } from "@/lib/content/public-content";
+import {
+  PUBLIC_UI,
+  alternateLanguages,
+  localeFromValue,
+  publicPath,
+} from "@/lib/content/public-routes";
+import type { Locale } from "@/types/content";
 
 interface Props {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ locale?: string }>;
 }
 
-function formatPeriod(start: string | null, end: string | null) {
+function formatPeriod(
+  start: string | null,
+  end: string | null,
+  locale: Locale
+) {
   if (!start) return null;
-  const formatter = new Intl.DateTimeFormat("en", {
-    month: "short",
-    year: "numeric",
-  });
+
+  const formatter = new Intl.DateTimeFormat(
+    locale === "id" ? "id-ID" : "en-US",
+    { month: "short", year: "numeric" }
+  );
+
   return `${formatter.format(new Date(start))} — ${
-    end ? formatter.format(new Date(end)) : "Present"
+    end ? formatter.format(new Date(end)) : PUBLIC_UI[locale].present
   }`;
 }
 
@@ -42,7 +57,15 @@ function MediaFigure({ media }: { media: PublicMedia }) {
   );
 }
 
-function EvidenceFigure({ evidence }: { evidence: PublicEvidence }) {
+function EvidenceFigure({
+  evidence,
+  locale,
+}: {
+  evidence: PublicEvidence;
+  locale: Locale;
+}) {
+  const ui = PUBLIC_UI[locale];
+
   return (
     <figure className="my-10 border-y border-border py-6 lg:-mx-20 lg:px-20">
       <div className="max-w-3xl">
@@ -69,7 +92,11 @@ function EvidenceFigure({ evidence }: { evidence: PublicEvidence }) {
 
       {evidence.sourceUrl || evidence.sourceDate ? (
         <figcaption className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-          {evidence.sourceDate ? <span>Source date: {evidence.sourceDate}</span> : null}
+          {evidence.sourceDate ? (
+            <span>
+              {ui.sourceDate}: {evidence.sourceDate}
+            </span>
+          ) : null}
           {evidence.sourceUrl ? (
             <a
               href={evidence.sourceUrl}
@@ -77,7 +104,7 @@ function EvidenceFigure({ evidence }: { evidence: PublicEvidence }) {
               rel="noopener noreferrer"
               className="text-primary hover:underline"
             >
-              Source
+              {ui.source}
             </a>
           ) : null}
         </figcaption>
@@ -86,33 +113,129 @@ function EvidenceFigure({ evidence }: { evidence: PublicEvidence }) {
   );
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  const work = await getPublicWorkDetail(slug, "en");
-  if (!work) return { title: "Work" };
+function TranslationUnavailable({
+  slug,
+  locale,
+}: {
+  slug: string;
+  locale: Locale;
+}) {
+  const ui = PUBLIC_UI[locale];
+
+  return (
+    <div className="editorial-container py-20 md:py-28">
+      <div className="max-w-2xl border-y border-border py-10">
+        <p className="text-sm text-muted-foreground">{ui.translationUnavailable}</p>
+        <h1 className="mt-3 font-display text-4xl font-semibold">
+          {ui.translationUnavailable}
+        </h1>
+        <p className="mt-4 text-base leading-7 text-muted-foreground">
+          {ui.translationUnavailableBody}
+        </p>
+        <Link
+          href={`/work/${slug}`}
+          className="mt-6 inline-block text-sm font-medium text-primary hover:underline"
+        >
+          {ui.viewEnglishVersion}
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+export async function generateMetadata({
+  params,
+  searchParams,
+}: Props): Promise<Metadata> {
+  const [{ slug }, { locale: rawLocale }] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  const locale = localeFromValue(rawLocale);
+
+  const [requested, english, indonesian] = await Promise.all([
+    getPublicWorkDetail(slug, locale),
+    getPublicWorkDetail(slug, "en"),
+    getPublicWorkDetail(slug, "id"),
+  ]);
+
+  if (!requested) {
+    if (locale === "id" && english) {
+      return {
+        title: PUBLIC_UI.id.translationUnavailable,
+        description: PUBLIC_UI.id.translationUnavailableBody,
+        robots: { index: false, follow: true },
+        alternates: {
+          canonical: `/work/${slug}`,
+          languages: alternateLanguages(`/work/${slug}`, {
+            en: true,
+            id: false,
+          }),
+        },
+      };
+    }
+    return { title: PUBLIC_UI[locale].allWork };
+  }
+
+  const canonical = publicPath(locale, `/work/${requested.slug}`);
+  const title = requested.seoTitle || requested.title;
+  const description =
+    requested.seoDescription || requested.summary || undefined;
 
   return {
-    title: work.title,
-    description: work.summary ?? undefined,
-    alternates: { canonical: `/projects/${work.slug}` },
+    title,
+    description,
+    alternates: {
+      canonical,
+      languages: alternateLanguages(`/work/${requested.slug}`, {
+        en: Boolean(english),
+        id: Boolean(indonesian),
+      }),
+    },
     openGraph: {
       type: "article",
-      title: work.title,
-      description: work.summary ?? undefined,
-      url: `/projects/${work.slug}`,
-      ...(work.cover ? { images: [{ url: work.cover.url }] } : {}),
+      locale: locale === "id" ? "id_ID" : "en_US",
+      title,
+      description,
+      url: canonical,
+      ...(requested.cover
+        ? { images: [{ url: requested.cover.url }] }
+        : {}),
     },
   };
 }
 
-export default async function ProjectDetailPage({ params }: Props) {
-  const { slug } = await params;
+export default async function ProjectDetailPage({
+  params,
+  searchParams,
+}: Props) {
+  const [{ slug }, { locale: rawLocale }] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  const locale = localeFromValue(rawLocale);
+  const ui = PUBLIC_UI[locale];
+
   const [work, collection] = await Promise.all([
-    getPublicWorkDetail(slug, "en"),
-    getPublicWork("en"),
+    getPublicWorkDetail(slug, locale),
+    getPublicWork(locale),
   ]);
 
-  if (!work) notFound();
+  if (!work) {
+    const redirectTarget = await getContentRedirect("work", slug, locale);
+    if (redirectTarget) {
+      permanentRedirect(publicPath(locale, `/work/${redirectTarget}`));
+    }
+
+    if (locale === "id") {
+      const english = await getPublicWorkDetail(slug, "en");
+      if (english) {
+        return <TranslationUnavailable slug={slug} locale={locale} />;
+      }
+    }
+
+    notFound();
+  }
 
   const currentIndex = collection.findIndex((item) => item.id === work.id);
   const nextWork =
@@ -120,7 +243,11 @@ export default async function ProjectDetailPage({ params }: Props) {
       ? collection[(currentIndex + 1) % collection.length]
       : null;
 
-  const period = formatPeriod(work.timeframeStart, work.timeframeEnd);
+  const period = formatPeriod(
+    work.timeframeStart,
+    work.timeframeEnd,
+    locale
+  );
   const primaryMedia =
     work.cover ??
     work.media.find((item) => item.role === "hero") ??
@@ -131,11 +258,11 @@ export default async function ProjectDetailPage({ params }: Props) {
   );
 
   const sections = [
-    { id: "context", title: "Context", body: work.context },
-    { id: "issue", title: "The issue", body: work.challenge },
-    { id: "approach", title: "Approach", body: work.approach },
-    { id: "outcome", title: "Outcome", body: work.outcome },
-    { id: "lessons", title: "Notes and lessons", body: work.lessons },
+    { id: "context", title: ui.context, body: work.context },
+    { id: "issue", title: ui.issue, body: work.challenge },
+    { id: "approach", title: ui.approach, body: work.approach },
+    { id: "outcome", title: ui.outcome, body: work.outcome },
+    { id: "lessons", title: ui.notesLessons, body: work.lessons },
   ].filter((section) => Boolean(section.body));
 
   const showSectionIndex = sections.length >= 4;
@@ -144,11 +271,11 @@ export default async function ProjectDetailPage({ params }: Props) {
     <article className="pb-20 md:pb-28">
       <header className="editorial-container py-12 md:py-20">
         <Link
-          href="/projects"
+          href={publicPath(locale, "/work")}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
-          Work
+          {ui.allWork}
         </Link>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_260px] lg:gap-16">
@@ -167,26 +294,31 @@ export default async function ProjectDetailPage({ params }: Props) {
             <dl className="space-y-5">
               {work.role ? (
                 <div>
-                  <dt className="text-xs text-muted-foreground">Role</dt>
+                  <dt className="text-xs text-muted-foreground">{ui.role}</dt>
                   <dd className="mt-1">{work.role}</dd>
                 </div>
               ) : null}
               <div>
-                <dt className="text-xs text-muted-foreground">Work</dt>
+                <dt className="text-xs text-muted-foreground">{ui.work}</dt>
                 <dd className="mt-1 capitalize">
-                  {work.discipline.replace("-", " ")} · {work.workType.replace("-", " ")}
+                  {work.discipline.replace("-", " ")} ·{" "}
+                  {work.workType.replace("-", " ")}
                 </dd>
               </div>
               {period ? (
                 <div>
-                  <dt className="text-xs text-muted-foreground">Timeframe</dt>
+                  <dt className="text-xs text-muted-foreground">{ui.timeframe}</dt>
                   <dd className="mt-1">{period}</dd>
                 </div>
               ) : null}
               {work.technologies.length ? (
                 <div>
-                  <dt className="text-xs text-muted-foreground">Tools / technology</dt>
-                  <dd className="mt-1 leading-6">{work.technologies.join(", ")}</dd>
+                  <dt className="text-xs text-muted-foreground">
+                    {ui.toolsTechnology}
+                  </dt>
+                  <dd className="mt-1 leading-6">
+                    {work.technologies.join(", ")}
+                  </dd>
                 </div>
               ) : null}
             </dl>
@@ -200,7 +332,7 @@ export default async function ProjectDetailPage({ params }: Props) {
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 text-primary hover:underline"
                   >
-                    Open live site
+                    {ui.openLiveSite}
                     <ArrowUpRight className="size-3.5" />
                   </a>
                 ) : null}
@@ -211,7 +343,7 @@ export default async function ProjectDetailPage({ params }: Props) {
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 text-primary hover:underline"
                   >
-                    View repository
+                    {ui.viewRepository}
                     <ArrowUpRight className="size-3.5" />
                   </a>
                 ) : null}
@@ -249,7 +381,7 @@ export default async function ProjectDetailPage({ params }: Props) {
           {showSectionIndex ? (
             <aside className="hidden lg:block">
               <nav
-                aria-label="Case study sections"
+                aria-label={ui.navigation}
                 className="sticky top-24 space-y-2 border-l border-border pl-4 text-xs text-muted-foreground"
               >
                 {sections.map((section) => (
@@ -263,7 +395,7 @@ export default async function ProjectDetailPage({ params }: Props) {
                 ))}
                 {work.evidence.length ? (
                   <a href="#evidence" className="block py-1 hover:text-foreground">
-                    Evidence
+                    {ui.evidence}
                   </a>
                 ) : null}
               </nav>
@@ -271,9 +403,11 @@ export default async function ProjectDetailPage({ params }: Props) {
           ) : null}
 
           <div className="min-w-0">
-            {!sections.length && !work.evidence.length && !additionalMedia.length ? (
+            {!sections.length &&
+            !work.evidence.length &&
+            !additionalMedia.length ? (
               <p className="border-y border-border py-8 text-base leading-7 text-muted-foreground">
-                This Work item currently contains a summary and project metadata. Additional case-study material has not been published.
+                {ui.workDetailPending}
               </p>
             ) : null}
 
@@ -294,7 +428,11 @@ export default async function ProjectDetailPage({ params }: Props) {
                 {index === 0 && work.evidence.length ? (
                   <section id="evidence" className="scroll-mt-24">
                     {work.evidence.map((evidence) => (
-                      <EvidenceFigure key={evidence.id} evidence={evidence} />
+                      <EvidenceFigure
+                        key={evidence.id}
+                        evidence={evidence}
+                        locale={locale}
+                      />
                     ))}
                   </section>
                 ) : null}
@@ -304,7 +442,11 @@ export default async function ProjectDetailPage({ params }: Props) {
             {!sections.length && work.evidence.length ? (
               <section id="evidence" className="scroll-mt-24">
                 {work.evidence.map((evidence) => (
-                  <EvidenceFigure key={evidence.id} evidence={evidence} />
+                  <EvidenceFigure
+                    key={evidence.id}
+                    evidence={evidence}
+                    locale={locale}
+                  />
                 ))}
               </section>
             ) : null}
@@ -312,7 +454,7 @@ export default async function ProjectDetailPage({ params }: Props) {
             {additionalMedia.length ? (
               <section className="border-t border-border pt-10">
                 <h2 className="font-display text-2xl font-semibold">
-                  Additional material
+                  {ui.additionalMaterial}
                 </h2>
                 {additionalMedia.map((media) => (
                   <MediaFigure key={media.id} media={media} />
@@ -325,9 +467,9 @@ export default async function ProjectDetailPage({ params }: Props) {
 
       {nextWork ? (
         <section className="editorial-container mt-20 border-t border-border pt-8">
-          <p className="text-xs text-muted-foreground">Next work</p>
+          <p className="text-xs text-muted-foreground">{ui.nextWork}</p>
           <Link
-            href={`/projects/${nextWork.slug}`}
+            href={publicPath(locale, `/work/${nextWork.slug}`)}
             className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end"
           >
             <div>
@@ -340,7 +482,7 @@ export default async function ProjectDetailPage({ params }: Props) {
                 </p>
               ) : null}
             </div>
-            <span className="text-sm text-primary">Read next</span>
+            <span className="text-sm text-primary">{ui.readNext}</span>
           </Link>
         </section>
       ) : null}

@@ -2,18 +2,48 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getSiteCopy } from "@/lib/content/site-content-server";
 import { getPublicInsights } from "@/lib/content/public-content";
+import {
+  PUBLIC_UI,
+  alternateLanguages,
+  localeFromValue,
+  publicPath,
+} from "@/lib/content/public-routes";
 
-export const metadata: Metadata = {
-  title: "Insights",
-  description:
-    "Project notes, technical exploration, research, and delivery practice by Hafizh Rizqullah Prasetya.",
-  alternates: { canonical: "/blog" },
-};
+interface Props {
+  searchParams: Promise<{ locale?: string }>;
+}
 
-export default async function BlogPage() {
+export async function generateMetadata({
+  searchParams,
+}: Props): Promise<Metadata> {
+  const { locale: rawLocale } = await searchParams;
+  const locale = localeFromValue(rawLocale);
+  const copy = await getSiteCopy(locale);
+  const canonical = publicPath(locale, "/insights");
+
+  return {
+    title: copy["insights.index"].title,
+    description: copy["insights.index"].intro,
+    alternates: {
+      canonical,
+      languages: alternateLanguages("/insights"),
+    },
+    openGraph: {
+      locale: locale === "id" ? "id_ID" : "en_US",
+      url: canonical,
+      title: copy["insights.index"].title,
+      description: copy["insights.index"].intro,
+    },
+  };
+}
+
+export default async function BlogPage({ searchParams }: Props) {
+  const { locale: rawLocale } = await searchParams;
+  const locale = localeFromValue(rawLocale);
+  const ui = PUBLIC_UI[locale];
   const [copy, insights] = await Promise.all([
-    getSiteCopy("en"),
-    getPublicInsights("en"),
+    getSiteCopy(locale),
+    getPublicInsights(locale),
   ]);
 
   return (
@@ -37,12 +67,11 @@ export default async function BlogPage() {
               <div className="text-xs leading-5 text-muted-foreground">
                 <p>
                   {insight.publishedAt
-                    ? new Intl.DateTimeFormat("en", {
-                        month: "long",
-                        day: "numeric",
-                        year: "numeric",
-                      }).format(new Date(insight.publishedAt))
-                    : "Published"}
+                    ? new Intl.DateTimeFormat(
+                        locale === "id" ? "id-ID" : "en-US",
+                        { month: "long", day: "numeric", year: "numeric" }
+                      ).format(new Date(insight.publishedAt))
+                    : ui.published}
                 </p>
                 {insight.tags.length ? (
                   <p className="mt-2">{insight.tags.join(" · ")}</p>
@@ -52,7 +81,7 @@ export default async function BlogPage() {
               <div>
                 <h2 className="font-display text-2xl font-semibold">
                   <Link
-                    href={`/blog/${insight.slug}`}
+                    href={publicPath(locale, `/insights/${insight.slug}`)}
                     className="hover:text-primary"
                   >
                     {insight.title}
@@ -64,10 +93,10 @@ export default async function BlogPage() {
                   </p>
                 ) : null}
                 <Link
-                  href={`/blog/${insight.slug}`}
+                  href={publicPath(locale, `/insights/${insight.slug}`)}
                   className="mt-4 inline-block text-sm font-medium text-primary hover:underline"
                 >
-                  Read insight
+                  {locale === "id" ? "Baca insight" : "Read insight"}
                 </Link>
               </div>
             </article>
@@ -75,9 +104,7 @@ export default async function BlogPage() {
         </div>
       ) : (
         <div className="mt-14 border-y border-dashed border-border py-12">
-          <p className="text-sm text-muted-foreground">
-            No published Insights are available yet.
-          </p>
+          <p className="text-sm text-muted-foreground">{ui.noInsights}</p>
         </div>
       )}
     </div>

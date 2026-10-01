@@ -1,65 +1,158 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
 import {
+  getContentRedirect,
   getPublicInsightDetail,
   getPublicWork,
 } from "@/lib/content/public-content";
+import {
+  PUBLIC_UI,
+  alternateLanguages,
+  localeFromValue,
+  publicPath,
+} from "@/lib/content/public-routes";
 
 interface Props {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ locale?: string }>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  const insight = await getPublicInsightDetail(slug, "en");
+export async function generateMetadata({
+  params,
+  searchParams,
+}: Props): Promise<Metadata> {
+  const [{ slug }, { locale: rawLocale }] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  const locale = localeFromValue(rawLocale);
 
-  if (!insight) return { title: "Insights" };
+  const [requested, english, indonesian] = await Promise.all([
+    getPublicInsightDetail(slug, locale),
+    getPublicInsightDetail(slug, "en"),
+    getPublicInsightDetail(slug, "id"),
+  ]);
 
-  const title = insight.seoTitle || insight.title;
-  const description = insight.seoDescription || insight.excerpt || undefined;
+  if (!requested) {
+    if (locale === "id" && english) {
+      return {
+        title: PUBLIC_UI.id.translationUnavailable,
+        description: PUBLIC_UI.id.translationUnavailableBody,
+        robots: { index: false, follow: true },
+        alternates: {
+          canonical: `/insights/${slug}`,
+          languages: alternateLanguages(`/insights/${slug}`, {
+            en: true,
+            id: false,
+          }),
+        },
+      };
+    }
+    return { title: PUBLIC_UI[locale].allInsights };
+  }
+
+  const title = requested.seoTitle || requested.title;
+  const description =
+    requested.seoDescription || requested.excerpt || undefined;
+  const canonical = publicPath(locale, `/insights/${requested.slug}`);
 
   return {
     title,
     description,
-    alternates: { canonical: `/blog/${insight.slug}` },
+    alternates: {
+      canonical,
+      languages: alternateLanguages(`/insights/${requested.slug}`, {
+        en: Boolean(english),
+        id: Boolean(indonesian),
+      }),
+    },
     openGraph: {
       type: "article",
+      locale: locale === "id" ? "id_ID" : "en_US",
       title,
       description,
-      url: `/blog/${insight.slug}`,
-      publishedTime: insight.publishedAt ?? undefined,
+      url: canonical,
+      publishedTime: requested.publishedAt ?? undefined,
     },
   };
 }
 
-export default async function BlogPostPage({ params }: Props) {
-  const { slug } = await params;
+function TranslationUnavailable({ slug }: { slug: string }) {
+  const ui = PUBLIC_UI.id;
+
+  return (
+    <div className="editorial-container py-20 md:py-28">
+      <div className="max-w-2xl border-y border-border py-10">
+        <p className="text-sm text-muted-foreground">{ui.translationUnavailable}</p>
+        <h1 className="mt-3 font-display text-4xl font-semibold">
+          {ui.translationUnavailable}
+        </h1>
+        <p className="mt-4 text-base leading-7 text-muted-foreground">
+          {ui.translationUnavailableBody}
+        </p>
+        <Link
+          href={`/insights/${slug}`}
+          className="mt-6 inline-block text-sm font-medium text-primary hover:underline"
+        >
+          {ui.viewEnglishVersion}
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+export default async function BlogPostPage({
+  params,
+  searchParams,
+}: Props) {
+  const [{ slug }, { locale: rawLocale }] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  const locale = localeFromValue(rawLocale);
+  const ui = PUBLIC_UI[locale];
+
   const [insight, work] = await Promise.all([
-    getPublicInsightDetail(slug, "en"),
-    getPublicWork("en"),
+    getPublicInsightDetail(slug, locale),
+    getPublicWork(locale),
   ]);
 
-  if (!insight) notFound();
+  if (!insight) {
+    const redirectTarget = await getContentRedirect("insight", slug, locale);
+    if (redirectTarget) {
+      permanentRedirect(publicPath(locale, `/insights/${redirectTarget}`));
+    }
+
+    if (locale === "id") {
+      const english = await getPublicInsightDetail(slug, "en");
+      if (english) return <TranslationUnavailable slug={slug} />;
+    }
+
+    notFound();
+  }
 
   const relatedWork = insight.relatedWorkId
     ? work.find((item) => item.id === insight.relatedWorkId) ?? null
     : null;
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://rzqllh-port.vercel.app";
+  const baseUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://rzqllh-port.vercel.app"
+  ).replace(/\/$/, "");
+  const canonicalPath = publicPath(locale, `/insights/${insight.slug}`);
 
   const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
+    inLanguage: locale,
     headline: insight.title,
     description: insight.excerpt || undefined,
     datePublished: insight.publishedAt || undefined,
     dateModified: insight.updatedAt || undefined,
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `${baseUrl}/blog/${insight.slug}`,
+      "@id": `${baseUrl}${canonicalPath}`,
     },
   };
 
@@ -72,11 +165,11 @@ export default async function BlogPostPage({ params }: Props) {
 
       <header className="editorial-container py-12 md:py-20">
         <Link
-          href="/blog"
+          href={publicPath(locale, "/insights")}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
-          Insights
+          {ui.allInsights}
         </Link>
 
         <div className="mt-10 max-w-5xl">
@@ -93,20 +186,19 @@ export default async function BlogPostPage({ params }: Props) {
           <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">
             {insight.publishedAt ? (
               <time dateTime={insight.publishedAt}>
-                {new Intl.DateTimeFormat("en", {
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                }).format(new Date(insight.publishedAt))}
+                {new Intl.DateTimeFormat(
+                  locale === "id" ? "id-ID" : "en-US",
+                  { month: "long", day: "numeric", year: "numeric" }
+                ).format(new Date(insight.publishedAt))}
               </time>
             ) : null}
             {insight.tags.length ? <span>{insight.tags.join(" · ")}</span> : null}
             {relatedWork ? (
               <Link
-                href={`/projects/${relatedWork.slug}`}
+                href={publicPath(locale, `/work/${relatedWork.slug}`)}
                 className="text-primary hover:underline"
               >
-                Related work: {relatedWork.title}
+                {ui.relatedWork}: {relatedWork.title}
               </Link>
             ) : null}
           </div>
@@ -122,14 +214,17 @@ export default async function BlogPostPage({ params }: Props) {
             />
           ) : (
             <p className="border-y border-border py-8 text-base leading-7 text-muted-foreground">
-              The full article body has not been published yet.
+              {ui.articleBodyPending}
             </p>
           )}
 
           {relatedWork ? (
             <aside className="mt-16 border-t border-border pt-7">
-              <p className="text-xs text-muted-foreground">Related work</p>
-              <Link href={`/projects/${relatedWork.slug}`} className="mt-2 block">
+              <p className="text-xs text-muted-foreground">{ui.relatedWork}</p>
+              <Link
+                href={publicPath(locale, `/work/${relatedWork.slug}`)}
+                className="mt-2 block"
+              >
                 <h2 className="font-display text-2xl font-semibold hover:text-primary">
                   {relatedWork.title}
                 </h2>

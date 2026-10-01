@@ -2,7 +2,19 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request });
+  const pathname = request.nextUrl.pathname;
+  const locale = pathname === "/id" || pathname.startsWith("/id/") ? "id" : "en";
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-portfolio-locale", locale);
+
+  const nextResponse = () =>
+    NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+
+  let supabaseResponse = nextResponse();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,7 +29,7 @@ export async function proxy(request: NextRequest) {
             request.cookies.set(name, value)
           );
 
-          supabaseResponse = NextResponse.next({ request });
+          supabaseResponse = nextResponse();
 
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
@@ -31,7 +43,6 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const pathname = request.nextUrl.pathname;
   const isApiRoute = pathname.startsWith("/api");
   const isAuthRoute = pathname === "/admin/login";
   const isAdminRoute = pathname.startsWith("/admin");

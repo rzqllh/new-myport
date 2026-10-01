@@ -1,19 +1,50 @@
 import type { Metadata } from "next";
 import { getSiteCopy } from "@/lib/content/site-content-server";
 import { getPublicSettings } from "@/lib/content/public-content";
+import {
+  PUBLIC_UI,
+  alternateLanguages,
+  localeFromValue,
+  publicPath,
+} from "@/lib/content/public-routes";
 import { ContactForm } from "@/components/contact-form";
 import { CopyEmailButton } from "@/components/copy-email-button";
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description:
-    "Contact Hafizh Rizqullah Prasetya about relevant IT project, product, or technical work.",
-  alternates: { canonical: "/contact" },
-};
+interface Props {
+  searchParams: Promise<{ locale?: string }>;
+}
 
-export default async function ContactPage() {
+export async function generateMetadata({
+  searchParams,
+}: Props): Promise<Metadata> {
+  const { locale: rawLocale } = await searchParams;
+  const locale = localeFromValue(rawLocale);
+  const copy = await getSiteCopy(locale);
+  const canonical = publicPath(locale, "/contact");
+
+  return {
+    title: copy["contact.intro"].title,
+    description: copy["contact.intro"].intro,
+    alternates: {
+      canonical,
+      languages: alternateLanguages("/contact"),
+    },
+    openGraph: {
+      locale: locale === "id" ? "id_ID" : "en_US",
+      url: canonical,
+      title: copy["contact.intro"].title,
+      description: copy["contact.intro"].intro,
+    },
+  };
+}
+
+export default async function ContactPage({ searchParams }: Props) {
+  const { locale: rawLocale } = await searchParams;
+  const locale = localeFromValue(rawLocale);
+  const ui = PUBLIC_UI[locale];
+
   const [copy, settings] = await Promise.all([
-    getSiteCopy("en"),
+    getSiteCopy(locale),
     getPublicSettings(),
   ]);
 
@@ -35,7 +66,7 @@ export default async function ContactPage() {
           <dl className="mt-10 space-y-6 border-t border-border pt-6 text-sm">
             {email ? (
               <div>
-                <dt className="text-xs text-muted-foreground">Email</dt>
+                <dt className="text-xs text-muted-foreground">{ui.email}</dt>
                 <dd className="mt-2 flex flex-wrap items-center gap-3">
                   <a
                     href={`mailto:${email}`}
@@ -49,13 +80,15 @@ export default async function ContactPage() {
             ) : null}
             {location ? (
               <div>
-                <dt className="text-xs text-muted-foreground">Location</dt>
+                <dt className="text-xs text-muted-foreground">{ui.location}</dt>
                 <dd className="mt-1">{location}</dd>
               </div>
             ) : null}
             {availability ? (
               <div>
-                <dt className="text-xs text-muted-foreground">Availability</dt>
+                <dt className="text-xs text-muted-foreground">
+                  {ui.availability}
+                </dt>
                 <dd className="mt-1">{availability}</dd>
               </div>
             ) : null}
@@ -64,14 +97,17 @@ export default async function ContactPage() {
 
         <section aria-labelledby="message-heading">
           <div className="border-t border-border pt-6 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
-            <h2 id="message-heading" className="font-display text-2xl font-semibold">
-              Send a message
+            <h2
+              id="message-heading"
+              className="font-display text-2xl font-semibold"
+            >
+              {ui.contactMessage}
             </h2>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Include enough context to understand the subject, scope, or question.
+              {ui.contactMessageHelp}
             </p>
             <div className="mt-7">
-              <ContactForm />
+              <ContactForm locale={locale} />
             </div>
           </div>
         </section>

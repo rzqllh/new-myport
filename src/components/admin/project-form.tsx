@@ -499,7 +499,7 @@ export function ProjectForm({ initialData }: { initialData?: ProjectRecord }) {
       <div>
         <p className="text-sm font-medium">Publication</p>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">
-          English controls the legacy public page until the bilingual route cutover.
+          English remains the default public locale; Indonesian publishes independently when its translation is ready.
         </p>
       </div>
 
@@ -633,7 +633,7 @@ export function ProjectForm({ initialData }: { initialData?: ProjectRecord }) {
                 variant="outline"
                 render={
                   <a
-                    href={`/projects/${initialData.slug}`}
+                    href={`/work/${initialData.slug}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   />

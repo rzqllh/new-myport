@@ -63,6 +63,13 @@ export const PUBLIC_UI = {
     viewEnglishVersion: "View English version",
     allWork: "Work",
     allInsights: "Insights",
+    name: "Name",
+    message: "Message",
+    sending: "Sending…",
+    sendMessage: "Send message",
+    messageSent: "Message sent",
+    messageSentBody: "Your message was submitted successfully.",
+    messagePlaceholder: "Project, role, question, or relevant context",
   },
   id: {
     skipToContent: "Lewati ke konten utama",
@@ -126,6 +133,13 @@ export const PUBLIC_UI = {
     viewEnglishVersion: "Lihat versi English",
     allWork: "Karya",
     allInsights: "Insight",
+    name: "Nama",
+    message: "Pesan",
+    sending: "Mengirim…",
+    sendMessage: "Kirim pesan",
+    messageSent: "Pesan terkirim",
+    messageSentBody: "Pesan Anda berhasil dikirim.",
+    messagePlaceholder: "Proyek, peran, pertanyaan, atau konteks yang relevan",
   },
 } as const;
 

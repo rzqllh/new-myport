@@ -1,20 +1,49 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 import { getSiteCopy } from "@/lib/content/site-content-server";
 import { getPublicWork } from "@/lib/content/public-content";
+import {
+  PUBLIC_UI,
+  alternateLanguages,
+  localeFromValue,
+  publicPath,
+} from "@/lib/content/public-routes";
 
-export const metadata: Metadata = {
-  title: "Work",
-  description:
-    "Selected project delivery, product, engineering, and research work by Hafizh Rizqullah Prasetya.",
-  alternates: { canonical: "/projects" },
-};
+interface Props {
+  searchParams: Promise<{ locale?: string }>;
+}
 
-export default async function ProjectsPage() {
+export async function generateMetadata({
+  searchParams,
+}: Props): Promise<Metadata> {
+  const { locale: rawLocale } = await searchParams;
+  const locale = localeFromValue(rawLocale);
+  const copy = await getSiteCopy(locale);
+  const canonical = publicPath(locale, "/work");
+
+  return {
+    title: copy["work.index"].title,
+    description: copy["work.index"].intro,
+    alternates: {
+      canonical,
+      languages: alternateLanguages("/work"),
+    },
+    openGraph: {
+      locale: locale === "id" ? "id_ID" : "en_US",
+      url: canonical,
+      title: copy["work.index"].title,
+      description: copy["work.index"].intro,
+    },
+  };
+}
+
+export default async function ProjectsPage({ searchParams }: Props) {
+  const { locale: rawLocale } = await searchParams;
+  const locale = localeFromValue(rawLocale);
+  const ui = PUBLIC_UI[locale];
   const [copy, work] = await Promise.all([
-    getSiteCopy("en"),
-    getPublicWork("en"),
+    getSiteCopy(locale),
+    getPublicWork(locale),
   ]);
 
   return (
@@ -39,16 +68,14 @@ export default async function ProjectsPage() {
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
                   <h2 className="font-display text-2xl font-semibold sm:text-3xl">
                     <Link
-                      href={`/projects/${item.slug}`}
+                      href={publicPath(locale, `/work/${item.slug}`)}
                       className="hover:text-primary"
                     >
                       {item.title}
                     </Link>
                   </h2>
                   {item.featured ? (
-                    <span className="text-xs text-muted-foreground">
-                      Selected
-                    </span>
+                    <span className="text-xs text-muted-foreground">{ui.selected}</span>
                   ) : null}
                 </div>
 
@@ -68,17 +95,15 @@ export default async function ProjectsPage() {
               <div className="flex flex-col items-start gap-3 text-sm text-muted-foreground lg:items-end lg:text-right">
                 <div>
                   <p className="capitalize">
-                    {item.discipline.replace("-", " ")} ·{" "}
-                    {item.workType.replace("-", " ")}
+                    {item.discipline.replace("-", " ")} · {item.workType.replace("-", " ")}
                   </p>
                   {item.role ? <p className="mt-1">{item.role}</p> : null}
                 </div>
                 <Link
-                  href={`/projects/${item.slug}`}
-                  className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+                  href={publicPath(locale, `/work/${item.slug}`)}
+                  className="font-medium text-primary hover:underline"
                 >
-                  Read
-                  <ArrowUpRight className="size-3.5" />
+                  {ui.read}
                 </Link>
               </div>
             </article>
@@ -86,9 +111,7 @@ export default async function ProjectsPage() {
         </div>
       ) : (
         <div className="mt-14 border-y border-dashed border-border py-12">
-          <p className="text-sm text-muted-foreground">
-            No published Work is available yet.
-          </p>
+          <p className="text-sm text-muted-foreground">{ui.noWork}</p>
         </div>
       )}
     </div>

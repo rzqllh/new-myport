@@ -46,6 +46,8 @@ export interface PublicWork {
   approach: string | null;
   outcome: string | null;
   lessons: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
   evidence: PublicEvidence[];
 }
 
@@ -239,6 +241,8 @@ async function getV2WorkCollection(locale: Locale) {
         approach: translation.approach,
         outcome: translation.outcome,
         lessons: translation.lessons,
+        seoTitle: translation.seo_title,
+        seoDescription: translation.seo_description,
         evidence: [],
       },
     ];
@@ -293,6 +297,8 @@ async function getLegacyWorkCollection() {
       approach: null,
       outcome: null,
       lessons: null,
+      seoTitle: null,
+      seoDescription: null,
       evidence: [],
     })
   );
@@ -300,7 +306,8 @@ async function getLegacyWorkCollection() {
 
 export async function getPublicWork(locale: Locale = "en") {
   const v2 = await getV2WorkCollection(locale);
-  return v2 ?? getLegacyWorkCollection();
+  if (v2 !== null) return v2;
+  return locale === "en" ? getLegacyWorkCollection() : [];
 }
 
 export async function getPublicWorkDetail(
@@ -540,7 +547,8 @@ async function getLegacyInsights() {
 
 export async function getPublicInsights(locale: Locale = "en") {
   const v2 = await getV2Insights(locale);
-  return v2 ?? getLegacyInsights();
+  if (v2 !== null) return v2;
+  return locale === "en" ? getLegacyInsights() : [];
 }
 
 export async function getPublicInsightDetail(
@@ -565,27 +573,44 @@ export async function getPublicExperiences(
   if (error || !data?.length) return [];
 
   const ids = data.map((item) => item.id);
-  const { data: translations } = await supabase
+  const { data: translations, error: translationError } = await supabase
     .from("experience_translations")
     .select("experience_id, role, description")
     .in("experience_id", ids)
     .eq("locale", locale);
 
+  if (translationError) {
+    if (locale === "id") return [];
+    return data.map((item) => ({
+      id: item.id,
+      company: item.company,
+      role: item.role,
+      description: item.description,
+      startDate: item.start_date,
+      endDate: item.end_date,
+      isCurrent: item.is_current,
+    }));
+  }
+
   const copyById = new Map(
     (translations ?? []).map((row) => [row.experience_id, row])
   );
 
-  return data.map((item) => {
+  return data.flatMap((item): PublicExperience[] => {
     const copy = copyById.get(item.id);
-    return {
-      id: item.id,
-      company: item.company,
-      role: copy?.role ?? item.role,
-      description: copy?.description ?? item.description,
-      startDate: item.start_date,
-      endDate: item.end_date,
-      isCurrent: item.is_current,
-    };
+    if (locale === "id" && !copy) return [];
+
+    return [
+      {
+        id: item.id,
+        company: item.company,
+        role: copy?.role ?? item.role,
+        description: copy?.description ?? item.description,
+        startDate: item.start_date,
+        endDate: item.end_date,
+        isCurrent: item.is_current,
+      },
+    ];
   });
 }
 
@@ -603,11 +628,13 @@ export async function getPublicCapabilities(
     if (!capabilities.length) return [];
 
     const ids = capabilities.map((item) => item.id);
-    const { data: translations } = await supabase
+    const { data: translations, error: translationError } = await supabase
       .from("capability_translations")
       .select("capability_id, name, description")
       .in("capability_id", ids)
       .eq("locale", locale);
+
+    if (translationError && locale === "id") return [];
 
     const copyById = new Map(
       (translations ?? []).map((row) => [row.capability_id, row])
@@ -629,6 +656,8 @@ export async function getPublicCapabilities(
     });
   }
 
+  if (locale === "id") return [];
+
   const { data: skills } = await supabase
     .from("skills")
     .select("id, name, category, sort_order")
@@ -649,7 +678,9 @@ export async function getPublicCapabilities(
   }));
 }
 
-export async function getPublicAbout(): Promise<PublicAbout> {
+export async function getPublicAbout(
+  locale: Locale = "en"
+): Promise<PublicAbout> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("about")
@@ -658,9 +689,9 @@ export async function getPublicAbout(): Promise<PublicAbout> {
     .maybeSingle();
 
   return {
-    bio: data?.bio ?? null,
-    philosophy: data?.philosophy ?? null,
-    hobbies: data?.hobbies ?? null,
+    bio: locale === "en" ? data?.bio ?? null : null,
+    philosophy: locale === "en" ? data?.philosophy ?? null : null,
+    hobbies: locale === "en" ? data?.hobbies ?? null : null,
     photoUrl: data?.photo_url ?? null,
   };
 }
@@ -682,4 +713,23 @@ export async function getPublicSettings(): Promise<PublicSettings> {
     cv: map.cv ?? {},
     profile: map.profile ?? {},
   };
+}
+
+
+export async function getContentRedirect(
+  contentType: "work" | "insight",
+  oldSlug: string,
+  locale: Locale = "en"
+): Promise<string | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("content_redirects")
+    .select("new_slug")
+    .eq("content_type", contentType)
+    .eq("locale", locale)
+    .eq("old_slug", oldSlug)
+    .maybeSingle();
+
+  if (error) return null;
+  return data?.new_slug ?? null;
 }

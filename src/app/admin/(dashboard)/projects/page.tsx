@@ -150,7 +150,7 @@ export default async function AdminProjectsPage({ searchParams }: Props) {
                     size="icon"
                     render={
                       <Link
-                        href={`/projects/${project.slug}`}
+                        href={`/work/${project.slug}`}
                         target="_blank"
                         aria-label={`Open ${project.title}`}
                       />

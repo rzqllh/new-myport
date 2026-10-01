@@ -424,7 +424,7 @@ export function BlogForm({ initialData }: { initialData?: BlogPost }) {
                 variant="outline"
                 render={
                   <a
-                    href={`/blog/${initialData.slug}`}
+                    href={`/insights/${initialData.slug}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   />

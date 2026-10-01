@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Archivo, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
@@ -76,6 +77,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const requestHeaders = await headers();
+  const documentLocale =
+    requestHeaders.get("x-portfolio-locale") === "id" ? "id" : "en";
   const supabase = await createClient();
   const { data } = await supabase.from("site_settings").select("key, value");
   const settings = Object.fromEntries(
@@ -93,7 +97,7 @@ export default async function RootLayout({
 
   return (
     <html
-      lang="en"
+      lang={documentLocale}
       suppressHydrationWarning
       className={`${spaceGrotesk.variable} ${archivo.variable} ${jetbrainsMono.variable} antialiased`}
     >

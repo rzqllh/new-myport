@@ -10,6 +10,12 @@ All notable changes to this project are documented here.
 - Added locale-aware public navigation/footer and an EN/ID switch that preserves the current canonical path.
 - Rebuilt the sitemap from CMS-backed Work/Insight data and both supported locales.
 - Added crawler exclusions for admin and API routes.
+- Made Home, Work, Insights, About, Contact, Resume, and both detail-page families locale-aware.
+- Added locale-correct canonical, hreflang, Open Graph locale, and document-language behavior.
+- Indonesian routes now render only published Indonesian v2 translations; they never silently reuse legacy English editorial content.
+- Added explicit unavailable-translation states for direct Indonesian detail URLs and dynamic permanent redirects from CMS redirect history.
+- Updated admin previews and shared navigation constants to canonical /work and /insights paths.
+- Localized contact-form UI and server-side validation messages.
 
 ### Public portfolio
 - Added a CMS-first public content compatibility layer that reads the bilingual v2 model when available and falls back to the existing database tables before the production migration is applied.

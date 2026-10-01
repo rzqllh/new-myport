@@ -194,3 +194,77 @@ test("sitemap uses canonical bilingual CMS routes without hardcoded content fall
   assert.match(sitemap, /\/insights\//);
   assert.doesNotMatch(sitemap, /FALLBACK_PROJECTS|FALLBACK_POST_SLUGS/);
 });
+
+
+test("bilingual public rendering never falls back to legacy English content for Indonesian routes", () => {
+  const content = read("src/lib/content/public-content.ts");
+
+  assert.match(content, /locale === "en" \? getLegacyWorkCollection\(\) : \[\]/);
+  assert.match(content, /locale === "en" \? getLegacyInsights\(\) : \[\]/);
+  assert.match(content, /if \(locale === "id"\) return \[\]/);
+});
+
+test("localized pages use canonical work and insights paths with alternate-language metadata", () => {
+  const paths = [
+    "src/app/(public)/page.tsx",
+    "src/app/(public)/projects/page.tsx",
+    "src/app/(public)/projects/[slug]/page.tsx",
+    "src/app/(public)/blog/page.tsx",
+    "src/app/(public)/blog/[slug]/page.tsx",
+    "src/app/(public)/about/page.tsx",
+    "src/app/(public)/contact/page.tsx",
+    "src/app/(public)/resume/page.tsx",
+  ];
+
+  for (const path of paths) {
+    const source = read(path);
+    assert.match(source, /publicPath|alternateLanguages/);
+    assert.doesNotMatch(source, /canonical:\s*`?\/projects|canonical:\s*`?\/blog/);
+  }
+});
+
+test("detail routes support redirect history and explicit unavailable-translation states", () => {
+  const content = read("src/lib/content/public-content.ts");
+  const workDetail = read("src/app/(public)/projects/[slug]/page.tsx");
+  const insightDetail = read("src/app/(public)/blog/[slug]/page.tsx");
+
+  assert.match(content, /getContentRedirect/);
+  assert.match(workDetail, /permanentRedirect/);
+  assert.match(insightDetail, /permanentRedirect/);
+  assert.match(workDetail, /translationUnavailable/);
+  assert.match(insightDetail, /translationUnavailable/);
+});
+
+test("document language follows the public locale forwarded by proxy", () => {
+  const proxy = read("src/proxy.ts");
+  const layout = read("src/app/layout.tsx");
+
+  assert.match(proxy, /x-portfolio-locale/);
+  assert.match(layout, /x-portfolio-locale/);
+  assert.match(layout, /lang=\{documentLocale\}/);
+});
+
+test("admin previews and shared navigation constants use canonical public routes", () => {
+  const paths = [
+    "src/components/admin/project-form.tsx",
+    "src/app/admin/(dashboard)/projects/page.tsx",
+    "src/app/admin/(dashboard)/blog/page.tsx",
+    "src/app/admin/(dashboard)/blog/blog-form.tsx",
+    "src/lib/constants.ts",
+  ];
+
+  for (const path of paths) {
+    const source = read(path);
+    assert.doesNotMatch(source, /href=\{?`?\/projects\//);
+    assert.doesNotMatch(source, /href=\{?`?\/blog\//);
+  }
+});
+
+test("contact form carries locale into localized server-side validation", () => {
+  const form = read("src/components/contact-form.tsx");
+  const action = read("src/app/(public)/contact/actions.ts");
+
+  assert.match(form, /name="locale"/);
+  assert.match(action, /const messages =/);
+  assert.match(action, /String\(formData\.get\("locale"\)/);
+});
