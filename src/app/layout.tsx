@@ -3,8 +3,8 @@ import { headers } from "next/headers";
 import { Archivo, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
-import { createClient } from "@/lib/supabase/server";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
+import { getPublicSettings } from "@/lib/content/public-content";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -28,16 +28,12 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const supabase = await createClient();
-  const { data } = await supabase.from("site_settings").select("key, value");
-  const settings = Object.fromEntries(
-    (data ?? []).map((row) => [row.key, row.value])
-  );
+  const settings = await getPublicSettings();
 
-  const title = settings.general?.site_title || SITE_NAME;
-  const tagline = settings.general?.tagline || SITE_TAGLINE;
-  const description = settings.seo?.meta_description || SITE_DESCRIPTION;
-  const ogImage = settings.seo?.og_image || "";
+  const title = settings.general.site_title || SITE_NAME;
+  const tagline = settings.general.tagline || SITE_TAGLINE;
+  const description = settings.seo.meta_description || SITE_DESCRIPTION;
+  const ogImage = settings.seo.og_image || "";
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://rzqllh-port.vercel.app";
 
@@ -80,19 +76,15 @@ export default async function RootLayout({
   const requestHeaders = await headers();
   const documentLocale =
     requestHeaders.get("x-portfolio-locale") === "id" ? "id" : "en";
-  const supabase = await createClient();
-  const { data } = await supabase.from("site_settings").select("key, value");
-  const settings = Object.fromEntries(
-    (data ?? []).map((row) => [row.key, row.value])
-  );
+  const settings = await getPublicSettings();
 
-  const siteName = settings.general?.site_title || SITE_NAME;
+  const siteName = settings.general.site_title || SITE_NAME;
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://rzqllh-port.vercel.app/";
   const sameAs = [
-    settings.social?.github,
-    settings.social?.linkedin,
-    settings.social?.instagram,
+    settings.social.github,
+    settings.social.linkedin,
+    settings.social.instagram,
   ].filter((value): value is string => Boolean(value));
 
   return (

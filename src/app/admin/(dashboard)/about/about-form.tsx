@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageUpload } from "@/components/image-upload";
 import { createClient } from "@/lib/supabase/client";
+import { revalidatePublicContent } from "@/lib/content/revalidate-public-client";
 import { toast } from "sonner";
 
 interface AboutData {
@@ -56,6 +57,7 @@ export function AboutForm({ initialData }: AboutFormProps) {
     if (err) {
       toast.error(err.message);
     } else {
+      await revalidatePublicContent();
       toast.success("Changes saved successfully.");
       router.refresh();
     }

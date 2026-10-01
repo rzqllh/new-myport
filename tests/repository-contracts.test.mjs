@@ -268,3 +268,45 @@ test("contact form carries locale into localized server-side validation", () => 
   assert.match(action, /const messages =/);
   assert.match(action, /String\(formData\.get\("locale"\)/);
 });
+
+
+test("public CMS reads use a shared cacheable anonymous data path", () => {
+  const publicContent = read("src/lib/content/public-content.ts");
+  const siteContent = read("src/lib/content/site-content-server.ts");
+  const publicClient = read("src/lib/supabase/public.ts");
+
+  assert.match(publicContent, /unstable_cache/);
+  assert.match(publicContent, /createPublicClient/);
+  assert.doesNotMatch(publicContent, /supabase\/server/);
+  assert.match(siteContent, /PUBLIC_CONTENT_CACHE_TAG/);
+  assert.match(publicClient, /persistSession: false/);
+});
+
+test("public settings are consolidated instead of re-queried by root and public layouts", () => {
+  const root = read("src/app/layout.tsx");
+  const publicLayout = read("src/app/(public)/layout.tsx");
+
+  assert.match(root, /getPublicSettings/);
+  assert.match(publicLayout, /getPublicSettings/);
+  assert.doesNotMatch(root, /from\("site_settings"\)/);
+  assert.doesNotMatch(publicLayout, /from\("site_settings"\)/);
+});
+
+test("admin content mutations invalidate the tagged public cache through an authenticated route", () => {
+  const route = read("src/app/api/admin/revalidate/route.ts");
+  const forms = [
+    "src/components/admin/project-form.tsx",
+    "src/app/admin/(dashboard)/blog/blog-form.tsx",
+    "src/app/admin/(dashboard)/site-content/site-content-form.tsx",
+    "src/app/admin/(dashboard)/settings/settings-form.tsx",
+    "src/app/admin/(dashboard)/about/about-form.tsx",
+  ];
+
+  assert.match(route, /auth\.getUser/);
+  assert.match(route, /is_portfolio_admin/);
+  assert.match(route, /revalidateTag\(PUBLIC_CONTENT_CACHE_TAG, "max"\)/);
+
+  for (const path of forms) {
+    assert.match(read(path), /revalidatePublicContent/);
+  }
+});

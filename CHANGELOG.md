@@ -62,6 +62,12 @@ All notable changes to this project are documented here.
 - Removed the production chat signing-secret fallback.
 - Added a tracked security audit and reporting guidance.
 
+### Performance & reliability
+- Added a cookie-free anonymous Supabase client for public CMS reads.
+- Added tagged five-minute caching for public Work, Insights, profile, settings, capabilities, experience, redirects, and Site Content reads.
+- Consolidated root/public-layout site-settings reads onto the shared cached accessor.
+- Added an authenticated admin cache-revalidation endpoint and wired public-content mutations to invalidate cached reads after save/delete.
+
 ### Engineering
 - Standardized the repository on pnpm and added lint/typecheck/test/build CI.
 - Added repository contract tests.

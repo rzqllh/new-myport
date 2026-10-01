@@ -8,6 +8,7 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { createClient } from "@/lib/supabase/client";
+import { revalidatePublicContent } from "@/lib/content/revalidate-public-client";
 import { createSlug, validateSlug } from "@/lib/content/slug";
 import { isV2SchemaUnavailable } from "@/lib/content/schema-compat";
 import {
@@ -466,6 +467,7 @@ export function ProjectForm({ initialData }: { initialData?: ProjectRecord }) {
 
       if (!projectId) throw new Error("Project ID was not returned after save.");
       await syncV2(projectId);
+      await revalidatePublicContent();
       setDirty(false);
       router.push("/admin/projects");
       router.refresh();

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { revalidatePublicContent } from "@/lib/content/revalidate-public-client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Trash, FloppyDisk } from "@phosphor-icons/react";
@@ -51,6 +52,7 @@ export function SkillsClient({ initialSkills }: { initialSkills: Skill[] }) {
       })
       .select().single();
     if (error) throw error;
+    await revalidatePublicContent();
     setSkills((p) => [...p, data]);
   }
 
@@ -62,12 +64,14 @@ export function SkillsClient({ initialSkills }: { initialSkills: Skill[] }) {
       proficiency: draft.proficiency,
     }).eq("id", id);
     if (error) throw error;
+    await revalidatePublicContent();
     setSkills((p) => p.map((i) => i.id === id ? { ...i, ...draft } : i));
   }
 
   async function handleDelete(id: string) {
     const { error } = await supabase.from("skills").delete().eq("id", id);
     if (error) throw error;
+    await revalidatePublicContent();
     setSkills((p) => p.filter((i) => i.id !== id));
   }
 

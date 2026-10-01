@@ -1,4 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
+import { createPublicClient } from "@/lib/supabase/public";
+import {
+  PUBLIC_CONTENT_CACHE_TAG,
+  PUBLIC_CONTENT_REVALIDATE_SECONDS,
+} from "@/lib/content/public-cache";
 import type { Locale } from "@/types/content";
 
 export interface PublicMedia {
@@ -95,6 +100,7 @@ export interface PublicAbout {
 export interface PublicSettings {
   general: Record<string, string>;
   social: Record<string, string>;
+  seo: Record<string, string>;
   cv: Record<string, string>;
   profile: Record<string, string>;
 }
@@ -134,7 +140,7 @@ function mapMedia(
 }
 
 async function getV2WorkCollection(locale: Locale) {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data: items, error } = await supabase
     .from("work_items")
     .select(
@@ -250,7 +256,7 @@ async function getV2WorkCollection(locale: Locale) {
 }
 
 async function getLegacyWorkCollection() {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("projects")
     .select(
@@ -318,7 +324,7 @@ export async function getPublicWorkDetail(
   const base = collection.find((item) => item.slug === slug);
   if (!base) return null;
 
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   if (base.source === "legacy") {
     const { data } = await supabase
@@ -460,7 +466,7 @@ export async function getPublicWorkDetail(
 }
 
 async function getV2Insights(locale: Locale) {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data: items, error } = await supabase
     .from("insights")
     .select(
@@ -516,7 +522,7 @@ async function getV2Insights(locale: Locale) {
 }
 
 async function getLegacyInsights() {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("blog_posts")
     .select(
@@ -562,7 +568,7 @@ export async function getPublicInsightDetail(
 export async function getPublicExperiences(
   locale: Locale = "en"
 ): Promise<PublicExperience[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("experiences")
     .select(
@@ -617,7 +623,7 @@ export async function getPublicExperiences(
 export async function getPublicCapabilities(
   locale: Locale = "en"
 ): Promise<PublicCapability[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data: capabilities, error } = await supabase
     .from("capabilities")
     .select("id, category, level, sort_order")
@@ -681,7 +687,7 @@ export async function getPublicCapabilities(
 export async function getPublicAbout(
   locale: Locale = "en"
 ): Promise<PublicAbout> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("about")
     .select("bio, philosophy, hobbies, photo_url")
@@ -697,11 +703,11 @@ export async function getPublicAbout(
 }
 
 export async function getPublicSettings(): Promise<PublicSettings> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("site_settings")
     .select("key, value")
-    .in("key", ["general", "social", "cv", "profile"]);
+    .in("key", ["general", "social", "seo", "cv", "profile"]);
 
   const map = Object.fromEntries(
     (data ?? []).map((row) => [row.key, row.value])
@@ -710,6 +716,7 @@ export async function getPublicSettings(): Promise<PublicSettings> {
   return {
     general: map.general ?? {},
     social: map.social ?? {},
+    seo: map.seo ?? {},
     cv: map.cv ?? {},
     profile: map.profile ?? {},
   };
@@ -721,7 +728,7 @@ export async function getContentRedirect(
   oldSlug: string,
   locale: Locale = "en"
 ): Promise<string | null> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("content_redirects")
     .select("new_slug")
@@ -732,4 +739,132 @@ export async function getContentRedirect(
 
   if (error) return null;
   return data?.new_slug ?? null;
+}
+
+
+const publicWorkCached = unstable_cache(
+  getPublicWorkUncached,
+  ["public-work"],
+  {
+    revalidate: PUBLIC_CONTENT_REVALIDATE_SECONDS,
+    tags: [PUBLIC_CONTENT_CACHE_TAG],
+  }
+);
+
+const publicWorkDetailCached = unstable_cache(
+  getPublicWorkDetailUncached,
+  ["public-work-detail"],
+  {
+    revalidate: PUBLIC_CONTENT_REVALIDATE_SECONDS,
+    tags: [PUBLIC_CONTENT_CACHE_TAG],
+  }
+);
+
+const publicInsightsCached = unstable_cache(
+  getPublicInsightsUncached,
+  ["public-insights"],
+  {
+    revalidate: PUBLIC_CONTENT_REVALIDATE_SECONDS,
+    tags: [PUBLIC_CONTENT_CACHE_TAG],
+  }
+);
+
+const publicInsightDetailCached = unstable_cache(
+  getPublicInsightDetailUncached,
+  ["public-insight-detail"],
+  {
+    revalidate: PUBLIC_CONTENT_REVALIDATE_SECONDS,
+    tags: [PUBLIC_CONTENT_CACHE_TAG],
+  }
+);
+
+const publicExperiencesCached = unstable_cache(
+  getPublicExperiencesUncached,
+  ["public-experiences"],
+  {
+    revalidate: PUBLIC_CONTENT_REVALIDATE_SECONDS,
+    tags: [PUBLIC_CONTENT_CACHE_TAG],
+  }
+);
+
+const publicCapabilitiesCached = unstable_cache(
+  getPublicCapabilitiesUncached,
+  ["public-capabilities"],
+  {
+    revalidate: PUBLIC_CONTENT_REVALIDATE_SECONDS,
+    tags: [PUBLIC_CONTENT_CACHE_TAG],
+  }
+);
+
+const publicAboutCached = unstable_cache(
+  getPublicAboutUncached,
+  ["public-about"],
+  {
+    revalidate: PUBLIC_CONTENT_REVALIDATE_SECONDS,
+    tags: [PUBLIC_CONTENT_CACHE_TAG],
+  }
+);
+
+const publicSettingsCached = unstable_cache(
+  getPublicSettingsUncached,
+  ["public-settings"],
+  {
+    revalidate: PUBLIC_CONTENT_REVALIDATE_SECONDS,
+    tags: [PUBLIC_CONTENT_CACHE_TAG],
+  }
+);
+
+const contentRedirectCached = unstable_cache(
+  getContentRedirectUncached,
+  ["public-content-redirect"],
+  {
+    revalidate: PUBLIC_CONTENT_REVALIDATE_SECONDS,
+    tags: [PUBLIC_CONTENT_CACHE_TAG],
+  }
+);
+
+export async function getPublicWork(locale: Locale = "en") {
+  return publicWorkCached(locale);
+}
+
+export async function getPublicWorkDetail(
+  slug: string,
+  locale: Locale = "en"
+) {
+  return publicWorkDetailCached(slug, locale);
+}
+
+export async function getPublicInsights(locale: Locale = "en") {
+  return publicInsightsCached(locale);
+}
+
+export async function getPublicInsightDetail(
+  slug: string,
+  locale: Locale = "en"
+) {
+  return publicInsightDetailCached(slug, locale);
+}
+
+export async function getPublicExperiences(locale: Locale = "en") {
+  return publicExperiencesCached(locale);
+}
+
+export async function getPublicCapabilities(locale: Locale = "en") {
+  return publicCapabilitiesCached(locale);
+}
+
+export async function getPublicAbout(locale: Locale = "en") {
+  return publicAboutCached(locale);
+}
+
+export async function getPublicSettings() {
+  return publicSettingsCached();
+}
+
+export async function getContentRedirect(
+  contentType: "work" | "insight",
+  oldSlug: string,
+  locale: Locale = "en"
+) {
+  return contentRedirectCached(contentType, oldSlug, locale);
 }

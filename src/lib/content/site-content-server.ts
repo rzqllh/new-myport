@@ -1,5 +1,9 @@
-import { cache } from "react";
-import { createClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
+import { createPublicClient } from "@/lib/supabase/public";
+import {
+  PUBLIC_CONTENT_CACHE_TAG,
+  PUBLIC_CONTENT_REVALIDATE_SECONDS,
+} from "@/lib/content/public-cache";
 import type { Locale } from "@/types/content";
 import {
   mergeSiteCopy,
@@ -7,9 +11,9 @@ import {
   type SiteCopyBundle,
 } from "@/lib/content/site-copy";
 
-export const getSiteCopy = cache(
+const getSiteCopyCached = unstable_cache(
   async (locale: Locale): Promise<SiteCopyBundle> => {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("site_content")
       .select("namespace, content")
@@ -27,5 +31,14 @@ export const getSiteCopy = cache(
         content: (row.content ?? {}) as Record<string, unknown>,
       }))
     );
+  },
+  ["site-copy"],
+  {
+    revalidate: PUBLIC_CONTENT_REVALIDATE_SECONDS,
+    tags: [PUBLIC_CONTENT_CACHE_TAG],
   }
 );
+
+export async function getSiteCopy(locale: Locale): Promise<SiteCopyBundle> {
+  return getSiteCopyCached(locale);
+}

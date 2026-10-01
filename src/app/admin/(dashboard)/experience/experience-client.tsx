@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { revalidatePublicContent } from "@/lib/content/revalidate-public-client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -50,6 +51,7 @@ export function ExperienceClient({ initialItems }: { initialItems: Experience[] 
       .select().single();
 
     if (error) throw error;
+    await revalidatePublicContent();
     setItems((prev) => [data, ...prev]);
   }
 
@@ -67,12 +69,14 @@ export function ExperienceClient({ initialItems }: { initialItems: Experience[] 
       .eq("id", id);
 
     if (error) throw error;
+    await revalidatePublicContent();
     setItems((prev) => prev.map((i) => i.id === id ? { ...i, ...draft, end_date: draft.is_current ? null : draft.end_date || null } : i));
   }
 
   async function handleDelete(id: string) {
     const { error } = await supabase.from("experiences").delete().eq("id", id);
     if (error) throw error;
+    await revalidatePublicContent();
     setItems((prev) => prev.filter((i) => i.id !== id));
   }
 

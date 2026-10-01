@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { revalidatePublicContent } from "@/lib/content/revalidate-public-client";
 import { Button } from "@/components/ui/button";
 import { Trash } from "@phosphor-icons/react";
 
@@ -12,6 +13,7 @@ export function DeleteBlogButton({ id }: { id: string }) {
   async function handleDelete() {
     if (!confirm("Delete this post? This cannot be undone.")) return;
     await supabase.from("blog_posts").delete().eq("id", id);
+    await revalidatePublicContent();
     router.refresh();
   }
 

@@ -1,4 +1,3 @@
-import { createClient } from "@/lib/supabase/server";
 import { getSiteCopy } from "@/lib/content/site-content-server";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -6,30 +5,23 @@ import { SkipLink } from "@/components/layout/skip-link";
 import { PageTransition } from "@/components/layout/page-transition";
 import ChatWidget from "@/components/chat-widget";
 import { SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
+import { getPublicSettings } from "@/lib/content/public-content";
 
 export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-  const [{ data: settings }, enCopy, idCopy] = await Promise.all([
-    supabase
-      .from("site_settings")
-      .select("key, value")
-      .in("key", ["general", "social", "profile"]),
+  const [settings, enCopy, idCopy] = await Promise.all([
+    getPublicSettings(),
     getSiteCopy("en"),
     getSiteCopy("id"),
   ]);
 
-  const map = Object.fromEntries(
-    (settings ?? []).map((row) => [row.key, row.value])
-  ) as Record<string, Record<string, string>>;
-
-  const siteName = map.general?.site_title || SITE_NAME;
-  const tagline = map.general?.tagline || SITE_TAGLINE;
-  const social = map.social ?? {};
-  const profile = map.profile ?? {};
+  const siteName = settings.general.site_title || SITE_NAME;
+  const tagline = settings.general.tagline || SITE_TAGLINE;
+  const social = settings.social;
+  const profile = settings.profile;
 
   const labelsByLocale = {
     en: {

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { revalidatePublicContent } from "@/lib/content/revalidate-public-client";
 import {
   SITE_CONTENT_DEFINITIONS,
   SITE_CONTENT_NAMESPACES,
@@ -72,6 +73,7 @@ export function SiteContentForm({
       return;
     }
 
+    await revalidatePublicContent();
     toast.success(`${definition.label} · ${locale.toUpperCase()} saved`);
   }
 

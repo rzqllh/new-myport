@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { revalidatePublicContent } from "@/lib/content/revalidate-public-client";
 import { ImageUpload } from "@/components/image-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -86,6 +87,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         upsertKey("cv", cv as unknown as Record<string, string>),
         upsertKey("profile", profile as unknown as Record<string, string>),
       ]);
+      await revalidatePublicContent();
       toast.success("Settings saved.");
       router.refresh();
     } catch (caught: unknown) {

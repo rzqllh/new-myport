@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowSquareOut } from "@phosphor-icons/react";
 import { createClient } from "@/lib/supabase/client";
+import { revalidatePublicContent } from "@/lib/content/revalidate-public-client";
 import { createSlug, validateSlug } from "@/lib/content/slug";
 import { isV2SchemaUnavailable } from "@/lib/content/schema-compat";
 import {
@@ -300,6 +301,7 @@ export function BlogForm({ initialData }: { initialData?: BlogPost }) {
 
       if (!insightId) throw new Error("Insight ID was not returned after save.");
       await syncV2(insightId, publishedAt);
+      await revalidatePublicContent();
       setDirty(false);
       router.push("/admin/blog");
       router.refresh();
