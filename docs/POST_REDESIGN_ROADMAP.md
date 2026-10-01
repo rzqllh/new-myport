@@ -67,6 +67,8 @@ Scope:
 - media/content evidence audit tooling,
 - field-performance measurement guide after production deployment.
 
+Implementation note: client-boundary checks are deterministic CI contracts. Numeric bundle and Core Web Vitals claims require a successful final production deployment and named measurement source.
+
 ## Merge rule
 
 P2 starts from P1 head, P3 from P2, and so on. At completion, merge P1 through P5 into `master` in order. Do not deploy or merge intermediate phases merely to satisfy tooling.

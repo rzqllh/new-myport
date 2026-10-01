@@ -742,3 +742,59 @@ test("release governance tracks required gates and the external branch-protectio
   assert.match(governance, /cannot mutate branch-protection administration/);
   assert.match(governance, /No bot\/Codex\/GPT review comments/);
 });
+
+
+test("public and admin route groups have actionable error boundaries", () => {
+  const publicError = read("src/app/(public)/error.tsx");
+  const adminError = read("src/app/admin/error.tsx");
+
+  assert.match(publicError, /reset/);
+  assert.match(publicError, /Kembali ke beranda/);
+  assert.match(adminError, /reset/);
+  assert.match(adminError, /Unsaved browser state is not treated as successfully persisted/);
+});
+
+test("CI audits public client boundaries before production build", () => {
+  const pkg = JSON.parse(read("package.json"));
+  const ci = read(".github/workflows/ci.yml");
+  const audit = read("scripts/client-boundary-audit.mjs");
+
+  assert.equal(pkg.scripts["audit:client"], "node scripts/client-boundary-audit.mjs");
+  assert.match(ci, /Client boundary audit/);
+  assert.match(ci, /pnpm audit:client/);
+  assert.match(audit, /@tiptap\//);
+  assert.match(audit, /react-image-crop/);
+  assert.match(audit, /@\/lib\/supabase\/client/);
+  assert.match(audit, /turns a route page\/layout into a client component/);
+});
+
+test("resume print layout is part of browser release QA", () => {
+  const e2e = read("tests/e2e/public.spec.ts");
+
+  assert.match(e2e, /emulateMedia\(\{ media: "print" \}\)/);
+  assert.match(e2e, /\.print-resume/);
+  assert.match(e2e, /data-print-hidden/);
+  assert.match(e2e, /scrollWidth/);
+});
+
+test("authenticated content audit exports deterministic health findings", () => {
+  const route = read("src/app/api/admin/content-audit/route.ts");
+  const health = read("src/lib/content/admin-content-health.ts");
+
+  assert.match(route, /getPortfolioAdminClient/);
+  assert.match(route, /getAdminContentHealth/);
+  assert.match(route, /portfolio-content-health\.json/);
+  assert.match(route, /Cache-Control.*no-store/s);
+  assert.match(health, /invalid source URL/);
+  assert.match(health, /invalid asset URL/);
+  assert.doesNotMatch(health, /fetch\(/);
+});
+
+test("performance documentation distinguishes targets, lab results, and field evidence", () => {
+  const performance = read("docs/PERFORMANCE.md");
+
+  assert.match(performance, /These are targets, not measured claims/);
+  assert.match(performance, /separate lab data from field data/);
+  assert.match(performance, /record that field data is unavailable/);
+  assert.match(performance, /No analytics or monitoring vendor is added/);
+});

@@ -54,3 +54,34 @@ These are targets, not measured claims:
 - no duplicate site-settings read in the same render path
 
 Field metrics should be recorded only after a production deployment is available. CI build success is not a substitute for real-user performance data.
+
+
+## Client-boundary budget
+
+The repository uses a deterministic static audit in CI:
+- public route pages/layouts remain Server Components,
+- public routes cannot import admin/editor components,
+- public routes cannot import the browser Supabase client,
+- TipTap and image-crop dependencies stay out of public route/shell source.
+
+This is a regression contract, not a byte-size claim. Bundle size should be measured from a production build/deployment before setting numeric JS budgets.
+
+## Print / resume verification
+
+Playwright verifies the resume under print media:
+- application chrome marked with `data-print-hidden` is absent,
+- `.print-resume` remains visible,
+- the document does not introduce horizontal overflow.
+
+## Production measurement procedure
+
+After the final `master` commit is deployed successfully:
+1. record the exact deployment commit SHA,
+2. run the Production smoke workflow against the production URL,
+3. measure Home, Work index, representative Work detail, Insights index, representative Insight detail, and Resume,
+4. record LCP, INP, CLS, and TTFB with the measurement source and date,
+5. separate lab data from field data,
+6. compare p75 field data only when the source has enough real-user samples,
+7. optimize the measured bottleneck rather than adding speculative caching or client code.
+
+No analytics or monitoring vendor is added by this phase. If a field source such as CrUX or an already-enabled hosting dashboard has insufficient traffic, record that field data is unavailable rather than substituting lab results.

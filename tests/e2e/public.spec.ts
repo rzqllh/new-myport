@@ -107,6 +107,19 @@ test.describe("release-critical public flows", () => {
     await expect(page.locator("h1")).toBeVisible();
   });
 
+  test("resume print mode removes application chrome and stays within page width", async ({ page }) => {
+    await page.goto("/resume");
+    await page.emulateMedia({ media: "print" });
+
+    await expect(page.locator(".print-resume")).toBeVisible();
+    await expect(page.locator("[data-print-hidden]").first()).toBeHidden();
+
+    const overflows = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1
+    );
+    expect(overflows).toBe(false);
+  });
+
   test("@mobile mobile navigation exposes canonical destinations", async ({ page }) => {
     await page.goto("/");
     const navigationButton = page.getByRole("button", { name: "Navigation" });

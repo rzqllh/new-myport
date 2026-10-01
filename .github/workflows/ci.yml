@@ -66,6 +66,9 @@ jobs:
       - name: Tests
         run: pnpm test
 
+      - name: Client boundary audit
+        run: pnpm audit:client
+
       - name: Production build
         run: pnpm build
 

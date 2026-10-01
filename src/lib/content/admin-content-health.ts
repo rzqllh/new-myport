@@ -27,6 +27,18 @@ function hasQuantifiedClaim(values: unknown[]) {
   return quantifiedClaimPattern.test(values.map(text).filter(Boolean).join(" "));
 }
 
+function isHttpUrl(value: unknown) {
+  const candidate = text(value);
+  if (!candidate) return false;
+
+  try {
+    const url = new URL(candidate);
+    return url.protocol === "https:" || url.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
 function sortIssues(issues: ContentHealthIssue[]) {
   const rank: Record<ContentHealthSeverity, number> = {
     blocking: 0,
@@ -109,7 +121,7 @@ export async function getAdminContentHealth(): Promise<AdminContentHealth> {
       .select("insight_id, locale, status, title, excerpt, seo_description"),
     supabase
       .from("media_assets")
-      .select("id")
+      .select("id, url")
       .eq("is_public", true),
     supabase
       .from("media_translations")
@@ -311,6 +323,28 @@ export async function getAdminContentHealth(): Promise<AdminContentHealth> {
         detail:
           "Evidence should point to a public-safe source URL or a managed media asset.",
         href: "/admin/projects/" + item.work_id + "/edit",
+      });
+    } else if (text(item.source_url) && !isHttpUrl(item.source_url)) {
+      issues.push({
+        id: "evidence-url-" + item.id,
+        severity: "review",
+        label: "Published evidence has an invalid source URL.",
+        detail:
+          "Evidence source URLs must use an explicit http or https URL. Availability is not inferred without a live check.",
+        href: "/admin/projects/" + item.work_id + "/edit",
+      });
+    }
+  }
+
+  for (const asset of media) {
+    if (!isHttpUrl(asset.url)) {
+      issues.push({
+        id: "media-url-" + asset.id,
+        severity: "blocking",
+        label: "Public media has an invalid asset URL.",
+        detail:
+          "Public media must resolve from an explicit http or https URL before it can be relied on by visitors.",
+        href: "/admin/projects",
       });
     }
   }

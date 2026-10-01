@@ -21,13 +21,22 @@ export default async function SettingsAdminPage() {
         title="Settings"
         description="Operational site data, integrations-facing metadata, profile facts, and resume links. Public page copy is managed separately in Site Content."
         action={
-          <Button
-            variant="outline"
-            render={<a href="/api/admin/export" />}
-            nativeButton={false}
-          >
-            Export content backup
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              render={<a href="/api/admin/content-audit" />}
+              nativeButton={false}
+            >
+              Export content audit
+            </Button>
+            <Button
+              variant="outline"
+              render={<a href="/api/admin/export" />}
+              nativeButton={false}
+            >
+              Export content backup
+            </Button>
+          </div>
         }
       />
       {error ? (

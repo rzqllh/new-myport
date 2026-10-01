@@ -96,6 +96,13 @@ All notable changes to this project are documented here.
 - Removed the production chat signing-secret fallback.
 - Added a tracked security audit and reporting guidance.
 
+### Final hardening
+- Added public and admin route-group error boundaries with retry and safe navigation paths.
+- Added a CI client-boundary audit that keeps editor-heavy and browser-only dependencies out of public route components.
+- Added print-media browser QA for Resume, including chrome removal and horizontal-overflow checks.
+- Added authenticated content-health JSON export plus evidence/media URL-format integrity checks.
+- Expanded the performance contract with an explicit post-deployment measurement procedure and no fabricated field metrics.
+
 ### Performance & reliability
 - Added a cookie-free anonymous Supabase client for public CMS reads.
 - Added tagged five-minute caching for public Work, Insights, profile, settings, capabilities, experience, redirects, and Site Content reads.
