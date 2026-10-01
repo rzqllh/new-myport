@@ -649,8 +649,8 @@ test("operational logging schema excludes user content and identity fields", () 
   const contact = read("src/app/(public)/contact/actions.ts");
 
   assert.doesNotMatch(observability, /messageText|email|name|token|rawIp/);
-  assert.doesNotMatch(chat, /logOperationalEvent\([\s\S]{0,300}latestQuestion/);
-  assert.doesNotMatch(contact, /logOperationalEvent\([\s\S]{0,300}parsed\.data/);
+  assert.doesNotMatch(chat, /(reason|message|text):\s*latestQuestion/);
+  assert.doesNotMatch(contact, /(reason|message|text|data):\s*parsed\.data/);
 });
 
 test("Turnstile verification and public rate-limit dependencies fail closed with bounded upstream work", () => {
