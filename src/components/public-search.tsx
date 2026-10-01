@@ -85,29 +85,31 @@ export function GlobalSearchDialog({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const results = useMemo(() => rankItems(items, query), [items, query]);
+  const safeActiveIndex =
+    results.length > 0 ? Math.min(activeIndex, results.length - 1) : 0;
 
   useEffect(() => {
-    if (!open) {
-      setQuery("");
-      setActiveIndex(0);
-      return;
-    }
+    if (!open) return;
 
     const timer = globalThis.setTimeout(() => inputRef.current?.focus(), 50);
     return () => globalThis.clearTimeout(timer);
   }, [open]);
 
-  useEffect(() => {
-    if (activeIndex >= results.length) setActiveIndex(0);
-  }, [activeIndex, results.length]);
+  function handleOpenChange(nextOpen: boolean) {
+    if (!nextOpen) {
+      setQuery("");
+      setActiveIndex(0);
+    }
+    onOpenChange(nextOpen);
+  }
 
   function select(item: PublicSearchItem) {
-    onOpenChange(false);
+    handleOpenChange(false);
     router.push(item.href);
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
         showCloseButton={false}
         className="top-[18vh] max-w-2xl translate-y-0 gap-0 overflow-hidden p-0"
@@ -139,17 +141,17 @@ export function GlobalSearchDialog({
                   setActiveIndex(
                     (current) => (current - 1 + results.length) % results.length
                   );
-                } else if (event.key === "Enter" && results[activeIndex]) {
+                } else if (event.key === "Enter" && results[safeActiveIndex]) {
                   event.preventDefault();
-                  select(results[activeIndex]);
+                  select(results[safeActiveIndex]);
                 }
               }}
               placeholder={ui.searchPlaceholder}
               aria-label={ui.searchPlaceholder}
               aria-controls="portfolio-search-results"
               aria-activedescendant={
-                results[activeIndex]
-                  ? "portfolio-search-" + results[activeIndex].id
+                results[safeActiveIndex]
+                  ? "portfolio-search-" + results[safeActiveIndex].id
                   : undefined
               }
               className="pl-9"
@@ -166,7 +168,7 @@ export function GlobalSearchDialog({
               className="divide-y divide-border"
             >
               {results.map((item, index) => {
-                const active = index === activeIndex;
+                const active = index === safeActiveIndex;
 
                 return (
                   <button
