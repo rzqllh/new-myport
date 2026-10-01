@@ -2,6 +2,8 @@
 
 This plan is intentionally phased. Each phase must complete its verification gate before the next phase introduces dependent behavior.
 
+Implementation status: Phases 0–10 are complete on the portfolio-redesign branch. Final merge verification remains the only outstanding step.
+
 ## Phase 0 — Documentation and baseline
 
 Status: complete when the documentation foundation and detail-page UI/UX correction are merged.
@@ -196,10 +198,13 @@ Tasks:
 
 Gate:
 - no optional integration can break core portfolio browsing,
-- performance budgets agreed and measured,
-- image and page loading reviewed on mobile.
+- performance budgets are documented as explicit targets,
+- cache, media, degraded-state, and production-build contracts are verified,
+- real-user field measurements are recorded only after a production release is available; CI/build success is not presented as field performance.
 
 ## Phase 10 — Differentiators
+
+Status: complete for the selected 10A–10C scope.
 
 Only after the core product is stable.
 
