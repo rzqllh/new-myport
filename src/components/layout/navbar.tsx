@@ -144,14 +144,14 @@ export function Navbar({
             <MagnifyingGlass className="size-4" />
             {ui.searchOpen}
           </Button>
-          <Link
+          <a
             href={localeHref}
             hrefLang={locale === "en" ? "id" : "en"}
             className="rounded-md px-2 py-2 text-xs font-medium text-muted-foreground hover:text-foreground"
             aria-label={ui.switchLanguage}
           >
             {locale === "en" ? "ID" : "EN"}
-          </Link>
+          </a>
           <ThemeToggle />
           <Button
             variant="outline"
@@ -172,14 +172,14 @@ export function Navbar({
           >
             <MagnifyingGlass className="size-5" />
           </Button>
-          <Link
+          <a
             href={localeHref}
             hrefLang={locale === "en" ? "id" : "en"}
             className="px-2 py-2 text-xs font-medium text-muted-foreground"
             aria-label={ui.switchLanguage}
           >
             {locale === "en" ? "ID" : "EN"}
-          </Link>
+          </a>
           <ThemeToggle />
           <Sheet>
             <SheetTrigger
