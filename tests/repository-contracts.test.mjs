@@ -360,3 +360,41 @@ test("performance documentation distinguishes targets from measured claims", () 
   assert.match(performance, /LCP <= 2\.5 s/);
   assert.match(performance, /CI build success is not a substitute/);
 });
+
+
+test("Capabilities admin uses qualitative v2 levels and no arbitrary percentage UI", () => {
+  const page = read("src/app/admin/(dashboard)/skills/page.tsx");
+  const client = read("src/app/admin/(dashboard)/skills/skills-client.tsx");
+
+  assert.match(page, /capabilities/);
+  assert.match(client, /primary/);
+  assert.match(client, /working/);
+  assert.match(client, /familiar/);
+  assert.doesNotMatch(client, /proficiency|%\)/i);
+});
+
+test("Experience admin authors localized copy while preserving shared factual fields", () => {
+  const page = read("src/app/admin/(dashboard)/experience/page.tsx");
+  const client = read(
+    "src/app/admin/(dashboard)/experience/experience-client.tsx"
+  );
+
+  assert.match(page, /experience_translations/);
+  assert.match(client, /locale: "en"/);
+  assert.match(client, /locale: "id"/);
+  assert.match(client, /company/);
+  assert.match(client, /start_date/);
+});
+
+test("About narrative belongs to bilingual Site Content instead of the legacy profile form", () => {
+  const siteCopy = read("src/lib/content/site-copy.ts");
+  const profileForm = read("src/app/admin/(dashboard)/about/about-form.tsx");
+  const publicContent = read("src/lib/content/public-content.ts");
+  const migration = read("supabase/migrations/006_content_model_v2.sql");
+
+  assert.match(siteCopy, /"about\.profile"/);
+  assert.match(publicContent, /\.eq\("namespace", "about\.profile"\)/);
+  assert.match(migration, /'about\.profile'/);
+  assert.doesNotMatch(profileForm, /philosophy|hobbies|\bbio\b/);
+  assert.match(profileForm, /Site Content/);
+});

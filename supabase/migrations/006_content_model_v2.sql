@@ -478,6 +478,20 @@ FROM skills
 ON CONFLICT (capability_id, locale) DO NOTHING;
 
 -- Initial site-content records replace public copy being scattered through JSX.
+INSERT INTO site_content (namespace, locale, status, content)
+SELECT
+  'about.profile',
+  'en',
+  'published',
+  jsonb_build_object(
+    'bio', COALESCE(bio, ''),
+    'philosophy', COALESCE(philosophy, ''),
+    'hobbies', COALESCE(hobbies, '')
+  )
+FROM about
+LIMIT 1
+ON CONFLICT (namespace, locale) DO NOTHING;
+
 INSERT INTO site_content (namespace, locale, status, content) VALUES
   (
     'navigation',

@@ -688,17 +688,42 @@ async function getPublicAboutUncached(
   locale: Locale = "en"
 ): Promise<PublicAbout> {
   const supabase = createPublicClient();
-  const { data } = await supabase
-    .from("about")
-    .select("bio, philosophy, hobbies, photo_url")
-    .limit(1)
-    .maybeSingle();
+  const [{ data: legacy }, { data: profile, error: profileError }] =
+    await Promise.all([
+      supabase
+        .from("about")
+        .select("bio, philosophy, hobbies, photo_url")
+        .limit(1)
+        .maybeSingle(),
+      supabase
+        .from("site_content")
+        .select("content")
+        .eq("namespace", "about.profile")
+        .eq("locale", locale)
+        .eq("status", "published")
+        .maybeSingle(),
+    ]);
+
+  const content = (profile?.content ?? {}) as Record<string, unknown>;
+  const value = (key: string) =>
+    typeof content[key] === "string" && content[key].trim()
+      ? content[key].trim()
+      : null;
+
+  if (!profileError && profile) {
+    return {
+      bio: value("bio"),
+      philosophy: value("philosophy"),
+      hobbies: value("hobbies"),
+      photoUrl: legacy?.photo_url ?? null,
+    };
+  }
 
   return {
-    bio: locale === "en" ? data?.bio ?? null : null,
-    philosophy: locale === "en" ? data?.philosophy ?? null : null,
-    hobbies: locale === "en" ? data?.hobbies ?? null : null,
-    photoUrl: data?.photo_url ?? null,
+    bio: locale === "en" ? legacy?.bio ?? null : null,
+    philosophy: locale === "en" ? legacy?.philosophy ?? null : null,
+    hobbies: locale === "en" ? legacy?.hobbies ?? null : null,
+    photoUrl: legacy?.photo_url ?? null,
   };
 }
 

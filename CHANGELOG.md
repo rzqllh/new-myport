@@ -49,6 +49,12 @@ All notable changes to this project are documented here.
 - Removed fabricated hero-stat defaults from the admin settings model.
 - Added safe dual-write compatibility for the staged schema-v2 rollout.
 
+### Content-model closure
+- Replaced the legacy Skills percentage editor with bilingual qualitative Capabilities using primary / working / familiar levels.
+- Added bilingual Experience authoring while keeping company and dates as shared factual fields.
+- Moved About biography, working approach, and outside-work narrative into bilingual Site Content; Profile now owns only shared profile media.
+- Kept legacy English tables as compatibility fallbacks without treating them as a second public editorial source.
+
 ### Data model
 - Added an additive bilingual Work/Insights content model with media, evidence, site content, redirect history, localized experience, and qualitative capabilities.
 - Added a staged explicit-admin authorization model that preserves owner access during bootstrap.

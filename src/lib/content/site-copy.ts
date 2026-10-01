@@ -7,6 +7,7 @@ export const SITE_CONTENT_NAMESPACES = [
   "home.capabilities",
   "home.insights",
   "about.intro",
+  "about.profile",
   "work.index",
   "insights.index",
   "contact.intro",
@@ -79,11 +80,21 @@ export const SITE_CONTENT_DEFINITIONS: Record<
     ],
   },
   "about.intro": {
-    label: "About",
+    label: "About · Intro",
     description: "Opening statement for the About page.",
     fields: [
       { key: "title", label: "Page title" },
       { key: "intro", label: "Introduction", multiline: true },
+    ],
+  },
+  "about.profile": {
+    label: "About · Profile",
+    description:
+      "Professional narrative and optional outside-work copy. Author English and Indonesian independently from the same facts.",
+    fields: [
+      { key: "bio", label: "Professional through-line", multiline: true },
+      { key: "philosophy", label: "Working approach", multiline: true },
+      { key: "hobbies", label: "Outside work", multiline: true },
     ],
   },
   "work.index": {
@@ -165,6 +176,11 @@ const en: SiteCopyBundle = {
     intro:
       "I work in IT project management and stay close to the product and technical details that affect delivery.",
   },
+  "about.profile": {
+    bio: "",
+    philosophy: "",
+    hobbies: "",
+  },
   "work.index": {
     title: "Work",
     intro:
@@ -226,6 +242,11 @@ const id: SiteCopyBundle = {
     title: "Tentang",
     intro:
       "Saya bekerja di pengelolaan proyek IT dan tetap cukup dekat dengan detail produk maupun teknis yang berpengaruh ke delivery.",
+  },
+  "about.profile": {
+    bio: "",
+    philosophy: "",
+    hobbies: "",
   },
   "work.index": {
     title: "Karya",
