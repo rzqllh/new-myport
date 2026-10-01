@@ -214,7 +214,12 @@ Candidates:
 - revision history,
 - scheduled publishing.
 
-Each candidate needs its own small PRD before implementation. No feature is added only because it looks impressive.
+Selected implementation:
+- 10A grounded portfolio assistant with server-selected source links,
+- 10B global CMS-backed portfolio search,
+- 10C deterministic admin content-health checks.
+
+Each selected candidate has its own small PRD. Deferred candidates and rationale are recorded in `PHASE_10_DECISIONS.md`. No feature is added only because it looks impressive.
 
 ## Execution rules
 

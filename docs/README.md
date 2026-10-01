@@ -16,6 +16,10 @@ This directory is the source of truth for the portfolio architecture and redesig
 10. [BASELINE_AUDIT.md](./BASELINE_AUDIT.md) — repository debt mapped to the redesign phases.
 11. [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) — phased execution plan and verification gates.
 12. [PERFORMANCE.md](./PERFORMANCE.md) — public caching, degraded-state behavior, media delivery, AI grounding, and measurable production performance targets.
+13. [PHASE_10_ASSISTANT_PRD.md](./PHASE_10_ASSISTANT_PRD.md) — grounded assistant scope, sources, UX, and gate.
+14. [PHASE_10_SEARCH_PRD.md](./PHASE_10_SEARCH_PRD.md) — global public search scope, keyboard UX, and gate.
+15. [PHASE_10_CONTENT_HEALTH_PRD.md](./PHASE_10_CONTENT_HEALTH_PRD.md) — deterministic admin content-health checks and gate.
+16. [PHASE_10_DECISIONS.md](./PHASE_10_DECISIONS.md) — selected and deferred differentiators with rationale.
 
 ## Governing principles
 
