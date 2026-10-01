@@ -298,6 +298,7 @@ export function BlogForm({ initialData }: { initialData?: BlogPost }) {
         insightId = data.id;
       }
 
+      if (!insightId) throw new Error("Insight ID was not returned after save.");
       await syncV2(insightId, publishedAt);
       setDirty(false);
       router.push("/admin/blog");

@@ -464,6 +464,7 @@ export function ProjectForm({ initialData }: { initialData?: ProjectRecord }) {
         if (imageError) throw imageError;
       }
 
+      if (!projectId) throw new Error("Project ID was not returned after save.");
       await syncV2(projectId);
       setDirty(false);
       router.push("/admin/projects");
@@ -551,7 +552,7 @@ export function ProjectForm({ initialData }: { initialData?: ProjectRecord }) {
 
       <div className="space-y-3 border-t border-border pt-5">
         <Label>Classification</Label>
-        <Select value={discipline} onValueChange={(value) => { setDirty(true); setDiscipline(value); }}>
+        <Select value={discipline} onValueChange={(value) => { setDirty(true); setDiscipline(value ?? "engineering"); }}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="project-management">Project management</SelectItem>
@@ -560,7 +561,7 @@ export function ProjectForm({ initialData }: { initialData?: ProjectRecord }) {
             <SelectItem value="research-design">Research & design</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={workType} onValueChange={(value) => { setDirty(true); setWorkType(value); }}>
+        <Select value={workType} onValueChange={(value) => { setDirty(true); setWorkType(value ?? "case-study"); }}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="case-study">Case study</SelectItem>
