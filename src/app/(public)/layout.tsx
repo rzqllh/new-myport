@@ -29,6 +29,13 @@ export default async function PublicLayout({
   const social = map.social ?? {};
   const cvUrl = map.cv?.url;
   const profile = map.profile ?? {};
+  const navigation = {
+    work: copy.navigation.work ?? "Work",
+    about: copy.navigation.about ?? "About",
+    insights: copy.navigation.insights ?? "Insights",
+    contact: copy.navigation.contact ?? "Contact",
+    resume: copy.navigation.resume ?? "Resume",
+  };
 
   return (
     <>
@@ -40,7 +47,7 @@ export default async function PublicLayout({
       </a>
       <Navbar
         siteName={siteName}
-        labels={copy.navigation}
+        labels={navigation}
         cvUrl={cvUrl}
         availability={profile.availability}
         location={profile.location}
@@ -57,7 +64,7 @@ export default async function PublicLayout({
       <Footer
         siteName={siteName}
         tagline={tagline}
-        labels={copy.navigation}
+        labels={navigation}
         copy={copy.footer}
         social={social}
         cvUrl={cvUrl}
