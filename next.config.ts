@@ -42,6 +42,60 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+
+  async redirects() {
+    return [
+      { source: "/projects", destination: "/work", permanent: true },
+      {
+        source: "/projects/:slug",
+        destination: "/work/:slug",
+        permanent: true,
+      },
+      { source: "/blog", destination: "/insights", permanent: true },
+      {
+        source: "/blog/:slug",
+        destination: "/insights/:slug",
+        permanent: true,
+      },
+      { source: "/id/projects", destination: "/id/work", permanent: true },
+      {
+        source: "/id/projects/:slug",
+        destination: "/id/work/:slug",
+        permanent: true,
+      },
+      { source: "/id/blog", destination: "/id/insights", permanent: true },
+      {
+        source: "/id/blog/:slug",
+        destination: "/id/insights/:slug",
+        permanent: true,
+      },
+    ];
+  },
+
+  async rewrites() {
+    return {
+      beforeFiles: [
+        { source: "/work", destination: "/projects" },
+        { source: "/work/:slug", destination: "/projects/:slug" },
+        { source: "/insights", destination: "/blog" },
+        { source: "/insights/:slug", destination: "/blog/:slug" },
+        { source: "/id", destination: "/?locale=id" },
+        { source: "/id/work", destination: "/projects?locale=id" },
+        {
+          source: "/id/work/:slug",
+          destination: "/projects/:slug?locale=id",
+        },
+        { source: "/id/insights", destination: "/blog?locale=id" },
+        {
+          source: "/id/insights/:slug",
+          destination: "/blog/:slug?locale=id",
+        },
+        { source: "/id/about", destination: "/about?locale=id" },
+        { source: "/id/contact", destination: "/contact?locale=id" },
+        { source: "/id/resume", destination: "/resume?locale=id" },
+      ],
+    };
+  },
 };
 
 export default nextConfig;

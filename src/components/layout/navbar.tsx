@@ -12,6 +12,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  PUBLIC_UI,
+  localeFromPathname,
+  publicPath,
+  switchLocalePath,
+} from "@/lib/content/public-routes";
+import type { Locale } from "@/types/content";
 import { cn } from "@/lib/utils";
 
 interface NavigationLabels {
@@ -24,36 +31,43 @@ interface NavigationLabels {
 
 interface NavbarProps {
   siteName: string;
-  labels: NavigationLabels;
-  cvUrl?: string;
+  labelsByLocale: Record<Locale, NavigationLabels>;
   availability?: string;
   location?: string;
 }
 
 const routes = [
-  { key: "work", href: "/projects" },
-  { key: "about", href: "/about" },
-  { key: "insights", href: "/blog" },
-  { key: "contact", href: "/contact" },
+  { key: "work", path: "/work" },
+  { key: "about", path: "/about" },
+  { key: "insights", path: "/insights" },
+  { key: "contact", path: "/contact" },
 ] as const;
 
 export function Navbar({
   siteName,
-  labels,
-  cvUrl,
+  labelsByLocale,
   availability,
   location,
 }: NavbarProps) {
   const pathname = usePathname();
+  const locale = localeFromPathname(pathname);
+  const labels = labelsByLocale[locale];
+  const ui = PUBLIC_UI[locale];
+  const homeHref = publicPath(locale, "/");
+  const resumeHref = publicPath(locale, "/resume");
+  const localeHref = switchLocalePath(pathname);
 
   return (
-    <header data-print-hidden className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90">
+    <header
+      data-print-hidden
+      className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90"
+    >
       <nav
         className="editorial-container flex h-16 items-center justify-between gap-6"
-        aria-label="Main navigation"
+        aria-label={ui.navigation}
       >
         <Link
-          href="/"
+          href={homeHref}
           className="min-w-0 truncate font-display text-sm font-semibold tracking-tight text-foreground"
         >
           {siteName}
@@ -61,12 +75,14 @@ export function Navbar({
 
         <div className="hidden items-center gap-1 md:flex">
           {routes.map((item) => {
+            const href = publicPath(locale, item.path);
             const active =
-              pathname === item.href || pathname.startsWith(`${item.href}/`);
+              pathname === href || pathname.startsWith(`${href}/`);
+
             return (
               <Link
                 key={item.key}
-                href={item.href}
+                href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "rounded-md px-3 py-2 text-sm transition-colors",
@@ -79,32 +95,41 @@ export function Navbar({
               </Link>
             );
           })}
+
           <span className="mx-2 h-4 w-px bg-border" />
+          <Link
+            href={localeHref}
+            hrefLang={locale === "en" ? "id" : "en"}
+            className="rounded-md px-2 py-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+            aria-label={ui.switchLanguage}
+          >
+            {locale === "en" ? "ID" : "EN"}
+          </Link>
           <ThemeToggle />
-          {cvUrl ? (
-            <Button
-              variant="outline"
-              size="sm"
-              render={
-                <a href={cvUrl} target="_blank" rel="noopener noreferrer" />
-              }
-              nativeButton={false}
-            >
-              {labels.resume}
-            </Button>
-          ) : null}
+          <Button
+            variant="outline"
+            size="sm"
+            render={<Link href={resumeHref} />}
+            nativeButton={false}
+          >
+            {labels.resume}
+          </Button>
         </div>
 
         <div className="flex items-center gap-1 md:hidden">
+          <Link
+            href={localeHref}
+            hrefLang={locale === "en" ? "id" : "en"}
+            className="px-2 py-2 text-xs font-medium text-muted-foreground"
+            aria-label={ui.switchLanguage}
+          >
+            {locale === "en" ? "ID" : "EN"}
+          </Link>
           <ThemeToggle />
           <Sheet>
             <SheetTrigger
               render={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Open navigation"
-                />
+                <Button variant="ghost" size="icon" aria-label={ui.navigation} />
               }
             >
               <List className="size-5" />
@@ -118,18 +143,29 @@ export function Navbar({
               </SheetHeader>
 
               <div className="space-y-8 p-5">
-                <nav aria-label="Mobile navigation">
+                <nav aria-label={ui.navigation}>
                   <ul className="divide-y divide-border">
-                    {routes.map((item) => (
-                      <li key={item.key}>
-                        <Link
-                          href={item.href}
-                          className="flex min-h-12 items-center text-base text-foreground"
-                        >
-                          {labels[item.key]}
-                        </Link>
-                      </li>
-                    ))}
+                    {routes.map((item) => {
+                      const href = publicPath(locale, item.path);
+                      return (
+                        <li key={item.key}>
+                          <Link
+                            href={href}
+                            className="flex min-h-12 items-center text-base text-foreground"
+                          >
+                            {labels[item.key]}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                    <li>
+                      <Link
+                        href={resumeHref}
+                        className="flex min-h-12 items-center text-base text-foreground"
+                      >
+                        {labels.resume}
+                      </Link>
+                    </li>
                   </ul>
                 </nav>
 
@@ -138,22 +174,6 @@ export function Navbar({
                     {availability ? <p>{availability}</p> : null}
                     {location ? <p>{location}</p> : null}
                   </div>
-                ) : null}
-
-                {cvUrl ? (
-                  <Button
-                    className="w-full"
-                    render={
-                      <a
-                        href={cvUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      />
-                    }
-                    nativeButton={false}
-                  >
-                    {labels.resume}
-                  </Button>
                 ) : null}
               </div>
             </SheetContent>

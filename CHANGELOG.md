@@ -4,6 +4,13 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+### Routing & localization
+- Added canonical public route infrastructure for /work, /insights, /about, /contact, and /resume with Indonesian /id equivalents.
+- Added permanent redirects from legacy /projects and /blog routes, including legacy Indonesian variants.
+- Added locale-aware public navigation/footer and an EN/ID switch that preserves the current canonical path.
+- Rebuilt the sitemap from CMS-backed Work/Insight data and both supported locales.
+- Added crawler exclusions for admin and API routes.
+
 ### Public portfolio
 - Added a CMS-first public content compatibility layer that reads the bilingual v2 model when available and falls back to the existing database tables before the production migration is applied.
 - Removed hardcoded project/article fallback content from Home, Work index, and Insights index rendering.

@@ -160,3 +160,37 @@ test("default site copy does not claim availability unless intentionally configu
     /Open to relevant opportunities|Terbuka untuk peluang yang relevan/
   );
 });
+
+
+test("canonical public routes and locale rewrites are explicit", () => {
+  const config = read("next.config.ts");
+
+  assert.match(config, /source: "\/projects"/);
+  assert.match(config, /destination: "\/work"/);
+  assert.match(config, /source: "\/blog"/);
+  assert.match(config, /destination: "\/insights"/);
+  assert.match(config, /permanent: true/);
+  assert.match(config, /source: "\/id\/work"/);
+  assert.match(config, /locale=id/);
+});
+
+test("public shell is locale-aware and links to canonical route segments", () => {
+  const nav = read("src/components/layout/navbar.tsx");
+  const footer = read("src/components/layout/footer.tsx");
+  const layout = read("src/app/(public)/layout.tsx");
+
+  assert.match(nav, /publicPath/);
+  assert.match(nav, /switchLocalePath/);
+  assert.doesNotMatch(nav, /href: "\/projects"|href: "\/blog"/);
+  assert.match(footer, /localeFromPathname/);
+  assert.match(layout, /getSiteCopy\("id"\)/);
+});
+
+test("sitemap uses canonical bilingual CMS routes without hardcoded content fallbacks", () => {
+  const sitemap = read("src/app/sitemap.ts");
+
+  assert.match(sitemap, /getPublicWork\("id"\)/);
+  assert.match(sitemap, /\/work\//);
+  assert.match(sitemap, /\/insights\//);
+  assert.doesNotMatch(sitemap, /FALLBACK_PROJECTS|FALLBACK_POST_SLUGS/);
+});

@@ -1,41 +1,58 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  PUBLIC_UI,
+  localeFromPathname,
+  publicPath,
+} from "@/lib/content/public-routes";
+import type { Locale } from "@/types/content";
+
+interface NavigationLabels {
+  work: string;
+  about: string;
+  insights: string;
+  contact: string;
+  resume: string;
+}
+
+interface FooterCopy {
+  heading?: string;
+  body?: string;
+  contact_cta?: string;
+  resume_cta?: string;
+}
 
 interface FooterProps {
   siteName: string;
   tagline?: string;
-  labels: {
-    work: string;
-    about: string;
-    insights: string;
-    contact: string;
-    resume: string;
-  };
-  copy: {
-    heading?: string;
-    body?: string;
-    contact_cta?: string;
-    resume_cta?: string;
-  };
+  labelsByLocale: Record<Locale, NavigationLabels>;
+  copyByLocale: Record<Locale, FooterCopy>;
   social: Record<string, string>;
-  cvUrl?: string;
 }
 
 const routes = [
-  { key: "work", href: "/projects" },
-  { key: "about", href: "/about" },
-  { key: "insights", href: "/blog" },
-  { key: "contact", href: "/contact" },
+  { key: "work", path: "/work" },
+  { key: "about", path: "/about" },
+  { key: "insights", path: "/insights" },
+  { key: "contact", path: "/contact" },
 ] as const;
 
 export function Footer({
   siteName,
   tagline,
-  labels,
-  copy,
+  labelsByLocale,
+  copyByLocale,
   social,
-  cvUrl,
 }: FooterProps) {
+  const pathname = usePathname();
+  const locale = localeFromPathname(pathname);
+  const labels = labelsByLocale[locale];
+  const copy = copyByLocale[locale];
+  const ui = PUBLIC_UI[locale];
   const year = new Date().getFullYear();
+
   const profiles = [
     ["GitHub", social.github],
     ["LinkedIn", social.linkedin],
@@ -56,31 +73,30 @@ export function Footer({
               </p>
             ) : null}
             <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm">
-              <Link href="/contact" className="font-medium text-primary hover:underline">
+              <Link
+                href={publicPath(locale, "/contact")}
+                className="font-medium text-primary hover:underline"
+              >
                 {copy.contact_cta || labels.contact}
               </Link>
-              {cvUrl ? (
-                <a
-                  href={cvUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  {copy.resume_cta || labels.resume}
-                </a>
-              ) : null}
+              <Link
+                href={publicPath(locale, "/resume")}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                {copy.resume_cta || labels.resume}
+              </Link>
             </div>
           </div>
 
-          <nav aria-label="Footer navigation">
+          <nav aria-label={ui.navigation}>
             <p className="mb-3 text-xs font-medium text-muted-foreground">
-              Navigation
+              {ui.navigation}
             </p>
             <ul className="space-y-2">
               {routes.map((item) => (
                 <li key={item.key}>
                   <Link
-                    href={item.href}
+                    href={publicPath(locale, item.path)}
                     className="text-sm text-muted-foreground hover:text-foreground"
                   >
                     {labels[item.key]}
@@ -92,7 +108,7 @@ export function Footer({
 
           <div>
             <p className="mb-3 text-xs font-medium text-muted-foreground">
-              Profiles
+              {ui.profiles}
             </p>
             <div className="space-y-2">
               {profiles.map(([label, href]) => (
@@ -108,10 +124,14 @@ export function Footer({
               ))}
               {social.email ? (
                 <a
-                  href={social.email.startsWith("mailto:") ? social.email : `mailto:${social.email}`}
+                  href={
+                    social.email.startsWith("mailto:")
+                      ? social.email
+                      : `mailto:${social.email}`
+                  }
                   className="block text-sm text-muted-foreground hover:text-foreground"
                 >
-                  Email
+                  {ui.email}
                 </a>
               ) : null}
             </div>
