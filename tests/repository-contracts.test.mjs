@@ -321,7 +321,8 @@ test("AI grounding contains no hardcoded portfolio fallback facts", () => {
   );
   assert.match(grounding, /getPublicWork/);
   assert.match(grounding, /PUBLIC_CONTENT_CACHE_TAG/);
-  assert.match(grounding, /path: "\/work\/" \+ item\.slug/);\n  assert.match(grounding, /grounding-ranker/);
+  assert.match(grounding, /path: "\/work\/" \+ item\.slug/);
+  assert.match(grounding, /grounding-ranker/);
 });
 
 test("optional GitHub activity is cacheable and not a core dynamic dependency", () => {
