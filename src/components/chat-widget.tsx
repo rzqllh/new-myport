@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   ArrowUpRight,
   ChatCircle,
@@ -40,6 +40,7 @@ interface ChatResponse {
 
 export default function ChatWidget() {
   const pathname = usePathname();
+  const prefersReducedMotion = useReducedMotion();
   const locale = localeFromPathname(pathname);
   const ui = PUBLIC_UI[locale];
 
@@ -161,9 +162,14 @@ export default function ChatWidget() {
         {!isOpen ? (
           <motion.div
             key="chat-toggle"
-            initial={{ opacity: 0, y: 8 }}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
+            exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 8 }}
+            transition={
+              prefersReducedMotion
+                ? { duration: 0 }
+                : { duration: 0.16, ease: [0.22, 1, 0.36, 1] }
+            }
             className="fixed bottom-4 right-4 z-40"
           >
             <Button
@@ -186,10 +192,14 @@ export default function ChatWidget() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="chat-heading"
-            initial={{ opacity: 0, y: 12 }}
+            initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 12 }}
-            transition={{ duration: 0.16 }}
+            exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
+            transition={
+              prefersReducedMotion
+                ? { duration: 0 }
+                : { duration: 0.18, ease: [0.22, 1, 0.36, 1] }
+            }
             className="fixed bottom-4 right-4 z-50 flex h-[min(620px,calc(100dvh-2rem))] w-[min(420px,calc(100vw-2rem))] flex-col overflow-hidden border border-border bg-background shadow-xl"
           >
             <header className="flex items-center justify-between border-b border-border px-4 py-3">

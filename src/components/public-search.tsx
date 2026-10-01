@@ -199,7 +199,11 @@ export function GlobalSearchDialog({
                       ) : null}
                     </span>
                     <ArrowRight
-                      className="hidden size-4 text-muted-foreground sm:block"
+                      className={
+                        active
+                          ? "hidden size-4 translate-x-0.5 text-muted-foreground transition-transform duration-150 sm:block"
+                          : "hidden size-4 text-muted-foreground transition-transform duration-150 sm:block"
+                      }
                       aria-hidden="true"
                     />
                   </button>

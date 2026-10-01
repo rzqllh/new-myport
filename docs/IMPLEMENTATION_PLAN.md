@@ -204,7 +204,7 @@ Gate:
 
 ## Phase 10 — Differentiators
 
-Status: complete for the selected 10A–10C scope.
+Status: selected 10A–10D scope implemented; final merge verification remains.
 
 Only after the core product is stable.
 
@@ -220,9 +220,10 @@ Candidates:
 - scheduled publishing.
 
 Selected implementation:
-- 10A grounded portfolio assistant with server-selected source links,
+- 10A grounded portfolio assistant with server-selected source links and deterministic retrieval harness,
 - 10B global CMS-backed portfolio search,
-- 10C deterministic admin content-health checks.
+- 10C deterministic admin content-health checks,
+- 10D motion and interaction quality with non-blocking route arrival, restrained hierarchy reveal, microinteraction feedback, and reduced-motion parity.
 
 Each selected candidate has its own small PRD. Deferred candidates and rationale are recorded in `PHASE_10_DECISIONS.md`. No feature is added only because it looks impressive.
 

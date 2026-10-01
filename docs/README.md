@@ -20,6 +20,7 @@ This directory is the source of truth for the portfolio architecture and redesig
 14. [PHASE_10_SEARCH_PRD.md](./PHASE_10_SEARCH_PRD.md) — global public search scope, keyboard UX, and gate.
 15. [PHASE_10_CONTENT_HEALTH_PRD.md](./PHASE_10_CONTENT_HEALTH_PRD.md) — deterministic admin content-health checks and gate.
 16. [PHASE_10_DECISIONS.md](./PHASE_10_DECISIONS.md) — selected and deferred differentiators with rationale.
+17. [PHASE_10_MOTION_PRD.md](./PHASE_10_MOTION_PRD.md) — macro/micro interaction rules, timing, reduced-motion behavior, and verification gate.
 
 ## Governing principles
 

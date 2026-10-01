@@ -37,6 +37,11 @@ All notable changes to this project are documented here.
 - Moved the portfolio assistant out of the root application shell so it no longer appears in admin.
 - Changed the default theme to follow the operating-system preference while retaining explicit theme control.
 - Added print-specific resume behavior.
+- Reworked public route motion so navigation never waits for an exit animation.
+- Added a shared viewport reveal for major editorial hierarchy on Home, Work, Insights, About, and Contact.
+- Added a reduced-motion-safe active navigation indicator and restrained editorial-row interaction feedback.
+- Replaced shared button transition-all behavior with explicit transition properties.
+- Extended reduced-motion handling to the portfolio assistant.
 
 ### Admin
 - Rebuilt the admin shell around grouped information architecture and responsive navigation.

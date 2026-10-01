@@ -528,3 +528,53 @@ test("assistant retrieval harness runs in CI against the production ranker", () 
     true
   );
 });
+
+
+test("public route motion does not delay navigation and honors reduced motion", () => {
+  const transition = read("src/components/layout/page-transition.tsx");
+  const reveal = read("src/components/motion/editorial-reveal.tsx");
+  const css = read("src/app/globals.css");
+
+  assert.match(transition, /useReducedMotion/);
+  assert.doesNotMatch(transition, /mode="wait"|AnimatePresence|exit=/);
+  assert.match(reveal, /whileInView/);
+  assert.match(reveal, /once: true/);
+  assert.match(reveal, /useReducedMotion/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
+});
+
+test("public navigation uses a reduced-motion-safe shared active indicator", () => {
+  const navbar = read("src/components/layout/navbar.tsx");
+
+  assert.match(navbar, /layoutId="public-nav-active"/);
+  assert.match(navbar, /useReducedMotion/);
+  assert.match(navbar, /aria-current/);
+});
+
+test("major public page hierarchy uses the shared editorial reveal primitive", () => {
+  for (const path of [
+    "src/app/(public)/page.tsx",
+    "src/app/(public)/projects/page.tsx",
+    "src/app/(public)/blog/page.tsx",
+    "src/app/(public)/about/page.tsx",
+    "src/app/(public)/contact/page.tsx",
+  ]) {
+    assert.match(read(path), /EditorialReveal/);
+  }
+});
+
+test("shared microinteraction motion avoids transition-all and assistant respects reduced motion", () => {
+  const button = read("src/components/ui/button.tsx");
+  const assistant = read("src/components/chat-widget.tsx");
+
+  assert.doesNotMatch(button, /transition-all/);
+  assert.match(button, /transition-\[color,background-color,border-color,box-shadow,transform\]/);
+  assert.match(assistant, /useReducedMotion/);
+});
+
+test("phase 10 motion contract is tracked", () => {
+  assert.equal(
+    existsSync(new URL("../docs/PHASE_10_MOTION_PRD.md", import.meta.url)),
+    true
+  );
+});

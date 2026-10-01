@@ -8,6 +8,7 @@ import {
   localeFromValue,
   publicPath,
 } from "@/lib/content/public-routes";
+import { EditorialReveal } from "@/components/motion/editorial-reveal";
 
 interface Props {
   searchParams: Promise<{ locale?: string }>;
@@ -48,28 +49,31 @@ export default async function ProjectsPage({ searchParams }: Props) {
 
   return (
     <div className="editorial-container py-16 md:py-24">
-      <header className="max-w-3xl">
+      <EditorialReveal>
+        <header className="max-w-3xl">
         <h1 className="font-display text-5xl font-semibold tracking-[-0.045em] sm:text-6xl">
           {copy["work.index"].title}
         </h1>
         <p className="mt-5 text-lg leading-8 text-muted-foreground">
           {copy["work.index"].intro}
         </p>
-      </header>
+        </header>
+      </EditorialReveal>
 
       {work.length ? (
-        <div className="mt-14 divide-y divide-border border-y border-border">
+        <EditorialReveal delay={0.04}>
+          <div className="mt-14 divide-y divide-border border-y border-border">
           {work.map((item) => (
             <article
               key={item.id}
-              className="grid gap-6 py-8 lg:grid-cols-[minmax(0,1fr)_230px]"
+              className="-mx-2 grid gap-6 px-2 py-8 transition-colors duration-150 hover:bg-card/45 lg:grid-cols-[minmax(0,1fr)_230px]"
             >
               <div className="min-w-0">
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
                   <h2 className="font-display text-2xl font-semibold sm:text-3xl">
                     <Link
                       href={publicPath(locale, `/work/${item.slug}`)}
-                      className="hover:text-primary"
+                      className="transition-colors duration-150 hover:text-primary"
                     >
                       {item.title}
                     </Link>
@@ -108,7 +112,8 @@ export default async function ProjectsPage({ searchParams }: Props) {
               </div>
             </article>
           ))}
-        </div>
+          </div>
+        </EditorialReveal>
       ) : (
         <div className="mt-14 border-y border-dashed border-border py-12">
           <p className="text-sm text-muted-foreground">{ui.noWork}</p>

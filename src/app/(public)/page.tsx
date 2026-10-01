@@ -17,6 +17,7 @@ import {
   publicPath,
 } from "@/lib/content/public-routes";
 import { Button } from "@/components/ui/button";
+import { EditorialReveal } from "@/components/motion/editorial-reveal";
 
 interface Props {
   searchParams: Promise<{ locale?: string }>;
@@ -86,7 +87,7 @@ export default async function HomePage({ searchParams }: Props) {
   return (
     <div>
       <section className="editorial-container grid min-h-[72vh] items-center gap-12 py-20 lg:grid-cols-[minmax(0,1.25fr)_minmax(260px,.75fr)] lg:py-28">
-        <div className="max-w-4xl">
+        <EditorialReveal className="max-w-4xl">
           {availability ? (
             <p className="mb-5 text-sm text-muted-foreground">{availability}</p>
           ) : null}
@@ -128,9 +129,10 @@ export default async function HomePage({ searchParams }: Props) {
               </a>
             ) : null}
           </div>
-        </div>
+        </EditorialReveal>
 
-        <aside className="border-l border-border pl-6 lg:pl-8">
+        <EditorialReveal delay={0.06}>
+          <aside className="border-l border-border pl-6 lg:pl-8">
           {currentExperience ? (
             <div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -157,11 +159,12 @@ export default async function HomePage({ searchParams }: Props) {
                 : "Portfolio content is being prepared."}
             </p>
           )}
-        </aside>
+          </aside>
+        </EditorialReveal>
       </section>
 
       <section className="border-t border-border py-20 md:py-24">
-        <div className="editorial-container">
+        <EditorialReveal className="editorial-container">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-2xl">
               <h2 className="font-display text-3xl font-semibold sm:text-4xl">
@@ -184,7 +187,7 @@ export default async function HomePage({ searchParams }: Props) {
               {selectedWork.map((item, index) => (
                 <article
                   key={item.id}
-                  className="grid gap-5 py-7 md:grid-cols-[48px_minmax(0,1fr)_220px] md:items-start"
+                  className="-mx-2 grid gap-5 px-2 py-7 transition-colors duration-150 hover:bg-card/45 md:grid-cols-[48px_minmax(0,1fr)_220px] md:items-start"
                 >
                   <span className="text-xs tabular-nums text-muted-foreground">
                     {String(index + 1).padStart(2, "0")}
@@ -194,7 +197,7 @@ export default async function HomePage({ searchParams }: Props) {
                       <h3 className="font-display text-2xl font-semibold">
                         <Link
                           href={publicPath(locale, `/work/${item.slug}`)}
-                          className="hover:text-primary"
+                          className="transition-colors duration-150 hover:text-primary"
                         >
                           {item.title}
                         </Link>
@@ -226,11 +229,11 @@ export default async function HomePage({ searchParams }: Props) {
               {ui.noWork}
             </p>
           )}
-        </div>
+        </EditorialReveal>
       </section>
 
       <section className="border-t border-border bg-card/35 py-20 md:py-24">
-        <div className="editorial-container grid gap-10 lg:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)]">
+        <EditorialReveal className="editorial-container grid gap-10 lg:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)]">
           <div className="max-w-xl">
             <h2 className="font-display text-3xl font-semibold sm:text-4xl">
               {copy["home.capabilities"].title}
@@ -265,11 +268,11 @@ export default async function HomePage({ searchParams }: Props) {
           ) : (
             <p className="text-sm text-muted-foreground">{ui.capabilitiesPending}</p>
           )}
-        </div>
+        </EditorialReveal>
       </section>
 
       <section className="border-t border-border py-20 md:py-24">
-        <div className="editorial-container">
+        <EditorialReveal className="editorial-container">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-2xl">
               <h2 className="font-display text-3xl font-semibold sm:text-4xl">
@@ -292,7 +295,7 @@ export default async function HomePage({ searchParams }: Props) {
               {selectedInsights.map((insight) => (
                 <article
                   key={insight.id}
-                  className="grid gap-3 py-6 md:grid-cols-[150px_minmax(0,1fr)] md:gap-8"
+                  className="-mx-2 grid gap-3 px-2 py-6 transition-colors duration-150 hover:bg-card/45 md:grid-cols-[150px_minmax(0,1fr)] md:gap-8"
                 >
                   <p className="text-xs text-muted-foreground">
                     {insight.publishedAt
@@ -306,7 +309,7 @@ export default async function HomePage({ searchParams }: Props) {
                     <h3 className="font-display text-xl font-semibold">
                       <Link
                         href={publicPath(locale, `/insights/${insight.slug}`)}
-                        className="hover:text-primary"
+                        className="transition-colors duration-150 hover:text-primary"
                       >
                         {insight.title}
                       </Link>
@@ -325,11 +328,11 @@ export default async function HomePage({ searchParams }: Props) {
               {ui.noInsights}
             </p>
           )}
-        </div>
+        </EditorialReveal>
       </section>
 
       <section className="border-t border-border py-16">
-        <div className="editorial-container flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+        <EditorialReveal className="editorial-container flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="font-display text-2xl font-semibold">
               {copy.footer.heading}
@@ -345,7 +348,7 @@ export default async function HomePage({ searchParams }: Props) {
           >
             {copy.footer.contact_cta || ui.contact}
           </Button>
-        </div>
+        </EditorialReveal>
       </section>
     </div>
   );

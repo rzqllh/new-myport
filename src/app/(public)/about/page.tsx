@@ -18,6 +18,7 @@ import {
 import type { Locale } from "@/types/content";
 import { responsiveImageProps } from "@/lib/content/public-image";
 import { Button } from "@/components/ui/button";
+import { EditorialReveal } from "@/components/motion/editorial-reveal";
 
 interface Props {
   searchParams: Promise<{ locale?: string }>;
@@ -80,7 +81,8 @@ export default async function AboutPage({ searchParams }: Props) {
 
   return (
     <div className="editorial-container py-16 md:py-24">
-      <header className="grid gap-10 border-b border-border pb-14 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-16">
+      <EditorialReveal>
+        <header className="grid gap-10 border-b border-border pb-14 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-16">
         <div className="max-w-4xl">
           <h1 className="font-display text-5xl font-semibold tracking-[-0.045em] sm:text-6xl">
             {copy["about.intro"].title}
@@ -157,9 +159,11 @@ export default async function AboutPage({ searchParams }: Props) {
             />
           </figure>
         ) : null}
-      </header>
+        </header>
+      </EditorialReveal>
 
-      <div className="grid gap-14 py-14 lg:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)] lg:gap-20">
+      <EditorialReveal delay={0.04}>
+        <div className="grid gap-14 py-14 lg:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)] lg:gap-20">
         <section>
           <h2 className="font-display text-3xl font-semibold">
             {ui.professionalThroughLine}
@@ -223,9 +227,12 @@ export default async function AboutPage({ searchParams }: Props) {
             </p>
           )}
         </section>
-      </div>
+        </div>
+      </EditorialReveal>
 
-      <section className="border-t border-border py-14">
+      <EditorialReveal delay={0.05}>
+        <EditorialReveal delay={0.06}>
+          <section className="border-t border-border py-14">
         <div className="grid gap-10 lg:grid-cols-[280px_minmax(0,1fr)]">
           <div>
             <h2 className="font-display text-3xl font-semibold">
@@ -258,7 +265,8 @@ export default async function AboutPage({ searchParams }: Props) {
             </p>
           )}
         </div>
-      </section>
+        </section>
+      </EditorialReveal>
 
       {about.hobbies ? (
         <section className="border-t border-border py-14">
@@ -270,7 +278,8 @@ export default async function AboutPage({ searchParams }: Props) {
               {about.hobbies}
             </p>
           </div>
-        </section>
+          </section>
+        </EditorialReveal>
       ) : null}
     </div>
   );
