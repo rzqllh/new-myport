@@ -84,6 +84,8 @@ All notable changes to this project are documented here.
 - Assistant responses now return server-selected source links separately from model text, preventing model-generated citation paths.
 - Reworked the assistant UI into a restrained bilingual portfolio surface with canonical source links.
 - Fixed expired-session retry so the original submitted question is preserved.
+- Added bilingual global portfolio search across published Work, Insights, About, Contact, and Resume.
+- Added Cmd/Ctrl+K access plus arrow-key and Enter navigation without adding a search dependency or external service.
 
 ### Engineering
 - Standardized the repository on pnpm and added lint/typecheck/test/build CI.

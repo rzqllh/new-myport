@@ -79,6 +79,13 @@ export const PUBLIC_UI = {
     assistantClose: "Close portfolio assistant",
     assistantSources: "Sources",
     assistantError: "The assistant is temporarily unavailable.",
+    searchOpen: "Search",
+    searchTitle: "Search the portfolio",
+    searchDescription: "Find published Work, Insights, and core profile pages.",
+    searchPlaceholder: "Search Work, Insights, or pages…",
+    searchResults: "Search results",
+    searchEmpty: "No published portfolio content matches this search.",
+    searchKeyboardHelp: "Use ↑ ↓ to move, Enter to open, Esc to close.",
   },
   id: {
     skipToContent: "Lewati ke konten utama",
@@ -158,6 +165,13 @@ export const PUBLIC_UI = {
     assistantClose: "Tutup asisten portofolio",
     assistantSources: "Sumber",
     assistantError: "Asisten sedang tidak tersedia.",
+    searchOpen: "Cari",
+    searchTitle: "Cari di portofolio",
+    searchDescription: "Temukan Karya, Insight, dan halaman profil yang sudah dipublikasikan.",
+    searchPlaceholder: "Cari Karya, Insight, atau halaman…",
+    searchResults: "Hasil pencarian",
+    searchEmpty: "Tidak ada konten portofolio terbit yang sesuai.",
+    searchKeyboardHelp: "Gunakan ↑ ↓ untuk memilih, Enter untuk membuka, Esc untuk menutup.",
   },
 } as const;
 

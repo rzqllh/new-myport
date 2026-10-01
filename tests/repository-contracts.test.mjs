@@ -431,3 +431,41 @@ test("assistant UI copy is localized through the shared public UI dictionary", (
   assert.match(routes, /assistantSources/);
   assert.match(widget, /PUBLIC_UI\[locale\]/);
 });
+
+
+test("global public search is built only from published CMS-backed public readers", () => {
+  const layout = read("src/app/(public)/layout.tsx");
+  const search = read("src/components/public-search.tsx");
+
+  assert.match(layout, /getPublicWork\("en"\)/);
+  assert.match(layout, /getPublicWork\("id"\)/);
+  assert.match(layout, /getPublicInsights\("en"\)/);
+  assert.match(layout, /getPublicInsights\("id"\)/);
+  assert.doesNotMatch(layout, /from\("projects"\)|from\("blog_posts"\)/);
+  assert.match(search, /rankItems/);
+});
+
+test("global public search supports one dialog with keyboard navigation and Cmd or Ctrl K", () => {
+  const navbar = read("src/components/layout/navbar.tsx");
+  const search = read("src/components/public-search.tsx");
+
+  assert.match(navbar, /GlobalSearchDialog/);
+  assert.match(navbar, /event\.metaKey \|\| event\.ctrlKey/);
+  assert.match(navbar, /event\.key\.toLowerCase\(\) === "k"/);
+  assert.match(search, /ArrowDown/);
+  assert.match(search, /ArrowUp/);
+  assert.match(search, /event\.key === "Enter"/);
+  assert.match(search, /role="listbox"/);
+});
+
+test("global public search uses canonical locale routes and localized UI copy", () => {
+  const layout = read("src/app/(public)/layout.tsx");
+  const search = read("src/components/public-search.tsx");
+  const routes = read("src/lib/content/public-routes.ts");
+
+  assert.match(layout, /publicPath\(locale, "\/work\/" \+ item\.slug\)/);
+  assert.match(layout, /publicPath\(locale, "\/insights\/" \+ item\.slug\)/);
+  assert.match(search, /PUBLIC_UI\[locale\]/);
+  assert.match(routes, /searchPlaceholder/);
+  assert.match(routes, /searchKeyboardHelp/);
+});

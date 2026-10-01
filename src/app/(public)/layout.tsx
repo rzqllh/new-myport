@@ -1,21 +1,40 @@
 import { getSiteCopy } from "@/lib/content/site-content-server";
+import {
+  getPublicInsights,
+  getPublicSettings,
+  getPublicWork,
+} from "@/lib/content/public-content";
+import { publicPath } from "@/lib/content/public-routes";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { SkipLink } from "@/components/layout/skip-link";
 import { PageTransition } from "@/components/layout/page-transition";
 import { DeferredChatWidget } from "@/components/deferred-chat-widget";
+import type { PublicSearchItem } from "@/components/public-search";
 import { SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
-import { getPublicSettings } from "@/lib/content/public-content";
+import type { Locale } from "@/types/content";
 
 export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [settings, enCopy, idCopy] = await Promise.all([
+  const [
+    settings,
+    enCopy,
+    idCopy,
+    enWork,
+    idWork,
+    enInsights,
+    idInsights,
+  ] = await Promise.all([
     getPublicSettings(),
     getSiteCopy("en"),
     getSiteCopy("id"),
+    getPublicWork("en"),
+    getPublicWork("id"),
+    getPublicInsights("en"),
+    getPublicInsights("id"),
   ]);
 
   const siteName = settings.general.site_title || SITE_NAME;
@@ -40,12 +59,85 @@ export default async function PublicLayout({
     },
   };
 
+  function buildSearchItems(locale: Locale): PublicSearchItem[] {
+    const copy = locale === "id" ? idCopy : enCopy;
+    const labels = labelsByLocale[locale];
+    const work = locale === "id" ? idWork : enWork;
+    const insights = locale === "id" ? idInsights : enInsights;
+
+    const pages: PublicSearchItem[] = [
+      {
+        id: "page-work",
+        kind: "page",
+        title: labels.work,
+        description: copy["work.index"].intro,
+        href: publicPath(locale, "/work"),
+      },
+      {
+        id: "page-insights",
+        kind: "page",
+        title: labels.insights,
+        description: copy["insights.index"].intro,
+        href: publicPath(locale, "/insights"),
+      },
+      {
+        id: "page-about",
+        kind: "page",
+        title: labels.about,
+        description: copy["about.intro"].intro,
+        href: publicPath(locale, "/about"),
+      },
+      {
+        id: "page-contact",
+        kind: "page",
+        title: labels.contact,
+        description: copy["contact.intro"].intro,
+        href: publicPath(locale, "/contact"),
+      },
+      {
+        id: "page-resume",
+        kind: "page",
+        title: labels.resume,
+        description: copy["home.hero"].positioning,
+        href: publicPath(locale, "/resume"),
+      },
+    ];
+
+    return [
+      ...pages,
+      ...work.map(
+        (item): PublicSearchItem => ({
+          id: "work-" + item.id,
+          kind: "work",
+          title: item.title,
+          description: item.summary || item.role || "",
+          href: publicPath(locale, "/work/" + item.slug),
+        })
+      ),
+      ...insights.map(
+        (item): PublicSearchItem => ({
+          id: "insight-" + item.id,
+          kind: "insight",
+          title: item.title,
+          description: item.excerpt || "",
+          href: publicPath(locale, "/insights/" + item.slug),
+        })
+      ),
+    ];
+  }
+
+  const searchItemsByLocale: Record<Locale, PublicSearchItem[]> = {
+    en: buildSearchItems("en"),
+    id: buildSearchItems("id"),
+  };
+
   return (
     <>
       <SkipLink />
       <Navbar
         siteName={siteName}
         labelsByLocale={labelsByLocale}
+        searchItemsByLocale={searchItemsByLocale}
         availability={profile.availability}
         location={profile.location}
       />

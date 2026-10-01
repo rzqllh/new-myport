@@ -2,8 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { List } from "@phosphor-icons/react";
+import { useEffect, useState } from "react";
+import { List, MagnifyingGlass } from "@phosphor-icons/react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import {
+  GlobalSearchDialog,
+  type PublicSearchItem,
+} from "@/components/public-search";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -32,6 +37,7 @@ interface NavigationLabels {
 interface NavbarProps {
   siteName: string;
   labelsByLocale: Record<Locale, NavigationLabels>;
+  searchItemsByLocale: Record<Locale, PublicSearchItem[]>;
   availability?: string;
   location?: string;
 }
@@ -46,16 +52,30 @@ const routes = [
 export function Navbar({
   siteName,
   labelsByLocale,
+  searchItemsByLocale,
   availability,
   location,
 }: NavbarProps) {
   const pathname = usePathname();
+  const [searchOpen, setSearchOpen] = useState(false);
   const locale = localeFromPathname(pathname);
   const labels = labelsByLocale[locale];
   const ui = PUBLIC_UI[locale];
   const homeHref = publicPath(locale, "/");
   const resumeHref = publicPath(locale, "/resume");
   const localeHref = switchLocalePath(pathname);
+
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
+  }, []);
 
   return (
     <header
@@ -97,6 +117,15 @@ export function Navbar({
           })}
 
           <span className="mx-2 h-4 w-px bg-border" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSearchOpen(true)}
+            aria-label={ui.searchOpen}
+          >
+            <MagnifyingGlass className="size-4" />
+            {ui.searchOpen}
+          </Button>
           <Link
             href={localeHref}
             hrefLang={locale === "en" ? "id" : "en"}
@@ -117,6 +146,14 @@ export function Navbar({
         </div>
 
         <div className="flex items-center gap-1 md:hidden">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSearchOpen(true)}
+            aria-label={ui.searchOpen}
+          >
+            <MagnifyingGlass className="size-5" />
+          </Button>
           <Link
             href={localeHref}
             hrefLang={locale === "en" ? "id" : "en"}
@@ -180,6 +217,13 @@ export function Navbar({
           </Sheet>
         </div>
       </nav>
+
+      <GlobalSearchDialog
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        locale={locale}
+        items={searchItemsByLocale[locale]}
+      />
     </header>
   );
 }
