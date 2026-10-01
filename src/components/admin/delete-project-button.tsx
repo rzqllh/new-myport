@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Trash } from "@phosphor-icons/react/dist/ssr";
 import { createClient } from "@/lib/supabase/client";
+import { revalidatePublicContent } from "@/lib/content/revalidate-public-client";
 
 interface DeleteProjectButtonProps {
   id: string;
@@ -23,6 +24,7 @@ export function DeleteProjectButton({ id }: DeleteProjectButtonProps) {
     
     setIsDeleting(false);
     if (!error) {
+      await revalidatePublicContent();
       router.refresh();
     } else {
       alert("Error deleting project.");

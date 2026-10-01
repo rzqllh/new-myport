@@ -1,17 +1,20 @@
-/* eslint-disable */
 "use client";
 
 import * as React from "react";
-import { Button } from "@/components/ui/button";
 import { Plus, Check, X } from "@phosphor-icons/react";
+import { Button } from "@/components/ui/button";
 import { AdminCard, AdminCardBody } from "./admin-card";
 
 export interface CrudListProps<T extends { id: string }> {
   items: T[];
-  itemName?: string; // e.g. "Skill"
+  itemName?: string;
   renderItem: (
     item: T,
-    actions: { startEdit: () => void; deleteItem: () => void; isDeleting: boolean }
+    actions: {
+      startEdit: () => void;
+      deleteItem: () => void;
+      isDeleting: boolean;
+    }
   ) => React.ReactNode;
   renderForm: (
     draft: Partial<T>,
@@ -22,6 +25,10 @@ export interface CrudListProps<T extends { id: string }> {
   onDelete: (id: string) => Promise<void>;
   blankItem: Partial<T>;
   onReorder?: (items: T[]) => Promise<void>;
+}
+
+function errorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
 }
 
 export function CrudList<T extends { id: string }>({
@@ -61,8 +68,8 @@ export function CrudList<T extends { id: string }>({
       await onUpdate(id, editDraft);
       setEditingId(null);
       setEditDraft(null);
-    } catch (err: any) {
-      setError(err.message || "Failed to update");
+    } catch (err: unknown) {
+      setError(errorMessage(err, "Failed to update"));
     } finally {
       setLoadingId(null);
     }
@@ -74,8 +81,8 @@ export function CrudList<T extends { id: string }>({
     setError(null);
     try {
       await onDelete(id);
-    } catch (err: any) {
-      setError(err.message || "Failed to delete");
+    } catch (err: unknown) {
+      setError(errorMessage(err, "Failed to delete"));
     } finally {
       setLoadingId(null);
     }
@@ -88,10 +95,9 @@ export function CrudList<T extends { id: string }>({
       await onAdd(newDraft);
       setAddingNew(false);
       setNewDraft({ ...blankItem });
-    } catch (err: any) {
-      setError(err.message || "Failed to add");
+    } catch (err: unknown) {
+      setError(errorMessage(err, "Failed to add"));
     } finally {
-      setLoadingId("new"); // Keep it "new" while adding is true but request finishes, handleAdd clears it in finally
       setLoadingId(null);
     }
   };
@@ -104,26 +110,28 @@ export function CrudList<T extends { id: string }>({
 
   return (
     <div className="space-y-4">
-      {error && (
-        <div className="bg-destructive/10 text-destructive p-3 rounded-lg text-sm">
+      {error ? (
+        <div className="bg-destructive/10 p-3 text-sm text-destructive">
           {error}
         </div>
-      )}
+      ) : null}
 
-      {items.length === 0 && !addingNew && (
+      {items.length === 0 && !addingNew ? (
         <p className="text-sm text-muted-foreground">
           No {itemName.toLowerCase()}s yet.
         </p>
-      )}
+      ) : null}
 
-      {items.length > 0 && (
+      {items.length > 0 ? (
         <AdminCard>
           {items.map((item) => (
             <React.Fragment key={item.id}>
               {editingId === item.id && editDraft ? (
                 <AdminCardBody>
                   {renderForm(editDraft, (patch) =>
-                    setEditDraft((prev) => (prev ? { ...prev, ...patch } : prev))
+                    setEditDraft((prev) =>
+                      prev ? { ...prev, ...patch } : prev
+                    )
                   )}
                   <div className="flex gap-2">
                     <Button
@@ -131,11 +139,11 @@ export function CrudList<T extends { id: string }>({
                       onClick={() => handleSaveEdit(item.id)}
                       disabled={loadingId === item.id}
                     >
-                      <Check weight="bold" data-icon="inline-start" size={14} />
+                      <Check weight="bold" size={14} />
                       {loadingId === item.id ? "Saving..." : "Save"}
                     </Button>
                     <Button size="sm" variant="outline" onClick={cancelEdit}>
-                      <X weight="bold" data-icon="inline-start" size={14} />
+                      <X weight="bold" size={14} />
                       Cancel
                     </Button>
                   </div>
@@ -150,7 +158,7 @@ export function CrudList<T extends { id: string }>({
             </React.Fragment>
           ))}
         </AdminCard>
-      )}
+      ) : null}
 
       {addingNew ? (
         <AdminCard>
@@ -160,7 +168,11 @@ export function CrudList<T extends { id: string }>({
               setNewDraft((prev) => ({ ...prev, ...patch }))
             )}
             <div className="flex gap-2">
-              <Button size="sm" onClick={handleAdd} disabled={loadingId === "new"}>
+              <Button
+                size="sm"
+                onClick={handleAdd}
+                disabled={loadingId === "new"}
+              >
                 {loadingId === "new" ? "Adding..." : "Add"}
               </Button>
               <Button size="sm" variant="outline" onClick={cancelAdd}>
@@ -170,7 +182,11 @@ export function CrudList<T extends { id: string }>({
           </AdminCardBody>
         </AdminCard>
       ) : (
-        <Button variant="outline" onClick={() => setAddingNew(true)} className="gap-2">
+        <Button
+          variant="outline"
+          onClick={() => setAddingNew(true)}
+          className="gap-2"
+        >
           <Plus weight="bold" size={16} />
           Add {itemName}
         </Button>
@@ -178,4 +194,3 @@ export function CrudList<T extends { id: string }>({
     </div>
   );
 }
-

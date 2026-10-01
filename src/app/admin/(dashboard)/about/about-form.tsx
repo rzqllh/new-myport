@@ -1,140 +1,92 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowRight } from "@phosphor-icons/react";
+import { toast } from "sonner";
+import { createClient } from "@/lib/supabase/client";
+import { revalidatePublicContent } from "@/lib/content/revalidate-public-client";
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { ImageUpload } from "@/components/image-upload";
-import { createClient } from "@/lib/supabase/client";
-import { toast } from "sonner";
 
-interface AboutData {
+interface AboutMedia {
   id: string;
-  bio: string | null;
-  philosophy: string | null;
-  hobbies: string | null;
   photo_url: string | null;
 }
 
-interface AboutFormProps {
-  initialData: AboutData | null;
-}
-
-export function AboutForm({ initialData }: AboutFormProps) {
+export function AboutForm({ initialData }: { initialData: AboutMedia | null }) {
   const supabase = createClient();
   const router = useRouter();
-
-  const [bio, setBio] = useState(initialData?.bio ?? "");
-  const [philosophy, setPhilosophy] = useState(initialData?.philosophy ?? "");
-  const [hobbies, setHobbies] = useState(initialData?.hobbies ?? "");
   const [photoUrl, setPhotoUrl] = useState(initialData?.photo_url ?? "");
-
   const [saving, setSaving] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     setSaving(true);
 
-    const payload = {
-      bio: bio || null,
-      philosophy: philosophy || null,
-      hobbies: hobbies || null,
-      photo_url: photoUrl || null,
-    };
+    const payload = { photo_url: photoUrl || null };
+    const result = initialData?.id
+      ? await supabase.from("about").update(payload).eq("id", initialData.id)
+      : await supabase.from("about").insert(payload);
 
-    let err;
-    if (initialData?.id) {
-      ({ error: err } = await supabase
-        .from("about")
-        .update(payload)
-        .eq("id", initialData.id));
-    } else {
-      ({ error: err } = await supabase.from("about").insert(payload));
+    if (result.error) {
+      toast.error(result.error.message);
+      setSaving(false);
+      return;
     }
 
-    if (err) {
-      toast.error(err.message);
-    } else {
-      toast.success("Changes saved successfully.");
-      router.refresh();
-    }
-
+    await revalidatePublicContent();
+    toast.success("Profile media saved.");
+    router.refresh();
     setSaving(false);
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl">
-      {/* Photo */}
-      <div className="space-y-3">
-        <div>
-          <Label>Profile Photo</Label>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Displayed on the About page and previews.
-          </p>
+    <div className="space-y-8">
+      <AdminPageHeader
+        title="Profile"
+        description="Profile media is operational data. Public About narrative is authored bilingually in Site Content."
+        action={
+          <Button
+            variant="outline"
+            render={<Link href="/admin/site-content" />}
+            nativeButton={false}
+          >
+            Edit About copy
+            <ArrowRight className="size-4" />
+          </Button>
+        }
+      />
+
+      <form onSubmit={handleSubmit} className="max-w-xl space-y-7">
+        <div className="space-y-3">
+          <div>
+            <Label>Profile photo</Label>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+              Shared across locales. Biography, working approach, and outside-work copy belong to About · Profile in Site Content.
+            </p>
+          </div>
+          <div className="max-w-xs">
+            <ImageUpload
+              value={photoUrl || undefined}
+              folder="portfolio/about"
+              label="Upload photo"
+              aspectRatio={4 / 5}
+              onUpload={(url) => setPhotoUrl(url)}
+              onRemove={() => setPhotoUrl("")}
+            />
+          </div>
         </div>
-        <div className="max-w-xs">
-          <ImageUpload
-            value={photoUrl || undefined}
-            folder="portfolio/about"
-            label="Upload photo"
-            aspectRatio={1}
-            onUpload={(url) => setPhotoUrl(url)}
-            onRemove={() => setPhotoUrl("")}
-          />
+
+        <div className="flex justify-end border-t border-border pt-5">
+          <Button type="submit" disabled={saving}>
+            {saving ? "Saving…" : "Save profile media"}
+          </Button>
         </div>
-      </div>
-
-      {/* Bio */}
-      <div className="space-y-2">
-        <Label htmlFor="bio">Bio</Label>
-        <p className="text-xs text-muted-foreground">
-          Main biography paragraph shown prominently on the About page.
-        </p>
-        <Textarea
-          id="bio"
-          value={bio}
-          onChange={(e) => setBio(e.target.value)}
-          placeholder="A few sentences about who you are and what you do..."
-          className="h-36 resize-none"
-        />
-      </div>
-
-      {/* Philosophy */}
-      <div className="space-y-2">
-        <Label htmlFor="philosophy">Philosophy / Approach</Label>
-        <p className="text-xs text-muted-foreground">
-          Your working philosophy, values, or design approach.
-        </p>
-        <Textarea
-          id="philosophy"
-          value={philosophy}
-          onChange={(e) => setPhilosophy(e.target.value)}
-          placeholder="How you think about work, design, or code..."
-          className="h-28 resize-none"
-        />
-      </div>
-
-      {/* Hobbies */}
-      <div className="space-y-2">
-        <Label htmlFor="hobbies">Hobbies & Interests</Label>
-        <p className="text-xs text-muted-foreground">
-          Brief section about life outside work.
-        </p>
-        <Textarea
-          id="hobbies"
-          value={hobbies}
-          onChange={(e) => setHobbies(e.target.value)}
-          placeholder="What you enjoy outside of work..."
-          className="h-24 resize-none"
-        />
-      </div>
-
-      <div className="flex justify-end pt-4 border-t">
-        <Button type="submit" disabled={saving}>
-          {saving ? "Saving..." : "Save Changes"}
-        </Button>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 }

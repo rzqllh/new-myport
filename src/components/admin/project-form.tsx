@@ -1,15 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import {
+  ArrowSquareOut,
+  Image as ImageIcon,
+  X,
+} from "@phosphor-icons/react";
+import { createClient } from "@/lib/supabase/client";
+import { revalidatePublicContent } from "@/lib/content/revalidate-public-client";
+import { createSlug, validateSlug } from "@/lib/content/slug";
+import { isV2SchemaUnavailable } from "@/lib/content/schema-compat";
+import {
+  EditorialWorkspace,
+  LocaleSwitch,
+  type EditorSection,
+} from "@/components/admin/editorial-workspace";
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
+import { ImageUpload } from "@/components/image-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -17,40 +28,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ImageUpload } from "@/components/image-upload";
-import { createClient } from "@/lib/supabase/client";
-import { X, DotsSixVertical, Image as ImageIcon } from "@phosphor-icons/react";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 
-// ─── Schema ────────────────────────────────────────────────────────────────────
+type PublishState = "draft" | "published";
+type Locale = "en" | "id";
 
-const projectSchema = z.object({
-  title: z.string().min(2, "Title must be at least 2 characters"),
-  slug: z
-    .string()
-    .min(2, "Slug must be at least 2 characters")
-    .regex(
-      /^[a-z0-9-]+$/,
-      "Slug can only contain lowercase letters, numbers, and hyphens"
-    ),
-  description: z.string().optional(),
-  role: z.string().optional(),
-  category: z.string().optional(),
-  tech_stack: z.string().optional(),
-  demo_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  github_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  featured: z.boolean(),
-  status: z.enum(["draft", "published"]),
-  sort_order: z.number().int(),
-});
-
-type ProjectFormValues = z.infer<typeof projectSchema>;
-
-// ─── Types ─────────────────────────────────────────────────────────────────────
+interface ProjectRecord {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  role: string | null;
+  category: string | null;
+  tech_stack: string[];
+  demo_url: string | null;
+  github_url: string | null;
+  featured: boolean;
+  status: PublishState;
+  sort_order: number;
+  cover_url: string | null;
+  cover_public_id: string | null;
+}
 
 interface GalleryImage {
-  /** Temporary client-side key for React lists */
   key: string;
-  /** UUID from Supabase (undefined for newly-added images not yet saved) */
   id?: string;
   url: string;
   public_id: string;
@@ -58,503 +60,785 @@ interface GalleryImage {
   sort_order: number;
 }
 
-interface ProjectFormProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  initialData?: any;
+interface WorkCopy {
+  title: string;
+  summary: string;
+  role: string;
+  context: string;
+  challenge: string;
+  approach: string;
+  outcome: string;
+  lessons: string;
+  seoTitle: string;
+  seoDescription: string;
 }
 
-// ─── Component ─────────────────────────────────────────────────────────────────
+const blankCopy: WorkCopy = {
+  title: "",
+  summary: "",
+  role: "",
+  context: "",
+  challenge: "",
+  approach: "",
+  outcome: "",
+  lessons: "",
+  seoTitle: "",
+  seoDescription: "",
+};
 
-export function ProjectForm({ initialData }: ProjectFormProps) {
-  const router = useRouter();
-  const supabase = createClient();
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Cover image state
-  const [coverUrl, setCoverUrl] = useState<string>(
-    initialData?.cover_url ?? ""
+function hasCopy(copy: WorkCopy) {
+  return Boolean(
+    copy.title ||
+      copy.summary ||
+      copy.context ||
+      copy.challenge ||
+      copy.approach ||
+      copy.outcome
   );
-  const [coverPublicId, setCoverPublicId] = useState<string>(
+}
+
+export function ProjectForm({ initialData }: { initialData?: ProjectRecord }) {
+  const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
+
+  const [locale, setLocale] = useState<Locale>("en");
+  const [enCopy, setEnCopy] = useState<WorkCopy>({
+    ...blankCopy,
+    title: initialData?.title ?? "",
+    summary: initialData?.description ?? "",
+    role: initialData?.role ?? "",
+  });
+  const [idCopy, setIdCopy] = useState<WorkCopy>(blankCopy);
+  const [slug, setSlug] = useState(initialData?.slug ?? "");
+  const [status, setStatus] = useState<PublishState>(
+    initialData?.status ?? "draft"
+  );
+  const [category, setCategory] = useState(initialData?.category ?? "");
+  const [techStack, setTechStack] = useState(
+    initialData?.tech_stack?.join(", ") ?? ""
+  );
+  const [demoUrl, setDemoUrl] = useState(initialData?.demo_url ?? "");
+  const [githubUrl, setGithubUrl] = useState(initialData?.github_url ?? "");
+  const [featured, setFeatured] = useState(initialData?.featured ?? false);
+  const [sortOrder, setSortOrder] = useState(initialData?.sort_order ?? 0);
+  const [discipline, setDiscipline] = useState("engineering");
+  const [workType, setWorkType] = useState("case-study");
+  const [coverUrl, setCoverUrl] = useState(initialData?.cover_url ?? "");
+  const [coverPublicId, setCoverPublicId] = useState(
     initialData?.cover_public_id ?? ""
   );
-
-  // Gallery images state — loaded from project_images table on edit
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
-  // IDs of images that were already in DB and the user has removed
   const [deletedImageIds, setDeletedImageIds] = useState<string[]>([]);
+  const [permalinkEditing, setPermalinkEditing] = useState(
+    !initialData || initialData.status !== "published"
+  );
+  const [v2Available, setV2Available] = useState<boolean | null>(null);
+  const [dirty, setDirty] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // ── Load existing gallery images on edit ──────────────────────────────────
+  const activeCopy = locale === "en" ? enCopy : idCopy;
+  const setActiveCopy = (patch: Partial<WorkCopy>) => {
+    setDirty(true);
+    if (locale === "en") {
+      setEnCopy((current) => ({ ...current, ...patch }));
+    } else {
+      setIdCopy((current) => ({ ...current, ...patch }));
+    }
+  };
+
+  useEffect(() => {
+    const warn = (event: BeforeUnloadEvent) => {
+      if (!dirty) return;
+      event.preventDefault();
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+
   useEffect(() => {
     if (!initialData?.id) return;
 
-    supabase
-      .from("project_images")
-      .select("id, url, public_id, alt_text, sort_order")
-      .eq("project_id", initialData.id)
-      .order("sort_order")
-      .then(({ data, error: loadError }) => {
-        if (loadError) {
-          console.error("Failed to load project images:", loadError);
-          return;
-        }
-        if (data) {
-          setGalleryImages(
-            data.map((img) => ({
-              key: img.id,
-              id: img.id,
-              url: img.url,
-              public_id: img.public_id ?? "",
-              alt_text: img.alt_text ?? "",
-              sort_order: img.sort_order,
-            }))
-          );
-        }
-      });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialData?.id]);
+    let active = true;
 
-  // ── Form ──────────────────────────────────────────────────────────────────
-  const form = useForm<ProjectFormValues>({
-    resolver: zodResolver(projectSchema),
-    defaultValues: {
-      title: initialData?.title ?? "",
-      slug: initialData?.slug ?? "",
-      description: initialData?.description ?? "",
-      role: initialData?.role ?? "",
-      category: initialData?.category ?? "",
-      tech_stack: initialData?.tech_stack
-        ? (initialData.tech_stack as string[]).join(", ")
-        : "",
-      demo_url: initialData?.demo_url ?? "",
-      github_url: initialData?.github_url ?? "",
-      featured: initialData?.featured ?? false,
-      status: initialData?.status ?? "draft",
-      sort_order: initialData?.sort_order ?? 0,
-    },
-  });
+    Promise.all([
+      supabase
+        .from("project_images")
+        .select("id, url, public_id, alt_text, sort_order")
+        .eq("project_id", initialData.id)
+        .order("sort_order"),
+      supabase
+        .from("work_items")
+        .select("discipline, work_type")
+        .eq("id", initialData.id)
+        .maybeSingle(),
+      supabase
+        .from("work_translations")
+        .select(
+          "locale, title, summary, role, context, challenge, approach, outcome, lessons, seo_title, seo_description"
+        )
+        .eq("work_id", initialData.id),
+    ]).then(([imagesResult, workResult, translationResult]) => {
+      if (!active) return;
 
-  // Auto-generate slug from title
-  function handleTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    form.setValue("title", e.target.value);
-    if (!initialData?.id) {
-      form.setValue(
-        "slug",
-        e.target.value
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/^-|-$/g, "")
-      );
-    }
-  }
+      if (imagesResult.data) {
+        setGalleryImages(
+          imagesResult.data.map((image) => ({
+            key: image.id,
+            id: image.id,
+            url: image.url,
+            public_id: image.public_id ?? "",
+            alt_text: image.alt_text ?? "",
+            sort_order: image.sort_order,
+          }))
+        );
+      }
 
-  // ── Gallery helpers ────────────────────────────────────────────────────────
+      if (workResult.error && isV2SchemaUnavailable(workResult.error)) {
+        setV2Available(false);
+        return;
+      }
 
-  function addGalleryImage(url: string, public_id: string) {
-    setGalleryImages((prev) => [
-      ...prev,
+      if (
+        translationResult.error &&
+        isV2SchemaUnavailable(translationResult.error)
+      ) {
+        setV2Available(false);
+        return;
+      }
+
+      setV2Available(true);
+
+      if (workResult.data) {
+        setDiscipline(workResult.data.discipline);
+        setWorkType(workResult.data.work_type);
+      }
+
+      for (const translation of translationResult.data ?? []) {
+        const copy: WorkCopy = {
+          title: translation.title ?? "",
+          summary: translation.summary ?? "",
+          role: translation.role ?? "",
+          context: translation.context ?? "",
+          challenge: translation.challenge ?? "",
+          approach: translation.approach ?? "",
+          outcome: translation.outcome ?? "",
+          lessons: translation.lessons ?? "",
+          seoTitle: translation.seo_title ?? "",
+          seoDescription: translation.seo_description ?? "",
+        };
+        if (translation.locale === "en") setEnCopy(copy);
+        if (translation.locale === "id") setIdCopy(copy);
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [initialData?.id, supabase]);
+
+  const handleEnglishTitle = (value: string) => {
+    setDirty(true);
+    setEnCopy((current) => ({ ...current, title: value }));
+    if (!initialData) setSlug(createSlug(value));
+  };
+
+  function addGalleryImage(url: string, publicId: string) {
+    setDirty(true);
+    setGalleryImages((current) => [
+      ...current,
       {
         key: crypto.randomUUID(),
         url,
-        public_id,
+        public_id: publicId,
         alt_text: "",
-        sort_order: prev.length,
+        sort_order: current.length,
       },
     ]);
   }
 
   function removeGalleryImage(key: string) {
-    setGalleryImages((prev) => {
-      const img = prev.find((i) => i.key === key);
-      if (img?.id) {
-        setDeletedImageIds((ids) => [...ids, img.id!]);
+    setDirty(true);
+    setGalleryImages((current) => {
+      const image = current.find((item) => item.key === key);
+      if (image?.id) {
+        setDeletedImageIds((ids) => [...ids, image.id!]);
       }
-      return prev
-        .filter((i) => i.key !== key)
-        .map((i, idx) => ({ ...i, sort_order: idx }));
+      return current
+        .filter((item) => item.key !== key)
+        .map((item, index) => ({ ...item, sort_order: index }));
     });
   }
 
-  function updateAltText(key: string, value: string) {
-    setGalleryImages((prev) =>
-      prev.map((i) => (i.key === key ? { ...i, alt_text: value } : i))
-    );
-  }
-
-  // ── Submit ────────────────────────────────────────────────────────────────
-
-  const onSubmit = async (values: ProjectFormValues) => {
-    setIsSubmitting(true);
-    setError(null);
-
-    const techStackArray = values.tech_stack
-      ? values.tech_stack
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean)
-      : [];
-
-    const dataToSave = {
-      title: values.title,
-      slug: values.slug,
-      description: values.description ?? null,
-      role: values.role ?? null,
-      category: values.category ?? null,
-      tech_stack: techStackArray,
-      demo_url: values.demo_url?.trim() || null,
-      github_url: values.github_url?.trim() || null,
-      featured: values.featured,
-      status: values.status,
-      sort_order: values.sort_order,
-      cover_url: coverUrl || null,
-      cover_public_id: coverPublicId || null,
+  async function syncV2(projectId: string) {
+    const workPayload = {
+      id: projectId,
+      slug,
+      status,
+      discipline,
+      work_type: workType,
+      featured,
+      sort_order: sortOrder,
+      live_url: demoUrl.trim() || null,
+      repository_url: githubUrl.trim() || null,
+      published_at: status === "published" ? new Date().toISOString() : null,
     };
 
-    try {
-      let projectId: string;
+    const { error: workError } = await supabase
+      .from("work_items")
+      .upsert(workPayload, { onConflict: "id" });
 
-      if (initialData?.id) {
-        // Update existing project
-        const { error: updateError } = await supabase
-          .from("projects")
-          .update(dataToSave)
-          .eq("id", initialData.id);
+    if (workError) {
+      if (isV2SchemaUnavailable(workError)) {
+        setV2Available(false);
+        return;
+      }
+      throw workError;
+    }
 
-        if (updateError) throw updateError;
-        projectId = initialData.id;
-      } else {
-        // Insert new project
-        const { data: inserted, error: insertError } = await supabase
-          .from("projects")
-          .insert(dataToSave)
-          .select("id")
-          .single();
+    const translations = [
+      {
+        work_id: projectId,
+        locale: "en",
+        status,
+        title: enCopy.title.trim(),
+        summary: enCopy.summary.trim() || null,
+        role: enCopy.role.trim() || null,
+        context: enCopy.context.trim() || null,
+        challenge: enCopy.challenge.trim() || null,
+        approach: enCopy.approach.trim() || null,
+        outcome: enCopy.outcome.trim() || null,
+        lessons: enCopy.lessons.trim() || null,
+        seo_title: enCopy.seoTitle.trim() || null,
+        seo_description: enCopy.seoDescription.trim() || null,
+      },
+    ];
 
-        if (insertError) throw insertError;
-        projectId = inserted.id;
+    if (hasCopy(idCopy)) {
+      translations.push({
+        work_id: projectId,
+        locale: "id",
+        status: "draft",
+        title: idCopy.title.trim() || enCopy.title.trim(),
+        summary: idCopy.summary.trim() || null,
+        role: idCopy.role.trim() || null,
+        context: idCopy.context.trim() || null,
+        challenge: idCopy.challenge.trim() || null,
+        approach: idCopy.approach.trim() || null,
+        outcome: idCopy.outcome.trim() || null,
+        lessons: idCopy.lessons.trim() || null,
+        seo_title: idCopy.seoTitle.trim() || null,
+        seo_description: idCopy.seoDescription.trim() || null,
+      });
+    }
+
+    const { error: translationError } = await supabase
+      .from("work_translations")
+      .upsert(translations, { onConflict: "work_id,locale" });
+
+    if (translationError && !isV2SchemaUnavailable(translationError)) {
+      throw translationError;
+    }
+
+    if (
+      initialData?.status === "published" &&
+      initialData.slug !== slug
+    ) {
+      const redirects = [
+        {
+          content_type: "work",
+          content_id: projectId,
+          locale: "en",
+          old_slug: initialData.slug,
+          new_slug: slug,
+        },
+      ];
+
+      if (hasCopy(idCopy)) {
+        redirects.push({
+          content_type: "work",
+          content_id: projectId,
+          locale: "id",
+          old_slug: initialData.slug,
+          new_slug: slug,
+        });
       }
 
-      // ── Delete removed images ──────────────────────────────────────────────
-      if (deletedImageIds.length > 0) {
+      const { error: redirectError } = await supabase
+        .from("content_redirects")
+        .upsert(redirects, { onConflict: "content_type,locale,old_slug" });
+
+      if (redirectError && !isV2SchemaUnavailable(redirectError)) {
+        throw redirectError;
+      }
+    }
+
+    setV2Available(true);
+  }
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    setError(null);
+
+    const slugState = validateSlug(slug);
+    if (!slugState.valid) {
+      setError(slugState.reason);
+      return;
+    }
+    if (!enCopy.title.trim()) {
+      setError("English title is required.");
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const legacyPayload = {
+        title: enCopy.title.trim(),
+        slug,
+        description: enCopy.summary.trim() || null,
+        role: enCopy.role.trim() || null,
+        category: category.trim() || null,
+        tech_stack: techStack
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean),
+        demo_url: demoUrl.trim() || null,
+        github_url: githubUrl.trim() || null,
+        featured,
+        status,
+        sort_order: sortOrder,
+        cover_url: coverUrl || null,
+        cover_public_id: coverPublicId || null,
+      };
+
+      let projectId = initialData?.id;
+
+      if (projectId) {
+        const { error: updateError } = await supabase
+          .from("projects")
+          .update(legacyPayload)
+          .eq("id", projectId);
+        if (updateError) throw updateError;
+      } else {
+        const { data, error: insertError } = await supabase
+          .from("projects")
+          .insert(legacyPayload)
+          .select("id")
+          .single();
+        if (insertError) throw insertError;
+        projectId = data.id;
+      }
+
+      if (deletedImageIds.length) {
         const { error: deleteError } = await supabase
           .from("project_images")
           .delete()
           .in("id", deletedImageIds);
-
         if (deleteError) throw deleteError;
       }
 
-      // ── Upsert gallery images ──────────────────────────────────────────────
-      const newImages = galleryImages.filter((i) => !i.id);
-      const existingImages = galleryImages.filter((i) => i.id);
-
-      if (newImages.length > 0) {
-        const { error: insertImgError } = await supabase
+      const newImages = galleryImages.filter((image) => !image.id);
+      if (newImages.length) {
+        const { error: insertImageError } = await supabase
           .from("project_images")
           .insert(
-            newImages.map((img) => ({
+            newImages.map((image) => ({
               project_id: projectId,
-              url: img.url,
-              public_id: img.public_id || null,
-              alt_text: img.alt_text || null,
-              sort_order: img.sort_order,
+              url: image.url,
+              public_id: image.public_id || null,
+              alt_text: image.alt_text || null,
+              sort_order: image.sort_order,
             }))
           );
-
-        if (insertImgError) throw insertImgError;
+        if (insertImageError) throw insertImageError;
       }
 
-      if (existingImages.length > 0) {
-        for (const img of existingImages) {
-          const { error: updateImgError } = await supabase
-            .from("project_images")
-            .update({
-              alt_text: img.alt_text || null,
-              sort_order: img.sort_order,
-            })
-            .eq("id", img.id!);
-
-          if (updateImgError) throw updateImgError;
-        }
+      for (const image of galleryImages.filter((item) => item.id)) {
+        const { error: imageError } = await supabase
+          .from("project_images")
+          .update({
+            alt_text: image.alt_text || null,
+            sort_order: image.sort_order,
+          })
+          .eq("id", image.id!);
+        if (imageError) throw imageError;
       }
 
+      if (!projectId) throw new Error("Project ID was not returned after save.");
+      await syncV2(projectId);
+      await revalidatePublicContent();
+      setDirty(false);
       router.push("/admin/projects");
       router.refresh();
-    } catch (err: unknown) {
-      console.error(err);
+    } catch (caught: unknown) {
+      console.error(caught);
       setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong saving the project."
+        caught instanceof Error ? caught.message : "Unable to save this Work item."
       );
-      setIsSubmitting(false);
+    } finally {
+      setSaving(false);
     }
-  };
+  }
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  const sections: EditorSection[] = [
+    { id: "overview", label: "Overview", complete: Boolean(activeCopy.title) },
+    {
+      id: "story",
+      label: "Story",
+      complete: Boolean(activeCopy.context || activeCopy.challenge || activeCopy.approach),
+    },
+    {
+      id: "outcome",
+      label: "Outcome",
+      complete: Boolean(activeCopy.outcome),
+    },
+    { id: "media", label: "Media", complete: Boolean(coverUrl || galleryImages.length) },
+  ];
+
+  const inspector = (
+    <div className="space-y-6">
+      <div>
+        <p className="text-sm font-medium">Publication</p>
+        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+          English remains the default public locale; Indonesian publishes independently when its translation is ready.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Status</Label>
+        <Select
+          value={status}
+          onValueChange={(value) => {
+            setDirty(true);
+            setStatus(value as PublishState);
+          }}
+        >
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="draft">Draft</SelectItem>
+            <SelectItem value="published">Published</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2 border-t border-border pt-5">
+        <Label htmlFor="work-slug">Permalink</Label>
+        <div className="rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+          /work/{slug || "untitled"}
+        </div>
+        <Input
+          id="work-slug"
+          value={slug}
+          disabled={!permalinkEditing}
+          onChange={(event) => {
+            setDirty(true);
+            setSlug(createSlug(event.target.value));
+          }}
+        />
+        {!permalinkEditing ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setPermalinkEditing(true)}
+          >
+            Change permalink
+          </Button>
+        ) : initialData?.status === "published" ? (
+          <p className="text-xs leading-5 text-muted-foreground">
+            The previous URL will be preserved in redirect history when schema v2 is active.
+          </p>
+        ) : null}
+      </div>
+
+      <div className="space-y-3 border-t border-border pt-5">
+        <Label>Classification</Label>
+        <Select value={discipline} onValueChange={(value) => { setDirty(true); setDiscipline(value ?? "engineering"); }}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="project-management">Project management</SelectItem>
+            <SelectItem value="product">Product</SelectItem>
+            <SelectItem value="engineering">Engineering</SelectItem>
+            <SelectItem value="research-design">Research & design</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={workType} onValueChange={(value) => { setDirty(true); setWorkType(value ?? "case-study"); }}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="case-study">Case study</SelectItem>
+            <SelectItem value="product">Product</SelectItem>
+            <SelectItem value="tool">Tool</SelectItem>
+            <SelectItem value="research">Research</SelectItem>
+            <SelectItem value="system">System</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2 border-t border-border pt-5">
+        <Label htmlFor="seo-title">SEO title · {locale.toUpperCase()}</Label>
+        <Input
+          id="seo-title"
+          value={activeCopy.seoTitle}
+          onChange={(event) => setActiveCopy({ seoTitle: event.target.value })}
+        />
+        <Label htmlFor="seo-description">SEO description</Label>
+        <Textarea
+          id="seo-description"
+          value={activeCopy.seoDescription}
+          onChange={(event) => setActiveCopy({ seoDescription: event.target.value })}
+          className="min-h-24"
+        />
+      </div>
+
+      <div className="space-y-3 border-t border-border pt-5">
+        <div className="flex items-center justify-between gap-3">
+          <Label htmlFor="featured">Featured</Label>
+          <Switch
+            id="featured"
+            checked={featured}
+            onCheckedChange={(value) => { setDirty(true); setFeatured(value); }}
+          />
+        </div>
+        <Label htmlFor="sort-order">Sort order</Label>
+        <Input
+          id="sort-order"
+          type="number"
+          value={sortOrder}
+          onChange={(event) => { setDirty(true); setSortOrder(Number(event.target.value)); }}
+        />
+      </div>
+
+      <p className="border-t border-border pt-5 text-xs leading-5 text-muted-foreground">
+        {v2Available === false
+          ? "Schema v2 is not available in this environment yet. Legacy fields will still save safely."
+          : "Bilingual content and redirect history sync to schema v2."}
+      </p>
+    </div>
+  );
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-3xl">
-      {error && (
-        <div className="bg-destructive/10 text-destructive p-4 rounded-lg text-sm">
+    <form onSubmit={handleSubmit} className="space-y-7">
+      <AdminPageHeader
+        title={initialData ? "Edit work" : "New work"}
+        description="Write the case study as a document. Publishing controls and permalink management stay in the inspector."
+        action={
+          <div className="flex items-center gap-2">
+            <LocaleSwitch
+              locale={locale}
+              onChange={setLocale}
+              idAvailable={hasCopy(idCopy)}
+            />
+            {initialData?.slug ? (
+              <Button
+                type="button"
+                variant="outline"
+                render={
+                  <a
+                    href={`/work/${initialData.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  />
+                }
+                nativeButton={false}
+              >
+                Preview
+                <ArrowSquareOut className="size-4" />
+              </Button>
+            ) : null}
+            <Button type="submit" disabled={saving}>
+              {saving ? "Saving…" : status === "published" ? "Save & publish" : "Save draft"}
+            </Button>
+          </div>
+        }
+      />
+
+      {error ? (
+        <div role="alert" className="border-y border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
           {error}
         </div>
-      )}
+      ) : null}
 
-      {/* ── Basic info ────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="title">
-            Title <span className="text-destructive">*</span>
-          </Label>
-          <Input
-            id="title"
-            {...form.register("title")}
-            onChange={handleTitleChange}
-            placeholder="Project Title"
-          />
-          {form.formState.errors.title && (
-            <p className="text-sm text-destructive">
-              {form.formState.errors.title.message}
-            </p>
-          )}
-        </div>
+      <EditorialWorkspace sections={sections} inspector={inspector}>
+        <div className="space-y-12">
+          <section id="overview" className="scroll-mt-24 space-y-5">
+            <div>
+              <p className="text-xs text-muted-foreground">
+                {locale === "en" ? "English" : "Bahasa Indonesia"}
+              </p>
+              <h2 className="mt-1 text-lg font-semibold">Overview</h2>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="work-title">Title</Label>
+              <Input
+                id="work-title"
+                value={activeCopy.title}
+                onChange={(event) =>
+                  locale === "en"
+                    ? handleEnglishTitle(event.target.value)
+                    : setActiveCopy({ title: event.target.value })
+                }
+                className="h-auto border-0 border-b border-border bg-transparent px-0 py-3 font-display text-3xl font-semibold shadow-none focus-visible:ring-0"
+                placeholder={locale === "en" ? "Work title" : "Judul karya"}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="work-summary">Summary</Label>
+              <Textarea
+                id="work-summary"
+                value={activeCopy.summary}
+                onChange={(event) => setActiveCopy({ summary: event.target.value })}
+                className="min-h-28 resize-y text-base leading-7"
+                placeholder={
+                  locale === "en"
+                    ? "What is this work and why does it matter?"
+                    : "Apa pekerjaan ini dan kenapa konteksnya penting?"
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="work-role">Your role</Label>
+              <Input
+                id="work-role"
+                value={activeCopy.role}
+                onChange={(event) => setActiveCopy({ role: event.target.value })}
+              />
+            </div>
+          </section>
 
-        <div className="space-y-2">
-          <Label htmlFor="slug">
-            Slug <span className="text-destructive">*</span>
-          </Label>
-          <Input
-            id="slug"
-            {...form.register("slug")}
-            placeholder="project-title"
-          />
-          {form.formState.errors.slug && (
-            <p className="text-sm text-destructive">
-              {form.formState.errors.slug.message}
-            </p>
-          )}
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          {...form.register("description")}
-          placeholder="Brief overview of the project..."
-          className="h-24 resize-none"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="role">Your Role</Label>
-          <Input
-            id="role"
-            {...form.register("role")}
-            placeholder="e.g. Lead Designer"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="category">Category</Label>
-          <Input
-            id="category"
-            {...form.register("category")}
-            placeholder="e.g. Web Dev"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="tech_stack">Tech Stack (comma-separated)</Label>
-        <Input
-          id="tech_stack"
-          {...form.register("tech_stack")}
-          placeholder="Next.js, Tailwind CSS, Supabase"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="demo_url">Live Demo URL</Label>
-          <Input
-            id="demo_url"
-            {...form.register("demo_url")}
-            placeholder="https://example.vercel.app"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="github_url">GitHub Repository URL</Label>
-          <Input
-            id="github_url"
-            {...form.register("github_url")}
-            placeholder="https://github.com/rzqllh/repo"
-          />
-        </div>
-      </div>
-
-      {/* ── Cover image ───────────────────────────────────────────────────── */}
-      <div className="space-y-3 pt-4 border-t">
-        <div>
-          <p className="text-sm font-medium">Cover Image</p>
-          <p className="text-xs text-muted-foreground">
-            Main image shown on the projects grid and detail header.
-          </p>
-        </div>
-        <ImageUpload
-          value={coverUrl || undefined}
-          folder="portfolio/covers"
-          label="Upload cover image"
-          onUpload={(url, publicId) => {
-            setCoverUrl(url);
-            setCoverPublicId(publicId);
-          }}
-          onRemove={() => {
-            setCoverUrl("");
-            setCoverPublicId("");
-          }}
-        />
-      </div>
-
-      {/* ── Gallery images ────────────────────────────────────────────────── */}
-      <div className="space-y-4 pt-4 border-t">
-        <div>
-          <p className="text-sm font-medium">Gallery Images</p>
-          <p className="text-xs text-muted-foreground">
-            Additional screenshots or mockups shown in the project detail page.
-          </p>
-        </div>
-
-        {galleryImages.length > 0 ? (
-          <div className="space-y-3">
-            {galleryImages.map((img) => (
-              <div
-                key={img.key}
-                className="flex items-start gap-3 p-3 rounded-xl border border-border bg-muted/30"
-              >
-                <DotsSixVertical
-                  weight="bold"
-                  size={16}
-                  className="mt-2 text-muted-foreground shrink-0 cursor-grab"
-                  aria-hidden
+          <section id="story" className="scroll-mt-24 space-y-6 border-t border-border pt-10">
+            <h2 className="text-lg font-semibold">Story</h2>
+            {([
+              ["context", "Context", locale === "en" ? "What was happening around the work?" : "Apa konteks pekerjaan ini?"],
+              ["challenge", "The issue", locale === "en" ? "What problem or constraint needed attention?" : "Masalah atau batasan apa yang perlu ditangani?"],
+              ["approach", "Approach", locale === "en" ? "What did you do, coordinate, or decide?" : "Apa yang Anda kerjakan, koordinasikan, atau putuskan?"],
+            ] as const).map(([key, label, placeholder]) => (
+              <div key={key} className="space-y-2">
+                <Label htmlFor={`work-${key}`}>{label}</Label>
+                <Textarea
+                  id={`work-${key}`}
+                  value={activeCopy[key]}
+                  onChange={(event) => setActiveCopy({ [key]: event.target.value })}
+                  placeholder={placeholder}
+                  className="min-h-36 resize-y leading-7"
                 />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={img.url}
-                  alt={img.alt_text || "Gallery image"}
-                  className="w-24 h-16 object-cover rounded-lg border border-border shrink-0"
-                />
-                <div className="flex-1 min-w-0 space-y-1">
-                  <Input
-                    placeholder="Alt text (optional)"
-                    value={img.alt_text}
-                    onChange={(e) => updateAltText(img.key, e.target.value)}
-                    className="h-8 text-sm"
-                  />
-                  <p className="text-xs text-muted-foreground truncate">
-                    {img.url}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeGalleryImage(img.key)}
-                  className="mt-1 p-1.5 rounded-lg hover:bg-destructive hover:text-destructive-foreground transition-colors text-muted-foreground"
-                  aria-label="Remove image"
-                >
-                  <X weight="bold" size={14} />
-                </button>
               </div>
             ))}
-          </div>
-        ) : (
-          <div className="flex items-center gap-3 p-4 rounded-xl border border-dashed border-border text-muted-foreground">
-            <ImageIcon weight="duotone" size={20} className="opacity-40" />
-            <span className="text-sm">No gallery images yet.</span>
-          </div>
-        )}
+          </section>
 
-        {/* Upload a new gallery image */}
-        <ImageUpload
-          folder="portfolio/gallery"
-          label="Add gallery image"
-          onUpload={addGalleryImage}
-        />
-      </div>
+          <section id="outcome" className="scroll-mt-24 space-y-6 border-t border-border pt-10">
+            <h2 className="text-lg font-semibold">Outcome</h2>
+            <div className="space-y-2">
+              <Label htmlFor="work-outcome">What changed</Label>
+              <Textarea
+                id="work-outcome"
+                value={activeCopy.outcome}
+                onChange={(event) => setActiveCopy({ outcome: event.target.value })}
+                className="min-h-32 resize-y leading-7"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="work-lessons">Notes / lessons</Label>
+              <Textarea
+                id="work-lessons"
+                value={activeCopy.lessons}
+                onChange={(event) => setActiveCopy({ lessons: event.target.value })}
+                className="min-h-28 resize-y leading-7"
+              />
+            </div>
+          </section>
 
-      {/* ── Meta controls ─────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t">
-        <div className="space-y-3">
-          <Label>Status</Label>
-          <Controller
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="published">Published</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          />
-        </div>
+          <section id="media" className="scroll-mt-24 space-y-6 border-t border-border pt-10">
+            <div>
+              <h2 className="text-lg font-semibold">Media & shared metadata</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                These fields are shared across languages.
+              </p>
+            </div>
 
-        <div className="space-y-3">
-          <Label>Sort Order</Label>
-          <Input
-            type="number"
-            {...form.register("sort_order", { valueAsNumber: true })}
-          />
-        </div>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="category">Legacy category</Label>
+                <Input id="category" value={category} onChange={(event) => { setDirty(true); setCategory(event.target.value); }} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="tech-stack">Technology / tools</Label>
+                <Input id="tech-stack" value={techStack} onChange={(event) => { setDirty(true); setTechStack(event.target.value); }} placeholder="Next.js, Supabase, Grafana" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="demo-url">Live URL</Label>
+                <Input id="demo-url" value={demoUrl} onChange={(event) => { setDirty(true); setDemoUrl(event.target.value); }} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="github-url">Repository URL</Label>
+                <Input id="github-url" value={githubUrl} onChange={(event) => { setDirty(true); setGithubUrl(event.target.value); }} />
+              </div>
+            </div>
 
-        <div className="space-y-3">
-          <Label>Featured Project</Label>
-          <div className="flex items-center h-10">
-            <Controller
-              control={form.control}
-              name="featured"
-              render={({ field }) => (
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="featured"
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                  <Label htmlFor="featured" className="font-normal">
-                    Show on homepage
-                  </Label>
+            <div className="space-y-3">
+              <Label>Cover image</Label>
+              <ImageUpload
+                value={coverUrl || undefined}
+                folder="portfolio/covers"
+                label="Upload cover image"
+                onUpload={(url, publicId) => { setDirty(true); setCoverUrl(url); setCoverPublicId(publicId); }}
+                onRemove={() => { setDirty(true); setCoverUrl(""); setCoverPublicId(""); }}
+              />
+            </div>
+
+            <div className="space-y-4">
+              <Label>Gallery / evidence images</Label>
+              {galleryImages.length ? (
+                <div className="divide-y divide-border border-y border-border">
+                  {galleryImages.map((image) => (
+                    <div key={image.key} className="flex gap-4 py-4">
+                      <div
+                        className="h-16 w-24 shrink-0 rounded-md border border-border bg-muted bg-cover bg-center"
+                        style={{ backgroundImage: `url("${image.url}")` }}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <Input
+                          value={image.alt_text}
+                          onChange={(event) => {
+                            setDirty(true);
+                            setGalleryImages((items) =>
+                              items.map((item) =>
+                                item.key === image.key
+                                  ? { ...item, alt_text: event.target.value }
+                                  : item
+                              )
+                            );
+                          }}
+                          placeholder="Describe this image"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeGalleryImage(image.key)}
+                        aria-label="Remove image"
+                      >
+                        <X className="size-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 border-y border-dashed border-border py-6 text-sm text-muted-foreground">
+                  <ImageIcon className="size-4" />
+                  No gallery images yet.
                 </div>
               )}
-            />
-          </div>
+              <ImageUpload
+                folder="portfolio/gallery"
+                label="Add gallery image"
+                onUpload={addGalleryImage}
+              />
+            </div>
+          </section>
         </div>
-      </div>
-
-      {/* ── Actions ───────────────────────────────────────────────────────── */}
-      <div className="flex justify-end pt-6 border-t gap-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.push("/admin/projects")}
-          disabled={isSubmitting}
-        >
-          Cancel
-        </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting
-            ? "Saving..."
-            : initialData
-              ? "Update Project"
-              : "Create Project"}
-        </Button>
-      </div>
+      </EditorialWorkspace>
     </form>
   );
 }

@@ -1,490 +1,512 @@
+/* eslint-disable @next/next/no-img-element */
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import Link from "next/link";
+import { notFound, permanentRedirect } from "next/navigation";
+import { ArrowLeft, ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 import {
-  ArrowLeft,
-  ArrowRight,
-  ArrowUpRight,
-  GithubLogo,
-  Globe,
-  CheckCircle,
-  ShieldCheck,
-  Browser,
-} from "@phosphor-icons/react/dist/ssr";
-import { createClient } from "@/lib/supabase/server";
-import { ScrollReveal } from "@/components/scroll-reveal";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { PROJECT_DETAILS_DATA, FALLBACK_PROJECTS } from "@/lib/project-content";
+  getContentRedirect,
+  getPublicWork,
+  getPublicWorkDetail,
+  type PublicEvidence,
+  type PublicMedia,
+} from "@/lib/content/public-content";
+import {
+  PUBLIC_UI,
+  alternateLanguages,
+  localeFromValue,
+  publicPath,
+} from "@/lib/content/public-routes";
+import type { Locale } from "@/types/content";
+import { responsiveImageProps } from "@/lib/content/public-image";
 
 interface Props {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ locale?: string }>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  const supabase = await createClient();
+function formatPeriod(
+  start: string | null,
+  end: string | null,
+  locale: Locale
+) {
+  if (!start) return null;
 
-  const { data: project } = await supabase
-    .from("projects")
-    .select("title, description")
-    .eq("slug", slug)
-    .single();
+  const formatter = new Intl.DateTimeFormat(
+    locale === "id" ? "id-ID" : "en-US",
+    { month: "short", year: "numeric" }
+  );
 
-  const fallback = FALLBACK_PROJECTS.find((p) => p.slug === slug);
+  return `${formatter.format(new Date(start))} — ${
+    end ? formatter.format(new Date(end)) : PUBLIC_UI[locale].present
+  }`;
+}
 
-  const title = project?.title || fallback?.title || "Project";
-  const description = project?.description || fallback?.description || "";
+function MediaFigure({ media }: { media: PublicMedia }) {
+  const image = responsiveImageProps(media.url, [640, 960, 1280, 1600]);
+
+  return (
+    <figure className="my-10 lg:-mx-20">
+      <img
+        src={image.src}
+        srcSet={image.srcSet}
+        sizes="(min-width: 1024px) 920px, 100vw"
+        alt={media.alt}
+        loading="lazy"
+        decoding="async"
+        className="h-auto w-full border border-border object-contain"
+      />
+      {media.caption ? (
+        <figcaption className="mt-3 text-xs leading-5 text-muted-foreground">
+          {media.caption}
+        </figcaption>
+      ) : null}
+    </figure>
+  );
+}
+
+function EvidenceFigure({
+  evidence,
+  locale,
+}: {
+  evidence: PublicEvidence;
+  locale: Locale;
+}) {
+  const ui = PUBLIC_UI[locale];
+  const image = evidence.media
+    ? responsiveImageProps(evidence.media.url, [640, 960, 1280, 1600])
+    : null;
+
+  return (
+    <figure className="my-10 border-y border-border py-6 lg:-mx-20 lg:px-20">
+      <div className="max-w-3xl">
+        <p className="text-xs capitalize text-muted-foreground">
+          {evidence.type.replace("-", " ")}
+        </p>
+        <h3 className="mt-2 font-display text-xl font-semibold">
+          {evidence.title}
+        </h3>
+        {evidence.description ? (
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            {evidence.description}
+          </p>
+        ) : null}
+      </div>
+
+      {evidence.media && image ? (
+        <img
+          src={image.src}
+          srcSet={image.srcSet}
+          sizes="(min-width: 1024px) 920px, 100vw"
+          alt={evidence.media.alt}
+          loading="lazy"
+          decoding="async"
+          className="mt-5 h-auto w-full object-contain"
+        />
+      ) : null}
+
+      {evidence.sourceUrl || evidence.sourceDate ? (
+        <figcaption className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          {evidence.sourceDate ? (
+            <span>
+              {ui.sourceDate}: {evidence.sourceDate}
+            </span>
+          ) : null}
+          {evidence.sourceUrl ? (
+            <a
+              href={evidence.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              {ui.source}
+            </a>
+          ) : null}
+        </figcaption>
+      ) : null}
+    </figure>
+  );
+}
+
+function TranslationUnavailable({
+  slug,
+  locale,
+}: {
+  slug: string;
+  locale: Locale;
+}) {
+  const ui = PUBLIC_UI[locale];
+
+  return (
+    <div className="editorial-container py-20 md:py-28">
+      <div className="max-w-2xl border-y border-border py-10">
+        <p className="text-sm text-muted-foreground">{ui.translationUnavailable}</p>
+        <h1 className="mt-3 font-display text-4xl font-semibold">
+          {ui.translationUnavailable}
+        </h1>
+        <p className="mt-4 text-base leading-7 text-muted-foreground">
+          {ui.translationUnavailableBody}
+        </p>
+        <Link
+          href={`/work/${slug}`}
+          className="mt-6 inline-block text-sm font-medium text-primary hover:underline"
+        >
+          {ui.viewEnglishVersion}
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+export async function generateMetadata({
+  params,
+  searchParams,
+}: Props): Promise<Metadata> {
+  const [{ slug }, { locale: rawLocale }] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  const locale = localeFromValue(rawLocale);
+
+  const [requested, english, indonesian] = await Promise.all([
+    getPublicWorkDetail(slug, locale),
+    getPublicWorkDetail(slug, "en"),
+    getPublicWorkDetail(slug, "id"),
+  ]);
+
+  if (!requested) {
+    if (locale === "id" && english) {
+      return {
+        title: PUBLIC_UI.id.translationUnavailable,
+        description: PUBLIC_UI.id.translationUnavailableBody,
+        robots: { index: false, follow: true },
+        alternates: {
+          canonical: `/work/${slug}`,
+          languages: alternateLanguages(`/work/${slug}`, {
+            en: true,
+            id: false,
+          }),
+        },
+      };
+    }
+    return { title: PUBLIC_UI[locale].allWork };
+  }
+
+  const canonical = publicPath(locale, `/work/${requested.slug}`);
+  const title = requested.seoTitle || requested.title;
+  const description =
+    requested.seoDescription || requested.summary || undefined;
 
   return {
     title,
     description,
     alternates: {
-      canonical: `/projects/${slug}`,
+      canonical,
+      languages: alternateLanguages(`/work/${requested.slug}`, {
+        en: Boolean(english),
+        id: Boolean(indonesian),
+      }),
     },
     openGraph: {
-      title: `${title} | Hafizh Rizqullah Prasetya`,
+      type: "article",
+      locale: locale === "id" ? "id_ID" : "en_US",
+      title,
       description,
-      url: `/projects/${slug}`,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${title} | Hafizh Rizqullah Prasetya`,
-      description,
+      url: canonical,
+      ...(requested.cover
+        ? { images: [{ url: requested.cover.url }] }
+        : {}),
     },
   };
 }
 
-export default async function ProjectDetailPage({ params }: Props) {
-  const { slug } = await params;
-  const supabase = await createClient();
+export default async function ProjectDetailPage({
+  params,
+  searchParams,
+}: Props) {
+  const [{ slug }, { locale: rawLocale }] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  const locale = localeFromValue(rawLocale);
+  const ui = PUBLIC_UI[locale];
 
-  // Fetch all published projects to find current and next project
-  const { data: allProjects } = await supabase
-    .from("projects")
-    .select("id, slug, title, category, sort_order")
-    .eq("status", "published")
-    .order("sort_order");
+  const [work, collection] = await Promise.all([
+    getPublicWorkDetail(slug, locale),
+    getPublicWork(locale),
+  ]);
 
-  const projectList = (allProjects && allProjects.length > 0) ? allProjects : FALLBACK_PROJECTS;
+  if (!work) {
+    const redirectTarget = await getContentRedirect("work", slug, locale);
+    if (redirectTarget) {
+      permanentRedirect(publicPath(locale, `/work/${redirectTarget}`));
+    }
 
-  const { data: dbProject } = await supabase
-    .from("projects")
-    .select(
-      `
-      id, slug, title, description, role, category, tech_stack, status, demo_url, github_url, cover_url, created_at,
-      project_images(url, alt_text, sort_order)
-    `
-    )
-    .eq("slug", slug)
-    .single();
+    if (locale === "id") {
+      const english = await getPublicWorkDetail(slug, "en");
+      if (english) {
+        return <TranslationUnavailable slug={slug} locale={locale} />;
+      }
+    }
 
-  const project = dbProject || FALLBACK_PROJECTS.find((p) => p.slug === slug);
-
-  if (!project) {
     notFound();
   }
 
-  // Find next project for bottom navigation
-  const currentIndex = projectList?.findIndex((p) => p.slug === slug) ?? -1;
-  const nextProject =
-    currentIndex >= 0 && projectList && projectList.length > 1
-      ? projectList[(currentIndex + 1) % projectList.length]
+  const currentIndex = collection.findIndex((item) => item.id === work.id);
+  const nextWork =
+    currentIndex >= 0 && collection.length > 1
+      ? collection[(currentIndex + 1) % collection.length]
       : null;
 
+  const period = formatPeriod(
+    work.timeframeStart,
+    work.timeframeEnd,
+    locale
+  );
+  const primaryMedia =
+    work.cover ??
+    work.media.find((item) => item.role === "hero") ??
+    work.media[0] ??
+    null;
+  const primaryImage = primaryMedia
+    ? responsiveImageProps(primaryMedia.url, [640, 960, 1280, 1600])
+    : null;
+  const additionalMedia = work.media.filter(
+    (item) => item.id !== primaryMedia?.id && item.role !== "cover"
+  );
 
-  // Rich content details
-  const details = PROJECT_DETAILS_DATA[slug];
+  const sections = [
+    { id: "context", title: ui.context, body: work.context },
+    { id: "issue", title: ui.issue, body: work.challenge },
+    { id: "approach", title: ui.approach, body: work.approach },
+    { id: "outcome", title: ui.outcome, body: work.outcome },
+    { id: "lessons", title: ui.notesLessons, body: work.lessons },
+  ].filter((section) => Boolean(section.body));
+
+  const showSectionIndex = sections.length >= 4;
 
   return (
-    <article className="pb-24 md:pb-32">
-      {/* ── Top Header Section ── */}
-      <header className="mx-auto max-w-[1400px] px-6 pt-12 md:pt-24 pb-12">
-        <ScrollReveal>
-          <Link
-            href="/projects"
-            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-8 md:mb-12"
-          >
-            <ArrowLeft weight="bold" />
-            <span>Back to all projects</span>
-          </Link>
-        </ScrollReveal>
+    <article className="pb-20 md:pb-28">
+      <header className="editorial-container py-12 md:py-20">
+        <Link
+          href={publicPath(locale, "/work")}
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" />
+          {ui.allWork}
+        </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
-          {/* Main Title & Overview */}
-          <div className="lg:col-span-8">
-            <ScrollReveal delay={0.05} className="space-y-4">
-              <div className="flex flex-wrap items-center gap-2 mb-2">
-                <span className="px-3 py-1 rounded-full text-xs font-mono uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
-                  {project.category?.replace("-", " ") || "Project"}
-                </span>
-                {project.role && (
-                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
-                    {project.role}
-                  </span>
-                )}
-              </div>
-
-              <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl tracking-tighter text-foreground leading-[1.05]">
-                {project.title}
-              </h1>
-
-              <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed pt-2">
-                {details?.tagline || project.description}
+        <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_260px] lg:gap-16">
+          <div className="max-w-4xl">
+            <h1 className="font-display text-5xl font-semibold tracking-[-0.05em] sm:text-6xl lg:text-7xl">
+              {work.title}
+            </h1>
+            {work.summary ? (
+              <p className="mt-6 max-w-3xl text-xl leading-8 text-muted-foreground">
+                {work.summary}
               </p>
-            </ScrollReveal>
-
-            {/* CTAs */}
-            {(project.demo_url || project.github_url) && (
-              <ScrollReveal delay={0.1} className="flex flex-wrap items-center gap-3 pt-6">
-                {project.demo_url && (
-                  <Button
-                    size="lg"
-                    className="h-12 px-7 rounded-xl shadow-lg shadow-primary/15"
-                    render={
-                      <a
-                        href={project.demo_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      />
-                    }
-                    nativeButton={false}
-                  >
-                    <span>Launch Live Application</span>
-                    <ArrowUpRight weight="bold" />
-                  </Button>
-                )}
-                {project.github_url && (
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="h-12 px-7 rounded-xl bg-card border-border hover:bg-muted"
-                    render={
-                      <a
-                        href={project.github_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      />
-                    }
-                    nativeButton={false}
-                  >
-                    <GithubLogo weight="fill" className="size-5 mr-2" />
-                    <span>View Repository Source</span>
-                  </Button>
-                )}
-              </ScrollReveal>
-            )}
+            ) : null}
           </div>
 
-          {/* Sidebar Quick Specs */}
-          <div className="lg:col-span-4">
-            <ScrollReveal delay={0.15}>
-              <div className="p-6 md:p-8 rounded-3xl bg-card border border-border/80 shadow-sm space-y-6">
-                <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground font-semibold">
-                  Project Specifications
-                </p>
-
-                {project.role && (
-                  <div>
-                    <span className="text-xs text-muted-foreground">My Role</span>
-                    <p className="font-semibold text-foreground text-sm pt-0.5">{project.role}</p>
-                  </div>
-                )}
-
-                {project.category && (
-                  <>
-                    <Separator className="bg-border/60" />
-                    <div>
-                      <span className="text-xs text-muted-foreground">Category</span>
-                      <p className="font-semibold text-foreground text-sm capitalize pt-0.5">
-                        {project.category.replace("-", " ")}
-                      </p>
-                    </div>
-                  </>
-                )}
-
-                {project.tech_stack && project.tech_stack.length > 0 && (
-                  <>
-                    <Separator className="bg-border/60" />
-                    <div>
-                      <span className="text-xs text-muted-foreground mb-2 block">Technologies</span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {project.tech_stack.map((tech: string) => (
-                          <span
-                            key={tech}
-                            className="px-2.5 py-1 rounded-md text-xs font-mono bg-muted text-foreground border border-border/60"
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
+          <aside className="border-l border-border pl-5 text-sm">
+            <dl className="space-y-5">
+              {work.role ? (
+                <div>
+                  <dt className="text-xs text-muted-foreground">{ui.role}</dt>
+                  <dd className="mt-1">{work.role}</dd>
+                </div>
+              ) : null}
+              <div>
+                <dt className="text-xs text-muted-foreground">{ui.work}</dt>
+                <dd className="mt-1 capitalize">
+                  {work.discipline.replace("-", " ")} ·{" "}
+                  {work.workType.replace("-", " ")}
+                </dd>
               </div>
-            </ScrollReveal>
-          </div>
+              {period ? (
+                <div>
+                  <dt className="text-xs text-muted-foreground">{ui.timeframe}</dt>
+                  <dd className="mt-1">{period}</dd>
+                </div>
+              ) : null}
+              {work.technologies.length ? (
+                <div>
+                  <dt className="text-xs text-muted-foreground">
+                    {ui.toolsTechnology}
+                  </dt>
+                  <dd className="mt-1 leading-6">
+                    {work.technologies.join(", ")}
+                  </dd>
+                </div>
+              ) : null}
+            </dl>
+
+            {work.liveUrl || work.repositoryUrl ? (
+              <div className="mt-6 space-y-2 border-t border-border pt-5">
+                {work.liveUrl ? (
+                  <a
+                    href={work.liveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-primary hover:underline"
+                  >
+                    {ui.openLiveSite}
+                    <ArrowUpRight className="size-3.5" />
+                  </a>
+                ) : null}
+                {work.repositoryUrl ? (
+                  <a
+                    href={work.repositoryUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-primary hover:underline"
+                  >
+                    {ui.viewRepository}
+                    <ArrowUpRight className="size-3.5" />
+                  </a>
+                ) : null}
+              </div>
+            ) : null}
+          </aside>
         </div>
       </header>
 
-      {/* ── Metrics Banner (If Available) ── */}
-      {details?.metrics && details.metrics.length > 0 && (
-        <section className="mx-auto max-w-[1400px] px-6 mb-16">
-          <ScrollReveal delay={0.15}>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-6 rounded-3xl bg-muted/30 border border-border/70">
-              {details.metrics.map((m) => (
-                <div key={m.label} className="p-4 rounded-2xl bg-card border border-border/50">
-                  <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
-                    {m.label}
-                  </p>
-                  <p className="font-display font-bold text-2xl md:text-3xl text-foreground mt-1">
-                    {m.value}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </ScrollReveal>
-        </section>
-      )}
+      {primaryMedia && primaryImage ? (
+        <div className="editorial-container pb-16">
+          <figure>
+            <img
+              src={primaryImage.src}
+              srcSet={primaryImage.srcSet}
+              sizes="(min-width: 1440px) 1344px, (min-width: 1024px) 92vw, 100vw"
+              alt={primaryMedia.alt}
+              fetchPriority="high"
+              decoding="async"
+              className="h-auto max-h-[760px] w-full border border-border object-contain"
+            />
+            {primaryMedia.caption ? (
+              <figcaption className="mt-3 text-xs leading-5 text-muted-foreground">
+                {primaryMedia.caption}
+              </figcaption>
+            ) : null}
+          </figure>
+        </div>
+      ) : null}
 
-      {/* ── Interactive Preview / Visual Showcase ── */}
-      <section className="mx-auto max-w-[1400px] px-6 mb-20">
-        <ScrollReveal delay={0.2}>
-          {project.demo_url ? (
-            /* Browser Mockup Frame */
-            <div className="rounded-3xl border border-border bg-card shadow-2xl overflow-hidden">
-              <div className="flex items-center justify-between px-6 py-4 bg-muted/60 border-b border-border text-xs text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <span className="size-3 rounded-full bg-border" />
-                  <span className="size-3 rounded-full bg-border" />
-                  <span className="size-3 rounded-full bg-border" />
-                </div>
-                <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-background border border-border text-foreground font-mono text-[11px] max-w-md truncate">
-                  <Globe weight="bold" className="size-3 text-primary" />
-                  <span>{project.demo_url}</span>
-                </div>
-                <a
-                  href={project.demo_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-foreground inline-flex items-center gap-1 font-medium text-xs"
-                >
-                  <span>Open</span>
-                  <ArrowUpRight weight="bold" />
-                </a>
-              </div>
-              <div className="p-12 md:p-20 text-center bg-gradient-to-br from-card via-muted/20 to-muted/50 flex flex-col items-center justify-center">
-                <Browser weight="duotone" className="size-16 text-primary mb-4" />
-                <h3 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-2">
-                  {project.title}
-                </h3>
-                <p className="text-muted-foreground max-w-md text-sm mb-6">
-                  {details?.tagline || project.description}
-                </p>
-                <Button
-                  size="lg"
-                  className="rounded-xl px-8"
-                  render={
-                    <a
-                      href={project.demo_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    />
-                  }
-                  nativeButton={false}
-                >
-                  Launch Live Demo
-                  <ArrowUpRight weight="bold" />
-                </Button>
-              </div>
-            </div>
-          ) : (
-            /* Technical Case Study Frame */
-            <div className="p-8 md:p-12 rounded-3xl border border-border bg-card shadow-lg flex flex-col md:flex-row items-center justify-between gap-8">
-              <div className="space-y-3 max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-mono font-medium">
-                  <ShieldCheck weight="bold" className="size-4" />
-                  <span>Case Study Overview</span>
-                </div>
-                <h3 className="font-display font-bold text-2xl md:text-3xl text-foreground">
-                  System Architecture & Implementation
-                </h3>
-                <p className="text-muted-foreground text-sm md:text-base leading-relaxed">
-                  {details?.tagline || project.description}
-                </p>
-              </div>
-              {project.github_url && (
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="rounded-xl shrink-0"
-                  render={
-                    <a
-                      href={project.github_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    />
-                  }
-                  nativeButton={false}
-                >
-                  <GithubLogo weight="bold" className="mr-2 size-5" />
-                  View Repository
-                </Button>
-              )}
-            </div>
-          )}
-        </ScrollReveal>
-      </section>
+      <div className="editorial-container">
+        <div
+          className={
+            showSectionIndex
+              ? "grid gap-12 lg:grid-cols-[170px_minmax(0,760px)] lg:justify-center"
+              : "mx-auto max-w-[760px]"
+          }
+        >
+          {showSectionIndex ? (
+            <aside className="hidden lg:block">
+              <nav
+                aria-label={ui.navigation}
+                className="sticky top-24 space-y-2 border-l border-border pl-4 text-xs text-muted-foreground"
+              >
+                {sections.map((section) => (
+                  <a
+                    key={section.id}
+                    href={`#${section.id}`}
+                    className="block py-1 hover:text-foreground"
+                  >
+                    {section.title}
+                  </a>
+                ))}
+                {work.evidence.length ? (
+                  <a href="#evidence" className="block py-1 hover:text-foreground">
+                    {ui.evidence}
+                  </a>
+                ) : null}
+              </nav>
+            </aside>
+          ) : null}
 
-      {/* ── Deep Technical Breakdown ── */}
-      <section className="mx-auto max-w-[1400px] px-6 mb-24">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Main Column: Problem, Solution, Architecture */}
-          <div className="lg:col-span-8 space-y-16">
-            {/* Problem & Solution */}
-            {details && (
-              <ScrollReveal className="space-y-8">
-                <div className="space-y-4">
-                  <p className="text-xs font-mono uppercase tracking-widest text-primary font-semibold">
-                    01 / The Challenge
-                  </p>
-                  <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">
-                    Problem & Context
+          <div className="min-w-0">
+            {!sections.length &&
+            !work.evidence.length &&
+            !additionalMedia.length ? (
+              <p className="border-y border-border py-8 text-base leading-7 text-muted-foreground">
+                {ui.workDetailPending}
+              </p>
+            ) : null}
+
+            {sections.map((section, index) => (
+              <div key={section.id}>
+                <section
+                  id={section.id}
+                  className="scroll-mt-24 border-t border-border py-10 first:border-t-0 first:pt-0"
+                >
+                  <h2 className="font-display text-3xl font-semibold">
+                    {section.title}
                   </h2>
-                  <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
-                    {details.problem}
+                  <p className="mt-4 whitespace-pre-line text-base leading-8 text-muted-foreground">
+                    {section.body}
                   </p>
-                </div>
+                </section>
 
-                <div className="space-y-4 pt-4">
-                  <p className="text-xs font-mono uppercase tracking-widest text-primary font-semibold">
-                    02 / The Solution
-                  </p>
-                  <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">
-                    Engineering Approach
-                  </h2>
-                  <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
-                    {details.solution}
-                  </p>
-                </div>
-              </ScrollReveal>
-            )}
-
-            {/* Architecture Cards */}
-            {details?.architecture && details.architecture.length > 0 && (
-              <ScrollReveal className="space-y-6">
-                <p className="text-xs font-mono uppercase tracking-widest text-primary font-semibold">
-                  03 / Core Subsystems
-                </p>
-                <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-6">
-                  Technical Architecture
-                </h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {details.architecture.map((item, idx) => (
-                    <div
-                      key={item.title}
-                      className="p-6 rounded-2xl bg-card border border-border/80 shadow-sm space-y-2 hover:border-foreground/20 transition-colors"
-                    >
-                      <div className="flex items-center gap-2 text-xs font-mono text-primary font-semibold mb-1">
-                        <span>0{idx + 1}.</span>
-                        <span>{item.title}</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {item.description}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </ScrollReveal>
-            )}
-
-            {/* Key Features List */}
-            {details?.keyFeatures && details.keyFeatures.length > 0 && (
-              <ScrollReveal className="space-y-6">
-                <p className="text-xs font-mono uppercase tracking-widest text-primary font-semibold">
-                  04 / Capabilities
-                </p>
-                <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-6">
-                  Feature Breakdown
-                </h2>
-
-                <div className="grid grid-cols-1 gap-3">
-                  {details.keyFeatures.map((feature) => (
-                    <div
-                      key={feature}
-                      className="flex items-start gap-3 p-4 rounded-xl bg-muted/40 border border-border/60"
-                    >
-                      <CheckCircle
-                        weight="fill"
-                        className="size-5 text-primary shrink-0 mt-0.5"
+                {index === 0 && work.evidence.length ? (
+                  <section id="evidence" className="scroll-mt-24">
+                    {work.evidence.map((evidence) => (
+                      <EvidenceFigure
+                        key={evidence.id}
+                        evidence={evidence}
+                        locale={locale}
                       />
-                      <span className="text-sm font-medium text-foreground">
-                        {feature}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </ScrollReveal>
-            )}
-          </div>
-
-          {/* Right Column: Tech Decisions & Stack Sidebar */}
-          <div className="lg:col-span-4 space-y-8">
-            {details?.techChoices && details.techChoices.length > 0 && (
-              <ScrollReveal delay={0.1}>
-                <div className="p-6 md:p-8 rounded-3xl bg-muted/30 border border-border/80 space-y-6">
-                  <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground font-semibold">
-                    Technical Stack Rationales
-                  </p>
-
-                  <div className="space-y-4">
-                    {details.techChoices.map((choice) => (
-                      <div key={choice.tech} className="space-y-1">
-                        <p className="font-mono text-sm font-bold text-foreground">
-                          {choice.tech}
-                        </p>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          {choice.reason}
-                        </p>
-                      </div>
                     ))}
-                  </div>
-                </div>
-              </ScrollReveal>
-            )}
+                  </section>
+                ) : null}
+              </div>
+            ))}
+
+            {!sections.length && work.evidence.length ? (
+              <section id="evidence" className="scroll-mt-24">
+                {work.evidence.map((evidence) => (
+                  <EvidenceFigure
+                    key={evidence.id}
+                    evidence={evidence}
+                    locale={locale}
+                  />
+                ))}
+              </section>
+            ) : null}
+
+            {additionalMedia.length ? (
+              <section className="border-t border-border pt-10">
+                <h2 className="font-display text-2xl font-semibold">
+                  {ui.additionalMaterial}
+                </h2>
+                {additionalMedia.map((media) => (
+                  <MediaFigure key={media.id} media={media} />
+                ))}
+              </section>
+            ) : null}
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* ── Bottom Next Project Navigator ── */}
-      {nextProject && (
-        <section className="mx-auto max-w-[1400px] px-6 pt-12 border-t border-border">
-          <ScrollReveal>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 p-8 md:p-10 rounded-3xl bg-card border border-border shadow-sm hover:shadow-md hover:border-foreground/20 transition-all group">
-              <div>
-                <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-1">
-                  Next Project
+      {nextWork ? (
+        <section className="editorial-container mt-20 border-t border-border pt-8">
+          <p className="text-xs text-muted-foreground">{ui.nextWork}</p>
+          <Link
+            href={publicPath(locale, `/work/${nextWork.slug}`)}
+            className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end"
+          >
+            <div>
+              <h2 className="font-display text-3xl font-semibold hover:text-primary">
+                {nextWork.title}
+              </h2>
+              {nextWork.summary ? (
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+                  {nextWork.summary}
                 </p>
-                <h4 className="font-display font-bold text-2xl md:text-3xl text-foreground group-hover:text-primary transition-colors">
-                  {nextProject.title}
-                </h4>
-                <p className="text-sm text-muted-foreground capitalize mt-1">
-                  {nextProject.category?.replace("-", " ")}
-                </p>
-              </div>
-
-              <Link
-                href={`/projects/${nextProject.slug}`}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-foreground text-background text-sm font-medium shadow hover:opacity-90 transition-opacity shrink-0"
-              >
-                <span>View Next Project</span>
-                <ArrowRight weight="bold" />
-              </Link>
+              ) : null}
             </div>
-          </ScrollReveal>
+            <span className="text-sm text-primary">{ui.readNext}</span>
+          </Link>
         </section>
-      )}
+      ) : null}
     </article>
   );
 }

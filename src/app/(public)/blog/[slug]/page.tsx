@@ -1,161 +1,243 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
+import {
+  getContentRedirect,
+  getPublicInsightDetail,
+  getPublicWork,
+} from "@/lib/content/public-content";
+import {
+  PUBLIC_UI,
+  alternateLanguages,
+  localeFromValue,
+  publicPath,
+} from "@/lib/content/public-routes";
 
-const FALLBACK_ARTICLES = [
-  {
-    id: "post-1",
-    slug: "building-modular-windows-diagnostics",
-    title: "Building Modular Windows Diagnostics with Python and WMI",
-    excerpt: "Architecting a unified, state-aware performance and network troubleshooting toolkit with automated registry rollback snapshots.",
-    tags: ["Python", "System Architecture", "CLI", "Windows"],
-    published_at: "2024-06-15",
-    content: "<p>Windows system administration, hardware performance monitoring, and network diagnosis often require dozens of fragmented CLI tools and PowerShell scripts that lack unified state awareness.</p><p>In developing <strong>Voltune</strong>, the objective was creating a modular Python engine interfacing with Win32 APIs and Windows Management Instrumentation (WMI). Before executing any performance tuning profile or component store cleanup, the system creates automated registry restore points, ensuring full state rollback safety.</p><p>Key principles implemented:</p><ul><li>Zero-dependency core CLI design.</li><li>Non-destructive, audit-first hardware probes.</li><li>Safe, automated registry snapshots prior to modifications.</li></ul>",
-  },
-  {
-    id: "post-2",
-    slug: "user-centered-design-mobile-banking",
-    title: "Evaluating Banking Interfaces with User-Centered Design & A/B Testing",
-    excerpt: "How quantitative usability metrics (SUS, Time-on-Task, Error Rates) inform navigation redesigns for high-volume consumer workflows.",
-    tags: ["UI/UX", "User Research", "A/B Testing", "Fintech"],
-    published_at: "2024-05-20",
-    content: "<p>Mobile banking interfaces require low cognitive friction and high trust. In our quantitative usability research at Gunadarma University, we investigated user friction during balance disclosures, multi-tier fund transfers, and QR code payments.</p><p>By conducting structured A/B usability experiments with representative user cohorts and evaluating System Usability Scale (SUS) benchmarks, we evaluated interaction improvements and reduced user task friction across primary banking journeys.</p>",
-  },
-  {
-    id: "post-3",
-    slug: "token-driven-dark-mode-design-systems",
-    title: "Designing Accessible Dark Themes with Semantic Color Tokens",
-    excerpt: "Moving beyond inverted hex codes: creating WCAG AA compliant surface hierarchies and contrast tokens for technical interfaces.",
-    tags: ["Design Systems", "CSS", "Accessibility", "Tailwind"],
-    published_at: "2024-04-10",
-    content: "<p>High-contrast dark interfaces require careful calibration beyond simply converting white backgrounds to pure black hex codes. Optical halation, insufficient border separation, and uncontrolled glow can severely reduce legibility.</p><p>By establishing semantic color tokens (surface-0, surface-1, surface-2, text-foreground, text-muted), interfaces maintain spatial depth and exceed WCAG AA contrast standards across both LCD and OLED panels.</p>",
-  },
-];
+interface Props {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ locale?: string }>;
+}
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params;
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("blog_posts")
-    .select("title, excerpt, published_at")
-    .eq("slug", slug)
-    .eq("status", "published")
-    .single();
+export async function generateMetadata({
+  params,
+  searchParams,
+}: Props): Promise<Metadata> {
+  const [{ slug }, { locale: rawLocale }] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  const locale = localeFromValue(rawLocale);
 
-  const fallback = FALLBACK_ARTICLES.find((a) => a.slug === slug);
-  const title = data?.title || fallback?.title || "Writing";
-  const description = data?.excerpt || fallback?.excerpt || "";
+  const [requested, english, indonesian] = await Promise.all([
+    getPublicInsightDetail(slug, locale),
+    getPublicInsightDetail(slug, "en"),
+    getPublicInsightDetail(slug, "id"),
+  ]);
+
+  if (!requested) {
+    if (locale === "id" && english) {
+      return {
+        title: PUBLIC_UI.id.translationUnavailable,
+        description: PUBLIC_UI.id.translationUnavailableBody,
+        robots: { index: false, follow: true },
+        alternates: {
+          canonical: `/insights/${slug}`,
+          languages: alternateLanguages(`/insights/${slug}`, {
+            en: true,
+            id: false,
+          }),
+        },
+      };
+    }
+    return { title: PUBLIC_UI[locale].allInsights };
+  }
+
+  const title = requested.seoTitle || requested.title;
+  const description =
+    requested.seoDescription || requested.excerpt || undefined;
+  const canonical = publicPath(locale, `/insights/${requested.slug}`);
 
   return {
     title,
     description,
     alternates: {
-      canonical: `/blog/${slug}`,
+      canonical,
+      languages: alternateLanguages(`/insights/${requested.slug}`, {
+        en: Boolean(english),
+        id: Boolean(indonesian),
+      }),
     },
     openGraph: {
-      title: `${title} | Hafizh Rizqullah Prasetya`,
-      description,
-      url: `/blog/${slug}`,
       type: "article",
-      publishedTime: data?.published_at || fallback?.published_at,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${title} | Hafizh Rizqullah Prasetya`,
+      locale: locale === "id" ? "id_ID" : "en_US",
+      title,
       description,
+      url: canonical,
+      publishedTime: requested.publishedAt ?? undefined,
     },
   };
 }
 
-export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const supabase = await createClient();
+function TranslationUnavailable({ slug }: { slug: string }) {
+  const ui = PUBLIC_UI.id;
 
-  const { data: dbPost } = await supabase
-    .from("blog_posts")
-    .select("*")
-    .eq("slug", slug)
-    .eq("status", "published")
-    .single();
+  return (
+    <div className="editorial-container py-20 md:py-28">
+      <div className="max-w-2xl border-y border-border py-10">
+        <p className="text-sm text-muted-foreground">{ui.translationUnavailable}</p>
+        <h1 className="mt-3 font-display text-4xl font-semibold">
+          {ui.translationUnavailable}
+        </h1>
+        <p className="mt-4 text-base leading-7 text-muted-foreground">
+          {ui.translationUnavailableBody}
+        </p>
+        <Link
+          href={`/insights/${slug}`}
+          className="mt-6 inline-block text-sm font-medium text-primary hover:underline"
+        >
+          {ui.viewEnglishVersion}
+        </Link>
+      </div>
+    </div>
+  );
+}
 
-  const post = dbPost || FALLBACK_ARTICLES.find((a) => a.slug === slug);
+export default async function BlogPostPage({
+  params,
+  searchParams,
+}: Props) {
+  const [{ slug }, { locale: rawLocale }] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  const locale = localeFromValue(rawLocale);
+  const ui = PUBLIC_UI[locale];
 
-  if (!post) notFound();
+  const [insight, work] = await Promise.all([
+    getPublicInsightDetail(slug, locale),
+    getPublicWork(locale),
+  ]);
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://rzqllh-port.vercel.app";
+  if (!insight) {
+    const redirectTarget = await getContentRedirect("insight", slug, locale);
+    if (redirectTarget) {
+      permanentRedirect(publicPath(locale, `/insights/${redirectTarget}`));
+    }
+
+    if (locale === "id") {
+      const english = await getPublicInsightDetail(slug, "en");
+      if (english) return <TranslationUnavailable slug={slug} />;
+    }
+
+    notFound();
+  }
+
+  const relatedWork = insight.relatedWorkId
+    ? work.find((item) => item.id === insight.relatedWorkId) ?? null
+    : null;
+
+  const baseUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://rzqllh-port.vercel.app"
+  ).replace(/\/$/, "");
+  const canonicalPath = publicPath(locale, `/insights/${insight.slug}`);
 
   const articleJsonLd = {
     "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: post.title,
-    description: post.excerpt || "",
-    datePublished: post.published_at || undefined,
-    author: {
-      "@type": "Person",
-      name: "Hafizh Rizqullah Prasetya",
-      url: baseUrl,
-    },
-    publisher: {
-      "@type": "Person",
-      name: "Hafizh Rizqullah Prasetya",
-      url: baseUrl,
-    },
+    "@type": "Article",
+    inLanguage: locale,
+    headline: insight.title,
+    description: insight.excerpt || undefined,
+    datePublished: insight.publishedAt || undefined,
+    dateModified: insight.updatedAt || undefined,
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `${baseUrl}/blog/${post.slug}`,
+      "@id": `${baseUrl}${canonicalPath}`,
     },
   };
 
   return (
-    <article className="mx-auto max-w-[800px] px-6 py-24 md:py-32">
+    <article className="pb-20 md:pb-28">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
       />
-      <Link
-        href="/blog"
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-12 transition-colors focus-visible:outline-2 focus-visible:outline-primary rounded"
-      >
-        <ArrowLeft weight="bold" className="size-4" />
-        <span>All writing</span>
-      </Link>
 
-      <header className="mb-12 space-y-4">
-        {post.published_at && (
-          <p className="text-xs font-mono text-muted-foreground">
-            {new Date(post.published_at).toLocaleDateString("en-US", {
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-            })}
-          </p>
-        )}
-        <h1 className="font-display font-bold text-3xl sm:text-4xl md:text-5xl tracking-tighter leading-tight text-foreground">
-          {post.title}
-        </h1>
-        {post.excerpt && (
-          <p className="text-muted-foreground text-lg leading-relaxed pt-2">{post.excerpt}</p>
-        )}
-        {post.tags && post.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 pt-2">
-            {post.tags.map((tag: string) => (
-              <span key={tag} className="text-[11px] font-mono px-2.5 py-0.5 rounded-md bg-muted text-muted-foreground border border-border/50">
-                {tag}
-              </span>
-            ))}
+      <header className="editorial-container py-12 md:py-20">
+        <Link
+          href={publicPath(locale, "/insights")}
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" />
+          {ui.allInsights}
+        </Link>
+
+        <div className="mt-10 max-w-5xl">
+          <h1 className="font-display text-5xl font-semibold tracking-[-0.05em] sm:text-6xl lg:text-7xl">
+            {insight.title}
+          </h1>
+
+          {insight.excerpt ? (
+            <p className="mt-6 max-w-3xl text-xl leading-8 text-muted-foreground">
+              {insight.excerpt}
+            </p>
+          ) : null}
+
+          <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">
+            {insight.publishedAt ? (
+              <time dateTime={insight.publishedAt}>
+                {new Intl.DateTimeFormat(
+                  locale === "id" ? "id-ID" : "en-US",
+                  { month: "long", day: "numeric", year: "numeric" }
+                ).format(new Date(insight.publishedAt))}
+              </time>
+            ) : null}
+            {insight.tags.length ? <span>{insight.tags.join(" · ")}</span> : null}
+            {relatedWork ? (
+              <Link
+                href={publicPath(locale, `/work/${relatedWork.slug}`)}
+                className="text-primary hover:underline"
+              >
+                {ui.relatedWork}: {relatedWork.title}
+              </Link>
+            ) : null}
           </div>
-        )}
+        </div>
       </header>
 
-      {post.content && (
-        <div
-          className="prose prose-neutral dark:prose-invert max-w-none text-base md:text-lg leading-relaxed prose-headings:font-display prose-headings:tracking-tight prose-a:text-primary"
-          dangerouslySetInnerHTML={{ __html: post.content }}
-        />
-      )}
+      <div className="editorial-container">
+        <div className="mx-auto max-w-[760px]">
+          {insight.bodyHtml ? (
+            <div
+              className="prose prose-lg prose-neutral max-w-none dark:prose-invert prose-headings:font-display prose-headings:font-semibold prose-headings:tracking-tight prose-a:text-primary prose-a:underline prose-a:underline-offset-4 prose-img:my-10 prose-img:w-[calc(100%+4rem)] prose-img:max-w-none prose-img:-ml-8 prose-pre:overflow-x-auto prose-table:block prose-table:overflow-x-auto"
+              dangerouslySetInnerHTML={{ __html: insight.bodyHtml }}
+            />
+          ) : (
+            <p className="border-y border-border py-8 text-base leading-7 text-muted-foreground">
+              {ui.articleBodyPending}
+            </p>
+          )}
+
+          {relatedWork ? (
+            <aside className="mt-16 border-t border-border pt-7">
+              <p className="text-xs text-muted-foreground">{ui.relatedWork}</p>
+              <Link
+                href={publicPath(locale, `/work/${relatedWork.slug}`)}
+                className="mt-2 block"
+              >
+                <h2 className="font-display text-2xl font-semibold hover:text-primary">
+                  {relatedWork.title}
+                </h2>
+                {relatedWork.summary ? (
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    {relatedWork.summary}
+                  </p>
+                ) : null}
+              </Link>
+            </aside>
+          ) : null}
+        </div>
+      </div>
     </article>
   );
 }
-

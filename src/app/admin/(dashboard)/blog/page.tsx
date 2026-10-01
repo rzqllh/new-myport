@@ -1,63 +1,164 @@
 import Link from "next/link";
+import {
+  ArrowSquareOut,
+  PencilSimple,
+  Plus,
+} from "@phosphor-icons/react/dist/ssr";
 import { createClient } from "@/lib/supabase/server";
-import { buttonVariants } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Plus, PencilSimple } from "@phosphor-icons/react/dist/ssr";
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
+import {
+  AdminEmptyState,
+  AdminErrorState,
+} from "@/components/admin/admin-states";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { DeleteBlogButton } from "./delete-blog-button";
-import { cn } from "@/lib/utils";
 
+export const metadata = { title: "Insights — Admin" };
 
-export const metadata = { title: "Blog — Admin" };
+interface Props {
+  searchParams: Promise<{ q?: string; status?: string }>;
+}
 
-export default async function AdminBlogPage() {
+function formatDate(value: string | null) {
+  if (!value) return "Not published";
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
+export default async function AdminBlogPage({ searchParams }: Props) {
+  const { q = "", status = "all" } = await searchParams;
   const supabase = await createClient();
-  const { data: posts } = await supabase
+
+  let query = supabase
     .from("blog_posts")
-    .select("id, slug, title, status, published_at")
-    .order("created_at", { ascending: false });
+    .select("id, slug, title, excerpt, status, published_at, updated_at")
+    .order("updated_at", { ascending: false });
+
+  if (status === "draft" || status === "published") {
+    query = query.eq("status", status);
+  }
+
+  if (q.trim()) {
+    query = query.ilike("title", `%${q.trim()}%`);
+  }
+
+  const { data: posts, error } = await query;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-display font-bold">Blog</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            {posts?.length ?? 0} post{posts?.length !== 1 ? "s" : ""}
-          </p>
-        </div>
-        <Link href="/admin/blog/new" className={cn(buttonVariants())}>
-          <Plus weight="bold" data-icon="inline-start" />
-          New Post
-        </Link>
-      </div>
+    <div className="space-y-7">
+      <AdminPageHeader
+        title="Insights"
+        description="Project notes, research, technical writing, and documented lessons."
+        action={
+          <Button
+            render={<Link href="/admin/blog/new" />}
+            nativeButton={false}
+          >
+            <Plus className="size-4" />
+            New insight
+          </Button>
+        }
+      />
 
-      {!posts || posts.length === 0 ? (
-        <p className="text-sm text-muted-foreground py-12 text-center">
-          No posts yet.{" "}
-          <Link href="/admin/blog/new" className="text-primary hover:underline">
-            Write one.
-          </Link>
-        </p>
+      <form className="flex flex-col gap-3 sm:flex-row sm:items-center" method="get">
+        <Input
+          name="q"
+          defaultValue={q}
+          placeholder="Search insights"
+          className="sm:max-w-xs"
+        />
+        <select
+          name="status"
+          defaultValue={status}
+          className="h-9 rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <option value="all">All states</option>
+          <option value="published">Published</option>
+          <option value="draft">Draft</option>
+        </select>
+        <Button type="submit" variant="outline">
+          Filter
+        </Button>
+      </form>
+
+      {error ? (
+        <AdminErrorState description="Insights could not be loaded from the content database." />
+      ) : !posts?.length ? (
+        <AdminEmptyState
+          title={q || status !== "all" ? "No matching insights" : "No insights yet"}
+          description={
+            q || status !== "all"
+              ? "Adjust the search or publishing-state filter."
+              : "Create the first Insight when there is a real project, research note, or technical subject worth documenting."
+          }
+        />
       ) : (
-        <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
+        <div className="divide-y divide-border border-y border-border">
           {posts.map((post) => (
-            <div key={post.id} className="flex items-center gap-4 px-5 py-4">
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">{post.title}</p>
-                <p className="text-xs text-muted-foreground truncate mt-0.5">
-                  /blog/{post.slug}
+            <article
+              key={post.id}
+              className="grid gap-4 py-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
+            >
+              <div className="min-w-0">
+                <h2 className="truncate text-sm font-semibold text-foreground">
+                  {post.title}
+                </h2>
+                <p className="mt-1 line-clamp-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+                  {post.excerpt || "No excerpt yet."}
                 </p>
+                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                  <span>/insights/{post.slug}</span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span
+                      className={
+                        post.status === "published"
+                          ? "size-1.5 rounded-full bg-emerald-500"
+                          : "size-1.5 rounded-full bg-muted-foreground"
+                      }
+                    />
+                    {post.status}
+                  </span>
+                  <span>{formatDate(post.published_at)}</span>
+                </div>
               </div>
-              <Badge variant={post.status === "published" ? "default" : "secondary"} className="shrink-0">
-                {post.status}
-              </Badge>
-              <div className="flex items-center gap-1 shrink-0">
-                <Link href={`/admin/blog/${post.id}/edit`} className={cn(buttonVariants({ size: "sm", variant: "ghost" }))}>
-                  <PencilSimple weight="duotone" size={16} />
-                </Link>
+
+              <div className="flex items-center gap-1 md:justify-end">
+                {post.status === "published" ? (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    render={
+                      <Link
+                        href={`/insights/${post.slug}`}
+                        target="_blank"
+                        aria-label={`Open ${post.title}`}
+                      />
+                    }
+                    nativeButton={false}
+                  >
+                    <ArrowSquareOut className="size-4" />
+                  </Button>
+                ) : null}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  render={
+                    <Link
+                      href={`/admin/blog/${post.id}/edit`}
+                      aria-label={`Edit ${post.title}`}
+                    />
+                  }
+                  nativeButton={false}
+                >
+                  <PencilSimple className="size-4" />
+                </Button>
                 <DeleteBlogButton id={post.id} />
               </div>
-            </div>
+            </article>
           ))}
         </div>
       )}
