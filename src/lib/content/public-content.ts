@@ -310,13 +310,13 @@ async function getLegacyWorkCollection() {
   );
 }
 
-export async function getPublicWork(locale: Locale = "en") {
+async function getPublicWorkUncached(locale: Locale = "en") {
   const v2 = await getV2WorkCollection(locale);
   if (v2 !== null) return v2;
   return locale === "en" ? getLegacyWorkCollection() : [];
 }
 
-export async function getPublicWorkDetail(
+async function getPublicWorkDetailUncached(
   slug: string,
   locale: Locale = "en"
 ): Promise<PublicWork | null> {
@@ -551,13 +551,13 @@ async function getLegacyInsights() {
   );
 }
 
-export async function getPublicInsights(locale: Locale = "en") {
+async function getPublicInsightsUncached(locale: Locale = "en") {
   const v2 = await getV2Insights(locale);
   if (v2 !== null) return v2;
   return locale === "en" ? getLegacyInsights() : [];
 }
 
-export async function getPublicInsightDetail(
+async function getPublicInsightDetailUncached(
   slug: string,
   locale: Locale = "en"
 ) {
@@ -565,7 +565,7 @@ export async function getPublicInsightDetail(
   return collection.find((item) => item.slug === slug) ?? null;
 }
 
-export async function getPublicExperiences(
+async function getPublicExperiencesUncached(
   locale: Locale = "en"
 ): Promise<PublicExperience[]> {
   const supabase = createPublicClient();
@@ -620,7 +620,7 @@ export async function getPublicExperiences(
   });
 }
 
-export async function getPublicCapabilities(
+async function getPublicCapabilitiesUncached(
   locale: Locale = "en"
 ): Promise<PublicCapability[]> {
   const supabase = createPublicClient();
@@ -684,7 +684,7 @@ export async function getPublicCapabilities(
   }));
 }
 
-export async function getPublicAbout(
+async function getPublicAboutUncached(
   locale: Locale = "en"
 ): Promise<PublicAbout> {
   const supabase = createPublicClient();
@@ -702,7 +702,7 @@ export async function getPublicAbout(
   };
 }
 
-export async function getPublicSettings(): Promise<PublicSettings> {
+async function getPublicSettingsUncached(): Promise<PublicSettings> {
   const supabase = createPublicClient();
   const { data } = await supabase
     .from("site_settings")
@@ -723,7 +723,7 @@ export async function getPublicSettings(): Promise<PublicSettings> {
 }
 
 
-export async function getContentRedirect(
+async function getContentRedirectUncached(
   contentType: "work" | "insight",
   oldSlug: string,
   locale: Locale = "en"
