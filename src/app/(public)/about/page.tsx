@@ -231,8 +231,7 @@ export default async function AboutPage({ searchParams }: Props) {
       </EditorialReveal>
 
       <EditorialReveal delay={0.05}>
-        <EditorialReveal delay={0.06}>
-          <section className="border-t border-border py-14">
+        <section className="border-t border-border py-14">
         <div className="grid gap-10 lg:grid-cols-[280px_minmax(0,1fr)]">
           <div>
             <h2 className="font-display text-3xl font-semibold">
@@ -269,7 +268,8 @@ export default async function AboutPage({ searchParams }: Props) {
       </EditorialReveal>
 
       {about.hobbies ? (
-        <section className="border-t border-border py-14">
+        <EditorialReveal delay={0.06}>
+          <section className="border-t border-border py-14">
           <div className="max-w-3xl">
             <h2 className="font-display text-2xl font-semibold">
               {ui.outsideWork}
