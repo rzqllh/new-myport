@@ -79,7 +79,7 @@ All notable changes to this project are documented here.
 
 ### Governance
 - Added CodeQL analysis for JavaScript/TypeScript with immutable action pins and least-privilege workflow permissions.
-- Added high-severity dependency review without PR bot comments.
+- Added native high-severity Dependency Review without PR bot comments, with a mandatory lockfile-wide high-severity pnpm audit fallback for repositories where GitHub Dependency Graph is unavailable.
 - Added weekly grouped Dependabot minor/patch updates without auto-merge.
 - Added a tracked release/branch-governance contract, including the intended master protection ruleset and production-smoke requirement.
 

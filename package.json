@@ -13,7 +13,8 @@
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm audit:client && pnpm build",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
-    "audit:client": "node scripts/client-boundary-audit.mjs"
+    "audit:client": "node scripts/client-boundary-audit.mjs",
+    "audit:dependencies": "pnpm audit --audit-level high"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

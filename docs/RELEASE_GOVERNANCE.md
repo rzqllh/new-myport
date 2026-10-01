@@ -8,7 +8,7 @@ Required release evidence, in order:
 1. CI `quality` green.
 2. CI `e2e` green.
 3. CodeQL green or reviewed with no unresolved high-confidence issue.
-4. Dependency review green for pull requests that change the dependency graph.
+4. Dependency security gate green: native GitHub Dependency Review when the repository dependency graph is available, plus a mandatory complete-lockfile `pnpm audit --audit-level high` fallback.
 5. Production smoke after a production deployment exists.
 
 ## Branching
@@ -22,7 +22,8 @@ Required release evidence, in order:
 ## Pull requests
 
 - No bot/Codex/GPT review comments are required or permitted by the automated workflows in this repository.
-- Dependency Review explicitly uses `comment-summary-in-pr: never`.
+- Native Dependency Review explicitly uses `comment-summary-in-pr: never`.
+- The native action is allowed to degrade only because GitHub rejects it when Dependency Graph is disabled; the same job still requires the lockfile-wide high-severity pnpm audit to pass.
 - Dependabot may open dependency PRs, but nothing auto-merges them.
 - High or critical dependency findings require review before merge.
 - PR descriptions must identify user-visible, schema, security, or deployment implications.
@@ -49,7 +50,7 @@ The GitHub connection available to this implementation can read repository rules
 
 - require pull request before merge,
 - require branch to be up to date,
-- require `quality`, `e2e`, `analyze / javascript-typescript`, and `dependency-review` when applicable,
+- require `quality`, `e2e`, `analyze / javascript-typescript`, and the dependency security job,
 - block force-push,
 - block branch deletion,
 - do not allow bypass except explicit repository-owner emergency recovery.

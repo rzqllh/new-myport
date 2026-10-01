@@ -17,10 +17,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Review dependency changes
+      - name: Native dependency review
+        id: native-review
+        continue-on-error: true
         uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
         with:
           fail-on-severity: high
           vulnerability-check: true
           license-check: false
           comment-summary-in-pr: never
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          version: 10.10.0
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Audit complete lockfile for high-severity vulnerabilities
+        run: pnpm audit --audit-level high
+
+      - name: Record native review fallback
+        if: steps.native-review.outcome == 'failure'
+        run: |
+          echo "Native GitHub Dependency Review was unavailable or failed." >> "$GITHUB_STEP_SUMMARY"
+          echo "The high-severity pnpm lockfile audit remained mandatory and completed in this job." >> "$GITHUB_STEP_SUMMARY"

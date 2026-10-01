@@ -718,6 +718,8 @@ test("security workflows are least-privilege, immutable-pinned, and silent in PR
   assert.match(review, /actions\/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294/);
   assert.match(review, /fail-on-severity:\s*high/);
   assert.match(review, /comment-summary-in-pr:\s*never/);
+  assert.match(review, /continue-on-error:\s*true/);
+  assert.match(review, /pnpm audit --audit-level high/);
   assert.doesNotMatch(review, /pull-requests:\s*write/);
 });
 
@@ -737,7 +739,7 @@ test("release governance tracks required gates and the external branch-protectio
   assert.match(governance, /CI `quality` green/);
   assert.match(governance, /CI `e2e` green/);
   assert.match(governance, /CodeQL green/);
-  assert.match(governance, /Dependency review green/);
+  assert.match(governance, /Dependency security gate green/);
   assert.match(governance, /block force-push/);
   assert.match(governance, /cannot mutate branch-protection administration/);
   assert.match(governance, /No bot\/Codex\/GPT review comments/);
