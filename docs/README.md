@@ -11,7 +11,9 @@ This directory is the source of truth for the next portfolio architecture and re
 5. [CONTENT_MODEL.md](./CONTENT_MODEL.md) — CMS ownership, bilingual content model, entities, evidence, taxonomy, and dynamic-content rules.
 6. [ADMIN_EDITORIAL_WORKSPACE.md](./ADMIN_EDITORIAL_WORKSPACE.md) — admin information architecture and editorial canvas UX.
 7. [PUBLIC_PAGE_ARCHITECTURE.md](./PUBLIC_PAGE_ARCHITECTURE.md) — hierarchy and content contracts for public pages and detail pages.
-8. [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) — phased execution plan and verification gates.
+8. [DECISIONS.md](./DECISIONS.md) — approved decisions that implementation must not silently reinterpret.
+9. [BASELINE_AUDIT.md](./BASELINE_AUDIT.md) — current repository debt mapped to the redesign phases.
+10. [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) — phased execution plan and verification gates.
 
 ## Governing principles
 

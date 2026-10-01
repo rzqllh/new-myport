@@ -4,13 +4,14 @@ This plan is intentionally phased. Each phase must complete its verification gat
 
 ## Phase 0 — Documentation and baseline
 
-Status: this documentation set.
+Status: complete when this documentation PR is merged.
 
 Tasks:
 - track docs in git,
 - align README,
 - establish route/content/design/editorial contracts,
 - record baseline technical debt,
+- add and maintain CHANGELOG,
 - no product implementation in this phase.
 
 Gate:
@@ -26,7 +27,8 @@ Tasks:
 - clean .env.example duplication,
 - remove development-only public endpoint(s),
 - remove broad eslint-disable usage where possible,
-- add CHANGELOG and SECURITY docs,
+- add SECURITY documentation,
+- maintain CHANGELOG as implementation proceeds,
 - add lint/typecheck/test/build CI,
 - add initial test stack,
 - audit dependencies and remove unused packages,
