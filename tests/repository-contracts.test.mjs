@@ -321,7 +321,7 @@ test("AI grounding contains no hardcoded portfolio fallback facts", () => {
   );
   assert.match(grounding, /getPublicWork/);
   assert.match(grounding, /PUBLIC_CONTENT_CACHE_TAG/);
-  assert.match(grounding, /path: "\/work\/" \+ item\.slug/);
+  assert.match(grounding, /path: "\/work\/" \+ item\.slug/);\n  assert.match(grounding, /grounding-ranker/);
 });
 
 test("optional GitHub activity is cacheable and not a core dynamic dependency", () => {
@@ -511,4 +511,19 @@ test("admin content health degrades safely when schema v2 is unavailable", () =>
   );
   assert.match(dashboard, /!contentHealth\.schemaV2Available/);
   assert.match(dashboard, /legacy Work item/);
+});
+
+
+test("assistant retrieval harness runs in CI against the production ranker", () => {
+  const pkg = JSON.parse(read("package.json"));
+
+  assert.match(pkg.scripts.test, /assistant-grounding\.test\.mts|tests\/\*\.test\.mts/);
+  assert.equal(
+    existsSync(new URL("../tests/assistant-grounding.test.mts", import.meta.url)),
+    true
+  );
+  assert.equal(
+    existsSync(new URL("../src/lib/grounding-ranker.ts", import.meta.url)),
+    true
+  );
 });

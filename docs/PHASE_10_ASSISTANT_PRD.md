@@ -33,6 +33,10 @@ Visitors can ask about experience, capabilities, and Work and receive concise an
 - If the portfolio does not support an answer, say so directly.
 - Assistant failures do not affect portfolio navigation.
 
+## Harness
+
+CI runs deterministic retrieval fixtures against the same production ranking module. The harness covers exact Work-title retrieval, cross-entity project-management retrieval, unrelated-query fallback, result limits, canonical source metadata, and empty-corpus behavior. It does not call the live model or consume API quota.
+
 ## Gate
 
 - No hardcoded biography/project fallback.
