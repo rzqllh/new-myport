@@ -77,6 +77,12 @@ All notable changes to this project are documented here.
 - Added contact-schema compatibility for the existing runtime `contacts` path and legacy `messages` data.
 - Added PostgreSQL migration verification in CI with representative legacy data.
 
+### Governance
+- Added CodeQL analysis for JavaScript/TypeScript with immutable action pins and least-privilege workflow permissions.
+- Added high-severity dependency review without PR bot comments.
+- Added weekly grouped Dependabot minor/patch updates without auto-merge.
+- Added a tracked release/branch-governance contract, including the intended master protection ruleset and production-smoke requirement.
+
 ### Security
 - Added same-origin enforcement for public chat POST requests.
 - Added bounded assistant output, upstream timeout handling, and request IDs.

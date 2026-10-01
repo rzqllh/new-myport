@@ -54,6 +54,8 @@ Scope:
 - dependency review on pull requests,
 - merge/release governance documentation.
 
+Implementation note: branch-protection/ruleset administration is tracked as a required repository target because the connected GitHub tool can read, but cannot mutate, that administration surface.
+
 ## P5 — Lower: performance and content maturity
 
 Branch: `phase/15-performance-content`

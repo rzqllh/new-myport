@@ -62,3 +62,12 @@ The production-hardening pass adds:
 Operational events must not include chat text, contact-form content, names, email addresses, session tokens, verification tokens, or raw IP addresses. Detailed user content remains outside the operational log contract.
 
 Next.js Server Actions retain the framework's origin protections. The explicit application origin policy is applied to the standalone public chat route where the application directly owns the POST boundary.
+
+
+## Automated supply-chain controls
+
+- CodeQL analyzes JavaScript/TypeScript on master, phase branches, pull requests, and a weekly schedule.
+- Dependency Review blocks newly introduced high/critical known vulnerabilities on pull requests.
+- Dependency Review does not post PR comments.
+- Dependabot opens grouped weekly minor/patch PRs; it does not auto-merge.
+- Third-party workflow actions are immutable-SHA pinned with reviewed release comments.

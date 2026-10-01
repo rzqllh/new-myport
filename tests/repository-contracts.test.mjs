@@ -706,3 +706,39 @@ test("content health detects source-less evidence and redirect integrity failure
   assert.match(health, /Redirect history contains a self-redirect/);
   assert.match(health, /Redirect history contains a cycle/);
 });
+
+
+test("security workflows are least-privilege, immutable-pinned, and silent in PR comments", () => {
+  const codeql = read(".github/workflows/codeql.yml");
+  const review = read(".github/workflows/dependency-review.yml");
+
+  assert.match(codeql, /github\/codeql-action\/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2/);
+  assert.match(codeql, /github\/codeql-action\/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2/);
+  assert.match(codeql, /security-events:\s*write/);
+  assert.match(review, /actions\/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294/);
+  assert.match(review, /fail-on-severity:\s*high/);
+  assert.match(review, /comment-summary-in-pr:\s*never/);
+  assert.doesNotMatch(review, /pull-requests:\s*write/);
+});
+
+test("Dependabot is review-only and groups routine updates without auto-merge", () => {
+  const config = read(".github/dependabot.yml");
+
+  assert.match(config, /package-ecosystem:\s*npm/);
+  assert.match(config, /interval:\s*weekly/);
+  assert.match(config, /production-dependencies/);
+  assert.match(config, /development-dependencies/);
+  assert.doesNotMatch(config, /auto-merge|automerge/i);
+});
+
+test("release governance tracks required gates and the external branch-protection target", () => {
+  const governance = read("docs/RELEASE_GOVERNANCE.md");
+
+  assert.match(governance, /CI `quality` green/);
+  assert.match(governance, /CI `e2e` green/);
+  assert.match(governance, /CodeQL green/);
+  assert.match(governance, /Dependency review green/);
+  assert.match(governance, /block force-push/);
+  assert.match(governance, /cannot mutate branch-protection administration/);
+  assert.match(governance, /No bot\/Codex\/GPT review comments/);
+});
