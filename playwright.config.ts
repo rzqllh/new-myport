@@ -20,7 +20,11 @@ export default defineConfig({
     video: "off",
   },
   projects: [
-    { name: "chromium-desktop", use: { ...devices["Desktop Chrome"] } },
+    {
+      name: "chromium-desktop",
+      use: { ...devices["Desktop Chrome"] },
+      grepInvert: /@mobile/,
+    },
     { name: "chromium-mobile", use: { ...devices["Pixel 7"] }, grep: /@mobile/ },
   ],
   webServer: process.env.PLAYWRIGHT_BASE_URL
