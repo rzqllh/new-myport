@@ -7,6 +7,7 @@ import {
   Briefcase,
   Code,
   Envelope,
+  FileText,
   FolderOpen,
   Gear,
   Quotes,
@@ -37,7 +38,8 @@ const groups = [
   {
     label: "Site",
     items: [
-      { href: "/admin/about", label: "About", icon: User },
+      { href: "/admin/site-content", label: "Site Content", icon: FileText },
+      { href: "/admin/about", label: "Profile", icon: User },
       { href: "/admin/settings", label: "Settings", icon: Gear },
     ],
   },

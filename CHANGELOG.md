@@ -10,8 +10,10 @@ All notable changes to this project are documented here.
 - Reworked Work and Insights lists into editorial rows with search and publication-state filtering.
 - Rebuilt Work and Insight editing around outline / canvas / inspector hierarchy.
 - Added EN/ID authoring, permalink locking/change flow, unsaved-change protection, preview, publication state, and locale-aware SEO editing.
-- Added safe dual-write compatibility: legacy content remains writable before schema v2 is deployed, while v2 translations and redirect history synchronize when available.
-- Added consistent admin empty/error/page-header patterns.
+- Added dedicated bilingual Site Content editing for navigation and public page/section copy.
+- Separated editorial copy from operational Settings.
+- Removed fabricated hero-stat defaults from the admin settings model; location, availability, social profiles, SEO defaults, and resume remain factual operational settings.
+- Added safe dual-write compatibility for the staged schema-v2 rollout.
 
 ### Data model
 - Added an additive bilingual Work/Insights content model with media, evidence, site content, redirect history, localized experience, and qualitative capabilities.

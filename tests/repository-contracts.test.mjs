@@ -60,3 +60,15 @@ test("Work and Insight editors use the editorial workspace and permalink contrac
     assert.match(source, /beforeunload/);
   }
 });
+
+test("site content is separate from operational settings", () => {
+  const settings = read("src/app/admin/(dashboard)/settings/settings-form.tsx");
+  const siteContent = read(
+    "src/app/admin/(dashboard)/site-content/site-content-form.tsx"
+  );
+
+  assert.doesNotMatch(settings, /client_satisfaction|on_time_delivery|teams_collaborated/);
+  assert.match(settings, /Profile & availability/);
+  assert.match(siteContent, /site_content/);
+  assert.match(siteContent, /LocaleSwitch/);
+});
