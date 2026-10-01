@@ -398,3 +398,36 @@ test("About narrative belongs to bilingual Site Content instead of the legacy pr
   assert.doesNotMatch(profileForm, /philosophy|hobbies|\bbio\b/);
   assert.match(profileForm, /Site Content/);
 });
+
+
+test("portfolio assistant sources are selected by server-side grounding, not invented by the model", () => {
+  const grounding = read("src/lib/gemini-grounding.ts");
+  const route = read("src/app/api/chat/route.ts");
+  const widget = read("src/components/chat-widget.tsx");
+
+  assert.match(grounding, /selectGroundingSources/);
+  assert.match(grounding, /formatGroundingSources/);
+  assert.match(route, /sources: selectedSources\.map/);
+  assert.match(route, /Do not invent source paths or citation labels/);
+  assert.match(widget, /message\.sources/);
+  assert.match(widget, /publicPath\(locale, source\.path\)/);
+});
+
+test("portfolio assistant session retry preserves the submitted question", () => {
+  const widget = read("src/components/chat-widget.tsx");
+
+  assert.match(widget, /const text = input\.trim\(\)/);
+  assert.match(widget, /const history = messages/);
+  assert.match(widget, /for \(let attempt = 0; attempt < 2; attempt \+= 1\)/);
+  assert.match(widget, /messages: \[\.\.\.history, userMessage\]/);
+  assert.doesNotMatch(widget, /setTimeout\(\(\) => sendMessage\(1\)/);
+});
+
+test("assistant UI copy is localized through the shared public UI dictionary", () => {
+  const routes = read("src/lib/content/public-routes.ts");
+  const widget = read("src/components/chat-widget.tsx");
+
+  assert.match(routes, /assistantOpen/);
+  assert.match(routes, /assistantSources/);
+  assert.match(widget, /PUBLIC_UI\[locale\]/);
+});

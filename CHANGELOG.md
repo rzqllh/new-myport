@@ -79,6 +79,12 @@ All notable changes to this project are documented here.
 - Deferred the optional portfolio assistant until browser idle time so it does not compete with the first useful render.
 - Added an explicit performance/reliability contract with degraded-state rules and production measurement targets.
 
+### Differentiators
+- Added a grounded portfolio assistant corpus that selects relevant published sources for each question.
+- Assistant responses now return server-selected source links separately from model text, preventing model-generated citation paths.
+- Reworked the assistant UI into a restrained bilingual portfolio surface with canonical source links.
+- Fixed expired-session retry so the original submitted question is preserved.
+
 ### Engineering
 - Standardized the repository on pnpm and added lint/typecheck/test/build CI.
 - Added repository contract tests.

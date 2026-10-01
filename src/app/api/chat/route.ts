@@ -2,7 +2,11 @@ import { GoogleGenAI } from "@google/genai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { verifyChatSession, signChatSession } from "@/lib/chat-auth";
-import { getCachedGroundingData } from "@/lib/gemini-grounding";
+import {
+  formatGroundingSources,
+  getCachedGroundingCorpus,
+  selectGroundingSources,
+} from "@/lib/gemini-grounding";
 import { checkChatRateLimits } from "@/lib/rate-limit";
 import { getRequestIp } from "@/lib/request-ip";
 
@@ -94,11 +98,24 @@ export async function POST(req: Request) {
       );
     }
 
-    const groundingData = await getCachedGroundingData();
+    const latestQuestion =
+      [...messages]
+        .reverse()
+        .find((message) => message.role === "user")
+        ?.parts.map((part) => part.text)
+        .join(" ") ?? "";
+
+    const corpus = await getCachedGroundingCorpus();
+    const selectedSources = selectGroundingSources(corpus, latestQuestion);
+    const groundingData = formatGroundingSources(selectedSources);
+
     const systemInstruction = [
-      "Answer only from the supplied portfolio data.",
+      "You are the portfolio assistant for Hafizh Rizqullah Prasetya.",
+      "Answer only from the supplied verified portfolio sources.",
       "Do not invent experience, metrics, outcomes, employers, projects, or skills.",
-      "If the data does not support an answer, say that the portfolio does not provide enough information.",
+      "If the supplied sources do not support an answer, say that the portfolio does not provide enough information.",
+      "Keep the answer concise, natural, and professional.",
+      "Do not invent source paths or citation labels; source links are rendered separately by the application.",
       "",
       groundingData,
     ].join("\n");
@@ -111,6 +128,11 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       message: response.text || "No response was generated.",
+      sources: selectedSources.map((source) => ({
+        title: source.title,
+        path: source.path,
+        kind: source.kind,
+      })),
       ...(newSessionToken && { sessionToken: newSessionToken }),
     });
   } catch (error) {

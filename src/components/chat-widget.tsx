@@ -1,194 +1,304 @@
-'use client';
-import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { ChatCircle, X, PaperPlaneRight } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import {
+  ArrowUpRight,
+  ChatCircle,
+  PaperPlaneRight,
+  X,
+} from "@phosphor-icons/react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  PUBLIC_UI,
+  localeFromPathname,
+  publicPath,
+} from "@/lib/content/public-routes";
+
+interface ChatSource {
+  title: string;
+  path: string;
+  kind: "profile" | "experience" | "capability" | "work";
+}
+
+interface ChatMessage {
+  role: "user" | "model";
+  parts: Array<{ text: string }>;
+  sources?: ChatSource[];
+}
+
+interface ChatResponse {
+  message?: string;
+  sessionToken?: string;
+  sources?: ChatSource[];
+  error?: string;
+  code?: string;
+}
 
 export default function ChatWidget() {
+  const pathname = usePathname();
+  const locale = localeFromPathname(pathname);
+  const ui = PUBLIC_UI[locale];
+
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<{ role: string; parts: { text: string }[] }[]>([
-    { role: 'model', parts: [{ text: "Hi there! I'm an AI assistant trained on Hafizh's portfolio. What would you like to know about his experience or projects?" }] }
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      role: "model",
+      parts: [{ text: ui.assistantIntro }],
+    },
   ]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [sessionToken, setSessionToken] = useState<string>();
-  
-  const scrollRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages]);
 
-  // Close on Escape key press
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
-        setIsOpen(false);
-      }
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, isLoading]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const timer = globalThis.setTimeout(() => inputRef.current?.focus(), 80);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsOpen(false);
     };
+
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      globalThis.clearTimeout(timer);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [isOpen]);
 
-  const sendMessage = async (retryCount = 0) => {
-    if (!input.trim() && retryCount === 0) return;
-    const currentInput = input;
-    
-    if (retryCount === 0) {
-      setMessages(p => [...p, { role: 'user', parts: [{ text: currentInput }] }]);
-      setInput('');
-    }
-    
+  async function sendMessage() {
+    const text = input.trim();
+    if (!text || isLoading) return;
+
+    const history = messages;
+    const userMessage: ChatMessage = {
+      role: "user",
+      parts: [{ text }],
+    };
+
+    setMessages((current) => [...current, userMessage]);
+    setInput("");
     setIsLoading(true);
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const payload: any = { 
-        messages: [...messages, { role: 'user', parts: [{ text: currentInput }] }] 
-      };
-      
-      if (sessionToken) {
-        payload.sessionToken = sessionToken;
+      let activeToken = sessionToken;
+      let responseData: ChatResponse | null = null;
+
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: [...history, userMessage],
+            ...(activeToken ? { sessionToken: activeToken } : {}),
+          }),
+        });
+
+        const data = (await response.json()) as ChatResponse;
+
+        if (
+          response.status === 401 &&
+          data.code === "SESSION_EXPIRED" &&
+          attempt === 0
+        ) {
+          activeToken = undefined;
+          setSessionToken(undefined);
+          continue;
+        }
+
+        if (!response.ok) {
+          throw new Error(data.error || ui.assistantError);
+        }
+
+        responseData = data;
+        break;
       }
 
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-
-      if (res.status === 401 && data.code === 'SESSION_EXPIRED' && retryCount === 0) {
-        setSessionToken(undefined);
-        setMessages(p => [...p, { role: 'model', parts: [{ text: 'Session expired. Retrying...' }] }]);
-        setTimeout(() => sendMessage(1), 3000); 
-        return;
+      if (!responseData?.message) {
+        throw new Error(ui.assistantError);
       }
 
-      if (!res.ok) {
-        setMessages(p => [...p, { role: 'model', parts: [{ text: data.error || 'An error occurred. Please try again.' }] }]);
-        return;
+      if (responseData.sessionToken) {
+        setSessionToken(responseData.sessionToken);
       }
 
-      if (data.sessionToken) setSessionToken(data.sessionToken);
-      setMessages(p => [...p, { role: 'model', parts: [{ text: data.message }] }]);
-
+      setMessages((current) => [
+        ...current,
+        {
+          role: "model",
+          parts: [{ text: responseData.message ?? ui.assistantError }],
+          sources: responseData.sources ?? [],
+        },
+      ]);
     } catch {
-      setMessages(p => [...p, { role: 'model', parts: [{ text: 'Network error. Please try again.' }] }]);
+      setMessages((current) => [
+        ...current,
+        {
+          role: "model",
+          parts: [{ text: ui.assistantError }],
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   return (
     <>
       <AnimatePresence>
-        {!isOpen && (
+        {!isOpen ? (
           <motion.div
             key="chat-toggle"
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-            className="fixed bottom-4 right-4 z-50"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            className="fixed bottom-4 right-4 z-40"
           >
-            <Button 
-              className="rounded-full w-14 h-14 shadow-lg" 
+            <Button
+              variant="outline"
+              className="h-11 gap-2 bg-background shadow-sm"
               onClick={() => setIsOpen(true)}
-              aria-label="Open portfolio AI assistant"
+              aria-label={ui.assistantOpen}
             >
-              <ChatCircle weight="fill" size={24} />
+              <ChatCircle className="size-4" />
+              <span className="hidden sm:inline">{ui.assistantTitle}</span>
             </Button>
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
 
       <AnimatePresence>
-        {isOpen && (
-          <motion.div
+        {isOpen ? (
+          <motion.section
             key="chat-window"
             role="dialog"
             aria-modal="true"
             aria-labelledby="chat-heading"
-            initial={{ opacity: 0, y: 20, scale: 0.9, originX: 1, originY: 1 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="fixed bottom-4 right-4 w-[350px] max-w-[calc(100vw-32px)] h-[500px] max-h-[calc(100dvh-32px)] flex flex-col shadow-xl border border-border rounded-xl z-50 bg-background overflow-hidden"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            transition={{ duration: 0.16 }}
+            className="fixed bottom-4 right-4 z-50 flex h-[min(620px,calc(100dvh-2rem))] w-[min(420px,calc(100vw-2rem))] flex-col overflow-hidden border border-border bg-background shadow-xl"
           >
-            <div className="flex justify-between items-center p-4 border-b bg-muted/30">
-              <h2 id="chat-heading" className="text-sm font-semibold text-foreground">Chat with AI</h2>
-              <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} aria-label="Close chat assistant">
-                <X weight="bold" size={20} />
+            <header className="flex items-center justify-between border-b border-border px-4 py-3">
+              <div>
+                <h2 id="chat-heading" className="text-sm font-semibold">
+                  {ui.assistantTitle}
+                </h2>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {locale === "id" ? "Berbasis konten publik" : "Grounded in public content"}
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => setIsOpen(false)}
+                aria-label={ui.assistantClose}
+              >
+                <X className="size-4" />
               </Button>
-            </div>
-            
-            <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-4" ref={scrollRef} aria-live="polite">
-              <AnimatePresence mode="popLayout">
-                {messages.map((m, i) => (
-                  <motion.div 
-                    key={i} 
-                    initial={{ opacity: 0, y: 10, scale: 0.95, originX: m.role === 'user' ? 1 : 0 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                    className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            </header>
+
+            <div
+              ref={scrollRef}
+              aria-live="polite"
+              className="flex-1 space-y-5 overflow-y-auto px-4 py-5"
+            >
+              {messages.map((message, index) => (
+                <article
+                  key={index}
+                  className={
+                    message.role === "user"
+                      ? "ml-auto max-w-[88%] border-l-2 border-primary pl-3"
+                      : "max-w-[92%]"
+                  }
+                >
+                  <p
+                    className={
+                      message.role === "user"
+                        ? "text-sm leading-6 text-foreground"
+                        : "whitespace-pre-wrap text-sm leading-6 text-foreground"
+                    }
                   >
-                    <div className={`rounded-2xl px-4 py-2.5 max-w-[85%] text-sm ${
-                      m.role === 'user' 
-                        ? 'bg-primary text-primary-foreground rounded-br-sm shadow-sm' 
-                        : 'bg-muted border border-border rounded-bl-sm shadow-sm'
-                    }`}>
-                      {m.parts[0].text}
+                    {message.parts[0]?.text}
+                  </p>
+
+                  {message.role === "model" && message.sources?.length ? (
+                    <div className="mt-3 border-t border-border pt-3">
+                      <p className="text-[11px] font-medium text-muted-foreground">
+                        {ui.assistantSources}
+                      </p>
+                      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1.5">
+                        {Array.from(
+                          new Map(
+                            message.sources.map((source) => [source.path, source])
+                          ).values()
+                        ).map((source) => (
+                          <Link
+                            key={source.path}
+                            href={publicPath(locale, source.path)}
+                            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            {source.title}
+                            <ArrowUpRight className="size-3" />
+                          </Link>
+                        ))}
+                      </div>
                     </div>
-                  </motion.div>
-                ))}
-                {isLoading && (
-                  <motion.div
-                    key="loading"
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="flex justify-start"
-                  >
-                    <div className="bg-muted border border-border rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm shadow-sm flex items-center gap-1.5">
-                      <span className="size-1.5 rounded-full bg-foreground/30 animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <span className="size-1.5 rounded-full bg-foreground/30 animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="size-1.5 rounded-full bg-foreground/30 animate-bounce" style={{ animationDelay: '300ms' }} />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                  ) : null}
+                </article>
+              ))}
+
+              {isLoading ? (
+                <p className="text-sm text-muted-foreground" role="status">
+                  {locale === "id" ? "Menelusuri portofolio…" : "Checking the portfolio…"}
+                </p>
+              ) : null}
             </div>
 
-            <div className="p-4 border-t bg-background">
-              <form 
-                className="flex gap-2 relative" 
-                onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
-              >
-                <Input 
-                  value={input} 
-                  onChange={(e) => setInput(e.target.value)} 
-                  placeholder="Type a message..." 
+            <form
+              className="border-t border-border p-3"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void sendMessage();
+              }}
+            >
+              <div className="flex gap-2">
+                <Input
+                  ref={inputRef}
+                  value={input}
+                  onChange={(event) => setInput(event.target.value)}
+                  placeholder={ui.assistantInput}
                   disabled={isLoading}
-                  className="pr-10 rounded-full bg-muted/50 border-border"
-                  aria-label="Message input"
+                  maxLength={4000}
+                  aria-label={ui.assistantInput}
                 />
-                <Button 
-                  type="submit" 
-                  size="icon" 
-                  className="absolute right-1 top-1 bottom-1 h-auto w-8 rounded-full"
+                <Button
+                  type="submit"
+                  size="icon"
                   disabled={isLoading || !input.trim()}
-                  aria-label="Send message"
+                  aria-label={ui.assistantSend}
                 >
-                  <PaperPlaneRight weight="fill" size={14} />
+                  <PaperPlaneRight className="size-4" />
                 </Button>
-              </form>
-            </div>
-          </motion.div>
-        )}
+              </div>
+            </form>
+          </motion.section>
+        ) : null}
       </AnimatePresence>
     </>
   );
 }
-

@@ -70,6 +70,15 @@ export const PUBLIC_UI = {
     messageSent: "Message sent",
     messageSentBody: "Your message was submitted successfully.",
     messagePlaceholder: "Project, role, question, or relevant context",
+    assistantOpen: "Open portfolio assistant",
+    assistantTitle: "Portfolio assistant",
+    assistantIntro:
+      "Ask about published Work, experience, or capabilities. Answers are grounded in this portfolio.",
+    assistantInput: "Ask about the portfolio…",
+    assistantSend: "Send question",
+    assistantClose: "Close portfolio assistant",
+    assistantSources: "Sources",
+    assistantError: "The assistant is temporarily unavailable.",
   },
   id: {
     skipToContent: "Lewati ke konten utama",
@@ -140,6 +149,15 @@ export const PUBLIC_UI = {
     messageSent: "Pesan terkirim",
     messageSentBody: "Pesan Anda berhasil dikirim.",
     messagePlaceholder: "Proyek, peran, pertanyaan, atau konteks yang relevan",
+    assistantOpen: "Buka asisten portofolio",
+    assistantTitle: "Asisten portofolio",
+    assistantIntro:
+      "Tanyakan Karya, pengalaman, atau kapabilitas yang sudah dipublikasikan. Jawaban mengacu pada portofolio ini.",
+    assistantInput: "Tanyakan tentang portofolio…",
+    assistantSend: "Kirim pertanyaan",
+    assistantClose: "Tutup asisten portofolio",
+    assistantSources: "Sumber",
+    assistantError: "Asisten sedang tidak tersedia.",
   },
 } as const;
 
