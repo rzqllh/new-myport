@@ -42,6 +42,8 @@ Scope:
 - preview-token foundation for draft review,
 - deterministic content-health expansion.
 
+Implementation note: revision restore is intentionally limited to editorial-copy rows. Permalinks and structural metadata keep their dedicated redirect/publishing workflows.
+
 ## P4 — Medium: supply chain and governance
 
 Branch: `phase/14-governance`

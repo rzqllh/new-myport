@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { SettingsForm } from "./settings-form";
+import { Button } from "@/components/ui/button";
 
 export const metadata = { title: "Settings — Admin" };
 
@@ -19,6 +20,15 @@ export default async function SettingsAdminPage() {
       <AdminPageHeader
         title="Settings"
         description="Operational site data, integrations-facing metadata, profile facts, and resume links. Public page copy is managed separately in Site Content."
+        action={
+          <Button
+            variant="outline"
+            render={<a href="/api/admin/export" />}
+            nativeButton={false}
+          >
+            Export content backup
+          </Button>
+        }
       />
       {error ? (
         <p role="alert" className="text-sm text-destructive">

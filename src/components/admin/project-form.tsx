@@ -17,6 +17,7 @@ import {
   type EditorSection,
 } from "@/components/admin/editorial-workspace";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
+import { RevisionHistory } from "@/components/admin/revision-history";
 import { ImageUpload } from "@/components/image-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -608,6 +609,14 @@ export function ProjectForm({ initialData }: { initialData?: ProjectRecord }) {
           onChange={(event) => { setDirty(true); setSortOrder(Number(event.target.value)); }}
         />
       </div>
+
+      {initialData?.id ? (
+        <RevisionHistory
+          resourceType="work_translation"
+          resourceId={initialData.id}
+          locale={locale}
+        />
+      ) : null}
 
       <p className="border-t border-border pt-5 text-xs leading-5 text-muted-foreground">
         {v2Available === false

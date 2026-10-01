@@ -661,3 +661,48 @@ test("Turnstile verification and public rate-limit dependencies fail closed with
   assert.match(contact, /contact\.rate_limit_unavailable/);
   assert.match(contact, /process\.env\.NODE_ENV === "production"/);
 });
+
+
+test("CMS resilience tracks editorial revisions without restoring structural metadata", () => {
+  const migration = read("supabase/migrations/007_editorial_revisions.sql");
+  const restore = read("src/app/api/admin/revisions/restore/route.ts");
+  const revisions = read("src/components/admin/revision-history.tsx");
+
+  assert.match(migration, /content_revisions/);
+  assert.match(migration, /work_translation/);
+  assert.match(migration, /insight_translation/);
+  assert.match(migration, /site_content/);
+  assert.doesNotMatch(migration, /resource_type IN \([^)]*work_item/);
+  assert.doesNotMatch(restore, /slug|published_at|repository_url|live_url/);
+  assert.match(revisions, /current version will remain in revision history/i);
+});
+
+test("authenticated CMS backup excludes contact and authentication data", () => {
+  const route = read("src/app/api/admin/export/route.ts");
+
+  assert.match(route, /getPortfolioAdminClient/);
+  assert.match(route, /portfolio-content-backup\.json/);
+  assert.match(route, /content_revisions/);
+  assert.doesNotMatch(route, /contacts|messages|portfolio_admins|auth\.users/);
+  assert.match(route, /Cache-Control.*no-store/s);
+});
+
+test("draft preview tokens are short-lived, scoped, and production-secret backed", () => {
+  const auth = read("src/lib/preview-auth.ts");
+  const route = read("src/app/api/admin/preview-token/route.ts");
+
+  assert.match(auth, /PREVIEW_TOKEN_SECRET/);
+  assert.match(auth, /setExpirationTime\("15m"\)/);
+  assert.match(auth, /portfolio-preview/);
+  assert.match(route, /getPortfolioAdminClient/);
+  assert.match(route, /resourceType/);
+  assert.match(route, /resourceId/);
+});
+
+test("content health detects source-less evidence and redirect integrity failures", () => {
+  const health = read("src/lib/content/admin-content-health.ts");
+
+  assert.match(health, /Published evidence is missing a source or media artifact/);
+  assert.match(health, /Redirect history contains a self-redirect/);
+  assert.match(health, /Redirect history contains a cycle/);
+});

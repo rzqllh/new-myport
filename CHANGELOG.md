@@ -47,6 +47,13 @@ All notable changes to this project are documented here.
 - Replaced shared button transition-all behavior with explicit transition properties.
 - Extended reduced-motion handling to the portfolio assistant.
 
+### CMS resilience
+- Added database-backed editorial revision snapshots for Work translations, Insight translations, and Site Content.
+- Added authenticated revision restore that preserves the displaced current copy as another revision.
+- Added authenticated JSON content backup export without contact messages, auth users, or admin membership data.
+- Added short-lived signed preview-token infrastructure for future draft rendering.
+- Extended content health with source-less evidence and redirect self-loop/cycle checks.
+
 ### Admin
 - Rebuilt the admin shell around grouped information architecture and responsive navigation.
 - Replaced the stats-first dashboard with attention, recent-edit, and publishing-state hierarchy.

@@ -12,6 +12,7 @@ import {
 } from "@/lib/content/site-copy";
 import { isV2SchemaUnavailable } from "@/lib/content/schema-compat";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
+import { RevisionHistory } from "@/components/admin/revision-history";
 import { LocaleSwitch } from "@/components/admin/editorial-workspace";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -145,6 +146,11 @@ export function SiteContentForm({
                 )}
               </div>
             ))}
+            <RevisionHistory
+              resourceType="site_content"
+              resourceId={namespace}
+              locale={locale}
+            />
           </div>
         </section>
       </div>

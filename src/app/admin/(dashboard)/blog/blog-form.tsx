@@ -13,6 +13,7 @@ import {
   type EditorSection,
 } from "@/components/admin/editorial-workspace";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
+import { RevisionHistory } from "@/components/admin/revision-history";
 import { TiptapEditor } from "@/components/tiptap-editor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -399,6 +400,14 @@ export function BlogForm({ initialData }: { initialData?: BlogPost }) {
           className="min-h-24"
         />
       </div>
+
+      {initialData?.id ? (
+        <RevisionHistory
+          resourceType="insight_translation"
+          resourceId={initialData.id}
+          locale={locale}
+        />
+      ) : null}
 
       <p className="border-t border-border pt-5 text-xs leading-5 text-muted-foreground">
         {v2Available === false

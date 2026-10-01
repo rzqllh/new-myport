@@ -89,6 +89,7 @@ export async function getAdminContentHealth(): Promise<AdminContentHealth> {
     mediaTranslationsResult,
     capabilitiesResult,
     capabilityTranslationsResult,
+    redirectsResult,
   ] = await Promise.all([
     supabase
       .from("work_translations")
@@ -97,7 +98,7 @@ export async function getAdminContentHealth(): Promise<AdminContentHealth> {
       ),
     supabase
       .from("work_evidence")
-      .select("work_id, is_public")
+      .select("id, work_id, is_public, evidence_type, media_id, source_url")
       .eq("is_public", true),
     supabase
       .from("insights")
@@ -120,6 +121,9 @@ export async function getAdminContentHealth(): Promise<AdminContentHealth> {
     supabase
       .from("capability_translations")
       .select("capability_id, locale, name"),
+    supabase
+      .from("content_redirects")
+      .select("content_type, locale, old_slug, new_slug"),
   ]);
 
   const queryFailed = [
@@ -131,6 +135,7 @@ export async function getAdminContentHealth(): Promise<AdminContentHealth> {
     mediaTranslationsResult.error,
     capabilitiesResult.error,
     capabilityTranslationsResult.error,
+    redirectsResult.error,
   ].some(Boolean);
 
   if (queryFailed) {
@@ -158,6 +163,7 @@ export async function getAdminContentHealth(): Promise<AdminContentHealth> {
   const mediaTranslations = mediaTranslationsResult.data ?? [];
   const capabilities = capabilitiesResult.data ?? [];
   const capabilityTranslations = capabilityTranslationsResult.data ?? [];
+  const redirects = redirectsResult.data ?? [];
 
   for (const work of workItemsResult.data ?? []) {
     const translations = workTranslations.filter(
@@ -293,6 +299,68 @@ export async function getAdminContentHealth(): Promise<AdminContentHealth> {
         detail: "The Indonesian article is published but its SEO copy is incomplete.",
         href,
       });
+    }
+  }
+
+  for (const item of evidence) {
+    if (!item.media_id && !text(item.source_url)) {
+      issues.push({
+        id: "evidence-source-" + item.id,
+        severity: "review",
+        label: "Published evidence is missing a source or media artifact.",
+        detail:
+          "Evidence should point to a public-safe source URL or a managed media asset.",
+        href: "/admin/projects/" + item.work_id + "/edit",
+      });
+    }
+  }
+
+  const redirectMap = new Map(
+    redirects.map((redirect) => [
+      [redirect.content_type, redirect.locale, redirect.old_slug].join(":"),
+      redirect.new_slug,
+    ])
+  );
+
+  for (const redirect of redirects) {
+    if (redirect.old_slug === redirect.new_slug) {
+      issues.push({
+        id:
+          "redirect-self-" +
+          [redirect.content_type, redirect.locale, redirect.old_slug].join("-"),
+        severity: "blocking",
+        label: "Redirect history contains a self-redirect.",
+        detail: "A canonical URL cannot redirect to the same slug.",
+        href: "/admin",
+      });
+      continue;
+    }
+
+    const start = redirect.old_slug;
+    let current = redirect.new_slug;
+    const seen = new Set([start]);
+
+    for (let depth = 0; depth < 20; depth += 1) {
+      if (seen.has(current)) {
+        issues.push({
+          id:
+            "redirect-cycle-" +
+            [redirect.content_type, redirect.locale, redirect.old_slug].join("-"),
+          severity: "blocking",
+          label: "Redirect history contains a cycle.",
+          detail:
+            "Resolve the redirect chain before publishing another permalink change.",
+          href: "/admin",
+        });
+        break;
+      }
+
+      seen.add(current);
+      const next = redirectMap.get(
+        [redirect.content_type, redirect.locale, current].join(":")
+      );
+      if (!next) break;
+      current = next;
     }
   }
 
