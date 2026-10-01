@@ -170,6 +170,23 @@ Avoid:
 
 Reduced-motion must be respected.
 
+Implementation rules:
+- Route arrival may animate briefly, but route changes must never wait for an exit animation.
+- Major public hierarchy may reveal once on viewport entry; do not animate every card or every paragraph.
+- Active navigation may use a shared moving indicator when reduced motion is not requested.
+- Editorial list rows may use restrained color/selection feedback; avoid large translations that disturb reading.
+- Shared controls use explicit transition properties rather than `transition-all`.
+- Public detail pages prioritize uninterrupted reading over staggered reveal.
+- Admin pages do not use decorative entrance sequences; motion there is reserved for panels, reordering, focus/state, and save/publish feedback.
+- JavaScript motion must use the user's reduced-motion preference in addition to the global CSS media query.
+
+Timing guidance:
+- hover/press/state feedback: 120–180 ms,
+- route arrival: 200–240 ms,
+- major section reveal: 320–420 ms.
+
+Avoid scroll-jacking, parallax, animated background noise, layout-shifting motion, and spring overshoot on reading content.
+
 ## 9. Public page language
 
 Public pages should feel editorial, not dashboard-like:

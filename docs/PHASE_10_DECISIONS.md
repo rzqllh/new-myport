@@ -13,6 +13,9 @@ Reason: the public information architecture now has Work, Insights, About, Conta
 ### Admin content-health checks
 Reason: bilingual publishing, SEO, media alt text, evidence, and qualitative capabilities create maintainable quality requirements that are better surfaced proactively.
 
+### Motion and interaction quality
+Reason: the public redesign benefits from continuity between hierarchy changes and navigation states, but motion must remain functional, restrained, and accessible. The implementation uses the existing Motion dependency, avoids navigation-delaying exit sequences, and honors reduced-motion.
+
 ## Defer
 
 ### /now

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { List, MagnifyingGlass } from "@phosphor-icons/react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
@@ -57,6 +58,7 @@ export function Navbar({
   location,
 }: NavbarProps) {
   const pathname = usePathname();
+  const prefersReducedMotion = useReducedMotion();
   const [searchOpen, setSearchOpen] = useState(false);
   const locale = localeFromPathname(pathname);
   const labels = labelsByLocale[locale];
@@ -105,13 +107,29 @@ export function Navbar({
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "rounded-md px-3 py-2 text-sm transition-colors",
+                  "relative rounded-md px-3 py-2 text-sm transition-colors duration-150",
                   active
                     ? "text-foreground"
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
                 {labels[item.key]}
+                {active ? (
+                  prefersReducedMotion ? (
+                    <span className="absolute inset-x-3 bottom-1 h-px bg-primary" />
+                  ) : (
+                    <motion.span
+                      layoutId="public-nav-active"
+                      className="absolute inset-x-3 bottom-1 h-px bg-primary"
+                      transition={{
+                        type: "spring",
+                        stiffness: 420,
+                        damping: 34,
+                        mass: 0.7,
+                      }}
+                    />
+                  )
+                ) : null}
               </Link>
             );
           })}
@@ -184,11 +202,19 @@ export function Navbar({
                   <ul className="divide-y divide-border">
                     {routes.map((item) => {
                       const href = publicPath(locale, item.path);
+                      const active =
+                        pathname === href || pathname.startsWith(`${href}/`);
                       return (
                         <li key={item.key}>
                           <Link
                             href={href}
-                            className="flex min-h-12 items-center text-base text-foreground"
+                            aria-current={active ? "page" : undefined}
+                            className={cn(
+                              "flex min-h-12 items-center border-l-2 px-3 text-base transition-colors duration-150",
+                              active
+                                ? "border-primary text-foreground"
+                                : "border-transparent text-foreground hover:border-border"
+                            )}
                           >
                             {labels[item.key]}
                           </Link>

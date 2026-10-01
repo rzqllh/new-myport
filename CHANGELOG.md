@@ -37,6 +37,11 @@ All notable changes to this project are documented here.
 - Moved the portfolio assistant out of the root application shell so it no longer appears in admin.
 - Changed the default theme to follow the operating-system preference while retaining explicit theme control.
 - Added print-specific resume behavior.
+- Reworked public route motion so navigation never waits for an exit animation.
+- Added a shared viewport reveal for major editorial hierarchy on Home, Work, Insights, About, and Contact.
+- Added a reduced-motion-safe active navigation indicator and restrained editorial-row interaction feedback.
+- Replaced shared button transition-all behavior with explicit transition properties.
+- Extended reduced-motion handling to the portfolio assistant.
 
 ### Admin
 - Rebuilt the admin shell around grouped information architecture and responsive navigation.
@@ -62,6 +67,7 @@ All notable changes to this project are documented here.
 - Added PostgreSQL migration verification in CI with representative legacy data.
 
 ### Security
+- Pinned CI third-party actions to immutable reviewed commit SHAs.
 - Added baseline response security headers.
 - Added server-side contact rate limiting and normalized request-IP handling.
 - Added validated, size-bounded chat requests and fail-closed production rate limiting.
@@ -92,6 +98,9 @@ All notable changes to this project are documented here.
 - Content-health checks degrade safely when schema v2 or a required query is unavailable; no external link status is claimed without an actual check.
 
 ### Engineering
+- Removed unused GSAP so public motion uses one animation runtime.
+- Replaced the remaining broad ImageUpload ESLint suppression with a rule-scoped exception.
+- Removed the hardcoded operational location fallback from admin Settings.
 - Standardized the repository on pnpm and added lint/typecheck/test/build CI.
 - Added repository contract tests.
 - Removed the development-only public project API endpoint.

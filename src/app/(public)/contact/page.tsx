@@ -9,6 +9,7 @@ import {
 } from "@/lib/content/public-routes";
 import { ContactForm } from "@/components/contact-form";
 import { CopyEmailButton } from "@/components/copy-email-button";
+import { EditorialReveal } from "@/components/motion/editorial-reveal";
 
 interface Props {
   searchParams: Promise<{ locale?: string }>;
@@ -54,7 +55,8 @@ export default async function ContactPage({ searchParams }: Props) {
 
   return (
     <div className="editorial-container py-16 md:py-24">
-      <div className="grid gap-14 lg:grid-cols-[minmax(0,.75fr)_minmax(0,1.25fr)] lg:gap-20">
+      <EditorialReveal>
+        <div className="grid gap-14 lg:grid-cols-[minmax(0,.75fr)_minmax(0,1.25fr)] lg:gap-20">
         <header className="max-w-xl">
           <h1 className="font-display text-5xl font-semibold tracking-[-0.045em] sm:text-6xl">
             {copy["contact.intro"].title}
@@ -111,7 +113,8 @@ export default async function ContactPage({ searchParams }: Props) {
             </div>
           </div>
         </section>
-      </div>
+        </div>
+      </EditorialReveal>
     </div>
   );
 }

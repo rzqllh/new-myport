@@ -8,6 +8,7 @@ import {
   localeFromValue,
   publicPath,
 } from "@/lib/content/public-routes";
+import { EditorialReveal } from "@/components/motion/editorial-reveal";
 
 interface Props {
   searchParams: Promise<{ locale?: string }>;
@@ -48,21 +49,24 @@ export default async function BlogPage({ searchParams }: Props) {
 
   return (
     <div className="editorial-container py-16 md:py-24">
-      <header className="max-w-3xl">
+      <EditorialReveal>
+        <header className="max-w-3xl">
         <h1 className="font-display text-5xl font-semibold tracking-[-0.045em] sm:text-6xl">
           {copy["insights.index"].title}
         </h1>
         <p className="mt-5 text-lg leading-8 text-muted-foreground">
           {copy["insights.index"].intro}
         </p>
-      </header>
+        </header>
+      </EditorialReveal>
 
       {insights.length ? (
-        <div className="mt-14 max-w-4xl divide-y divide-border border-y border-border">
+        <EditorialReveal delay={0.04}>
+          <div className="mt-14 max-w-4xl divide-y divide-border border-y border-border">
           {insights.map((insight) => (
             <article
               key={insight.id}
-              className="grid gap-3 py-8 sm:grid-cols-[150px_minmax(0,1fr)] sm:gap-8"
+              className="-mx-2 grid gap-3 px-2 py-8 transition-colors duration-150 hover:bg-card/45 sm:grid-cols-[150px_minmax(0,1fr)] sm:gap-8"
             >
               <div className="text-xs leading-5 text-muted-foreground">
                 <p>
@@ -82,7 +86,7 @@ export default async function BlogPage({ searchParams }: Props) {
                 <h2 className="font-display text-2xl font-semibold">
                   <Link
                     href={publicPath(locale, `/insights/${insight.slug}`)}
-                    className="hover:text-primary"
+                    className="transition-colors duration-150 hover:text-primary"
                   >
                     {insight.title}
                   </Link>
@@ -101,7 +105,8 @@ export default async function BlogPage({ searchParams }: Props) {
               </div>
             </article>
           ))}
-        </div>
+          </div>
+        </EditorialReveal>
       ) : (
         <div className="mt-14 border-y border-dashed border-border py-12">
           <p className="text-sm text-muted-foreground">{ui.noInsights}</p>

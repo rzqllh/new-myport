@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import test from "node:test";
 
 function read(path) {
@@ -527,4 +527,106 @@ test("assistant retrieval harness runs in CI against the production ranker", () 
     existsSync(new URL("../src/lib/grounding-ranker.ts", import.meta.url)),
     true
   );
+});
+
+
+test("public route motion does not delay navigation and honors reduced motion", () => {
+  const transition = read("src/components/layout/page-transition.tsx");
+  const reveal = read("src/components/motion/editorial-reveal.tsx");
+  const css = read("src/app/globals.css");
+
+  assert.match(transition, /useReducedMotion/);
+  assert.doesNotMatch(transition, /mode="wait"|AnimatePresence|exit=/);
+  assert.match(reveal, /whileInView/);
+  assert.match(reveal, /once: true/);
+  assert.match(reveal, /useReducedMotion/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
+});
+
+test("public navigation uses a reduced-motion-safe shared active indicator", () => {
+  const navbar = read("src/components/layout/navbar.tsx");
+
+  assert.match(navbar, /layoutId="public-nav-active"/);
+  assert.match(navbar, /useReducedMotion/);
+  assert.match(navbar, /aria-current/);
+});
+
+test("major public page hierarchy uses the shared editorial reveal primitive", () => {
+  for (const path of [
+    "src/app/(public)/page.tsx",
+    "src/app/(public)/projects/page.tsx",
+    "src/app/(public)/blog/page.tsx",
+    "src/app/(public)/about/page.tsx",
+    "src/app/(public)/contact/page.tsx",
+  ]) {
+    assert.match(read(path), /EditorialReveal/);
+  }
+});
+
+test("shared microinteraction motion avoids transition-all and assistant respects reduced motion", () => {
+  const button = read("src/components/ui/button.tsx");
+  const assistant = read("src/components/chat-widget.tsx");
+
+  assert.doesNotMatch(button, /transition-all/);
+  assert.match(button, /transition-\[color,background-color,border-color,box-shadow,transform\]/);
+  assert.match(assistant, /useReducedMotion/);
+});
+
+test("phase 10 motion contract is tracked", () => {
+  assert.equal(
+    existsSync(new URL("../docs/PHASE_10_MOTION_PRD.md", import.meta.url)),
+    true
+  );
+});
+
+
+function walkFiles(path) {
+  const root = new URL(`../${path}/`, import.meta.url);
+  const files = [];
+
+  function visit(url, relative) {
+    for (const entry of readdirSync(url)) {
+      const child = new URL(entry, url);
+      const childRelative = relative ? `${relative}/${entry}` : entry;
+      if (statSync(child).isDirectory()) {
+        visit(new URL(`${entry}/`, url), childRelative);
+      } else {
+        files.push({ url: child, path: childRelative });
+      }
+    }
+  }
+
+  visit(root, "");
+  return files;
+}
+
+test("source tree has no broad eslint-disable file suppression", () => {
+  const offenders = walkFiles("src")
+    .filter((file) => /\.(?:ts|tsx|js|jsx)$/.test(file.path))
+    .filter((file) => /\/\*\s*eslint-disable\s*\*\//.test(readFileSync(file.url, "utf8")))
+    .map((file) => file.path);
+
+  assert.deepEqual(offenders, []);
+});
+
+test("runtime dependencies use one animation stack", () => {
+  const pkg = JSON.parse(read("package.json"));
+
+  assert.equal(pkg.dependencies.gsap, undefined);
+  assert.ok(pkg.dependencies.motion);
+});
+
+test("operational profile facts do not get invented code fallbacks", () => {
+  const settings = read("src/app/admin/(dashboard)/settings/settings-form.tsx");
+
+  assert.doesNotMatch(settings, /location:\s*initialSettings\.profile\?\.location\s*\?\?\s*"Indonesia"/);
+});
+
+test("GitHub Actions are pinned to immutable reviewed SHAs", () => {
+  const ci = read(".github/workflows/ci.yml");
+
+  assert.match(ci, /actions\/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1/);
+  assert.match(ci, /actions\/setup-node@820762786026740c76f36085b0efc47a31fe5020/);
+  assert.match(ci, /pnpm\/action-setup@ea17c68df8912ef543352723c149a84f56e3d413/);
+  assert.doesNotMatch(ci, /uses:\s+[^\s]+@v\d+/);
 });
