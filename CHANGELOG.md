@@ -71,6 +71,11 @@ All notable changes to this project are documented here.
 - Added PostgreSQL migration verification in CI with representative legacy data.
 
 ### Security
+- Added same-origin enforcement for public chat POST requests.
+- Added bounded assistant output, upstream timeout handling, and request IDs.
+- Tightened trusted proxy/IP header precedence for rate-limit keys.
+- Made contact rate-limit infrastructure fail closed in production and bounded Turnstile verification time.
+- Added privacy-safe structured operational events and adversarial assistant regression tests.
 - Pinned CI third-party actions to immutable reviewed commit SHAs.
 - Added baseline response security headers.
 - Added server-side contact rate limiting and normalized request-IP handling.

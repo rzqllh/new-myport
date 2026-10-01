@@ -46,3 +46,19 @@ After the redesign stabilizes, tighten origins based on actual production traffi
 - review file upload authorization and deletion,
 - validate final CSP against production integrations,
 - add end-to-end authorization tests once the new admin model exists.
+
+
+## Post-redesign hardening
+
+The production-hardening pass adds:
+- same-origin enforcement for the public chat write endpoint,
+- request IDs on chat responses for support correlation,
+- bounded Gemini output and a 12-second application timeout,
+- a 10-second Turnstile verification timeout,
+- explicit trusted-header precedence for rate-limit IP keys,
+- fail-closed public rate-limit dependencies in production,
+- structured operational events limited to event metadata.
+
+Operational events must not include chat text, contact-form content, names, email addresses, session tokens, verification tokens, or raw IP addresses. Detailed user content remains outside the operational log contract.
+
+Next.js Server Actions retain the framework's origin protections. The explicit application origin policy is applied to the standalone public chat route where the application directly owns the POST boundary.

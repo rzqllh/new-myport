@@ -630,3 +630,34 @@ test("GitHub Actions are pinned to immutable reviewed SHAs", () => {
   assert.match(ci, /pnpm\/action-setup@ea17c68df8912ef543352723c149a84f56e3d413/);
   assert.doesNotMatch(ci, /uses:\s+[^\s]+@v\d+/);
 });
+
+
+test("public chat writes enforce origin, bounded model output, and timeout", () => {
+  const route = read("src/app/api/chat/route.ts");
+
+  assert.match(route, /isAllowedWriteOrigin/);
+  assert.match(route, /ORIGIN_NOT_ALLOWED/);
+  assert.match(route, /CHAT_MAX_OUTPUT_TOKENS = 512/);
+  assert.match(route, /CHAT_TIMEOUT_MS = 12_000/);
+  assert.match(route, /AI_TIMEOUT/);
+  assert.match(route, /x-request-id/);
+});
+
+test("operational logging schema excludes user content and identity fields", () => {
+  const observability = read("src/lib/observability.ts");
+  const chat = read("src/app/api/chat/route.ts");
+  const contact = read("src/app/(public)/contact/actions.ts");
+
+  assert.doesNotMatch(observability, /messageText|email|name|token|rawIp/);
+  assert.doesNotMatch(chat, /logOperationalEvent\([\s\S]{0,300}latestQuestion/);
+  assert.doesNotMatch(contact, /logOperationalEvent\([\s\S]{0,300}parsed\.data/);
+});
+
+test("Turnstile verification and public rate-limit dependencies fail closed with bounded upstream work", () => {
+  const auth = read("src/lib/chat-auth.ts");
+  const contact = read("src/app/(public)/contact/actions.ts");
+
+  assert.match(auth, /AbortSignal\.timeout\(10_000\)/);
+  assert.match(contact, /contact\.rate_limit_unavailable/);
+  assert.match(contact, /process\.env\.NODE_ENV === "production"/);
+});
