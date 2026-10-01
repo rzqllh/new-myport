@@ -127,8 +127,8 @@ test("detail pages follow the editorial hierarchy instead of the old specificati
     /Project Specifications|01 \/|02 \/|Metrics Banner|fake browser/i
   );
   assert.match(workDetail, /EvidenceFigure/);
-  assert.match(workDetail, /Next work/);
-  assert.match(insightDetail, /Related work/);
+  assert.match(workDetail, /ui\.nextWork/);
+  assert.match(insightDetail, /ui\.relatedWork/);
 });
 
 test("public factual profile data is not duplicated in root structured data", () => {
