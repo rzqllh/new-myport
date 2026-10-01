@@ -39,22 +39,22 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Local workspace and documentation
+# Local workspace / agent-specific files
 .agents/
 .claude/
 .github/copilot-instructions.md
 AGENTS.md
 ARCHITECTURE.md
 CLAUDE.md
-DESIGN.md
 GEMINI.md
 PROJECT.md
 START-HERE.md
-docs/
 design-system/
 implementation_plan.md
 skills-lock.json
 *.pdf
+
+# Product documentation under docs/ is intentionally tracked.
 
 # Supabase local state
 supabase/.temp/
