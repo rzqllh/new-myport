@@ -4,6 +4,10 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+### Release QA
+- Added Playwright 1.63 browser verification for canonical routes, legacy redirects, EN/ID document semantics, keyboard search, unauthenticated admin protection, contact validation, assistant accessibility, reduced motion, and mobile navigation.
+- Added an environment-driven production smoke script and manual workflow that verifies public routes, redirects, locale markup, and baseline security headers without triggering a deployment.
+
 ### Routing & localization
 - Added canonical public route infrastructure for /work, /insights, /about, /contact, and /resume with Indonesian /id equivalents.
 - Added permanent redirects from legacy /projects and /blog routes, including legacy Indonesian variants.
