@@ -1,15 +1,14 @@
 "use client";
 
-import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { Sun, Moon } from "@phosphor-icons/react";
+import { Moon, Sun } from "@phosphor-icons/react";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // Avoid hydration mismatch
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
 
@@ -21,20 +20,16 @@ export function ThemeToggle() {
     );
   }
 
-  const isDark = theme === "dark";
+  const dark = resolvedTheme === "dark";
 
   return (
     <Button
       variant="ghost"
       size="icon"
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      onClick={() => setTheme(dark ? "light" : "dark")}
+      aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
     >
-      {isDark ? (
-        <Sun weight="duotone" className="size-[18px]" />
-      ) : (
-        <Moon weight="duotone" className="size-[18px]" />
-      )}
+      {dark ? <Sun className="size-[18px]" /> : <Moon className="size-[18px]" />}
     </Button>
   );
 }

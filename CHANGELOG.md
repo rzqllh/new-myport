@@ -4,6 +4,13 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+### Design system
+- Replaced the neutral default palette with the tracked warm-paper, ink, and oxblood semantic tokens in light and dark modes.
+- Simplified public navigation into a restrained editorial header and removed floating-glass, numbered-menu, and decorative availability treatments.
+- Rebuilt the footer around Site Content, operational settings, and direct navigation instead of decorative activity telemetry.
+- Moved the portfolio assistant out of the root application shell so it no longer appears in admin.
+- Changed the default theme to follow the operating-system preference while retaining explicit theme control.
+
 ### Admin
 - Rebuilt the admin shell around grouped information architecture and responsive navigation.
 - Replaced the stats-first dashboard with attention, recent-edit, and publishing-state hierarchy.
@@ -12,7 +19,7 @@ All notable changes to this project are documented here.
 - Added EN/ID authoring, permalink locking/change flow, unsaved-change protection, preview, publication state, and locale-aware SEO editing.
 - Added dedicated bilingual Site Content editing for navigation and public page/section copy.
 - Separated editorial copy from operational Settings.
-- Removed fabricated hero-stat defaults from the admin settings model; location, availability, social profiles, SEO defaults, and resume remain factual operational settings.
+- Removed fabricated hero-stat defaults from the admin settings model.
 - Added safe dual-write compatibility for the staged schema-v2 rollout.
 
 ### Data model

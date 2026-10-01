@@ -72,3 +72,17 @@ test("site content is separate from operational settings", () => {
   assert.match(siteContent, /site_content/);
   assert.match(siteContent, /LocaleSwitch/);
 });
+
+test("public shell uses editorial tokens and avoids the old glass navigation treatment", () => {
+  const css = read("src/app/globals.css");
+  const nav = read("src/components/layout/navbar.tsx");
+  const root = read("src/app/layout.tsx");
+  const publicLayout = read("src/app/(public)/layout.tsx");
+
+  assert.match(css, /#f5f2eb/i);
+  assert.match(css, /#8f3430/i);
+  assert.doesNotMatch(css, /\.glass\s*\{/);
+  assert.doesNotMatch(nav, /Available for opportunities|Live GitHub|Navigation\s*<\/p>/);
+  assert.doesNotMatch(root, /ChatWidget/);
+  assert.match(publicLayout, /ChatWidget/);
+});

@@ -1,116 +1,129 @@
 import Link from "next/link";
-import { GithubLogo, LinkedinLogo, TwitterLogo, Envelope, InstagramLogo } from "@phosphor-icons/react/dist/ssr";
-import { Separator } from "@/components/ui/separator";
-import { NAV_ITEMS, SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
-import { createClient } from "@/lib/supabase/server";
-import { FooterContact } from "./footer-contact";
-import { GitHubActivityBadge } from "@/components/github-activity-badge";
 
-export async function Footer() {
+interface FooterProps {
+  siteName: string;
+  tagline?: string;
+  labels: {
+    work: string;
+    about: string;
+    insights: string;
+    contact: string;
+    resume: string;
+  };
+  copy: {
+    heading?: string;
+    body?: string;
+    contact_cta?: string;
+    resume_cta?: string;
+  };
+  social: Record<string, string>;
+  cvUrl?: string;
+}
+
+const routes = [
+  { key: "work", href: "/projects" },
+  { key: "about", href: "/about" },
+  { key: "insights", href: "/blog" },
+  { key: "contact", href: "/contact" },
+] as const;
+
+export function Footer({
+  siteName,
+  tagline,
+  labels,
+  copy,
+  social,
+  cvUrl,
+}: FooterProps) {
   const year = new Date().getFullYear();
-  const supabase = await createClient();
-
-  const { data: settings } = await supabase
-    .from("site_settings")
-    .select("key, value")
-    .in("key", ["social", "general"]);
-
-  const social = (settings?.find(s => s.key === "social")?.value as Record<string, string>) || {};
-  const general = (settings?.find(s => s.key === "general")?.value as Record<string, string>) || {};
-
-  const siteName = general.site_title || SITE_NAME;
-  const siteTagline = general.tagline || SITE_TAGLINE;
-
-  const SOCIAL_ICONS = [
-    { href: social.github, label: "GitHub", Icon: GithubLogo },
-    { href: social.linkedin, label: "LinkedIn", Icon: LinkedinLogo },
-    { href: social.twitter, label: "Twitter / X", Icon: TwitterLogo },
-    { href: social.instagram, label: "Instagram", Icon: InstagramLogo },
-    { href: social.email, label: "Email", Icon: Envelope },
-  ].filter((s) => s.href && s.href !== "mailto:");
+  const profiles = [
+    ["GitHub", social.github],
+    ["LinkedIn", social.linkedin],
+    ["Instagram", social.instagram],
+  ].filter((item): item is [string, string] => Boolean(item[1]));
 
   return (
-    <footer className="border-t border-border bg-muted/30">
-      <div className="mx-auto max-w-[1400px] px-6 pt-12 md:pt-16 pb-8 md:pb-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          {/* Brand */}
-          <div className="space-y-3">
-            <Link
-              href="/"
-              className="font-display font-bold text-lg tracking-tight text-foreground hover:text-primary transition-colors"
-            >
-              {siteName}
-            </Link>
-            <p className="text-sm text-muted-foreground">{siteTagline}</p>
-            {/* Social links */}
-            {SOCIAL_ICONS.length > 0 && (
-              <div className="flex items-center gap-2 pt-1">
-                {SOCIAL_ICONS.map(({ href, label, Icon }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={label}
-                    className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                  >
-                    <Icon weight="duotone" className="size-[18px]" />
-                  </a>
-                ))}
-              </div>
-            )}
+    <footer className="border-t border-border">
+      <div className="editorial-container py-14 md:py-18">
+        <div className="grid gap-10 lg:grid-cols-[1.2fr_.8fr_.8fr]">
+          <div className="max-w-xl">
+            <p className="font-display text-2xl font-semibold tracking-tight">
+              {copy.heading}
+            </p>
+            {copy.body ? (
+              <p className="mt-3 max-w-lg text-sm leading-6 text-muted-foreground">
+                {copy.body}
+              </p>
+            ) : null}
+            <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+              <Link href="/contact" className="font-medium text-primary hover:underline">
+                {copy.contact_cta || labels.contact}
+              </Link>
+              {cvUrl ? (
+                <a
+                  href={cvUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  {copy.resume_cta || labels.resume}
+                </a>
+              ) : null}
+            </div>
           </div>
 
-          {/* Navigation */}
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          <nav aria-label="Footer navigation">
+            <p className="mb-3 text-xs font-medium text-muted-foreground">
               Navigation
             </p>
-            <nav aria-label="Footer navigation">
-              <ul className="space-y-2" role="list">
-                {NAV_ITEMS.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </div>
+            <ul className="space-y-2">
+              {routes.map((item) => (
+                <li key={item.key}>
+                  <Link
+                    href={item.href}
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    {labels[item.key]}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
-          {/* Contact snippet */}
-          <FooterContact />
+          <div>
+            <p className="mb-3 text-xs font-medium text-muted-foreground">
+              Profiles
+            </p>
+            <div className="space-y-2">
+              {profiles.map(([label, href]) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-sm text-muted-foreground hover:text-foreground"
+                >
+                  {label}
+                </a>
+              ))}
+              {social.email ? (
+                <a
+                  href={social.email.startsWith("mailto:") ? social.email : `mailto:${social.email}`}
+                  className="block text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Email
+                </a>
+              ) : null}
+            </div>
+          </div>
         </div>
 
-        <Separator className="my-8" />
-
-        <div className="flex flex-col gap-4 border-t border-border/60 pt-6 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-foreground">
-              {siteName}
-            </p>
-
-            <p className="text-xs text-muted-foreground">
-              Designing systems. Shipping things. Occasionally breaking both.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <GitHubActivityBadge />
-
-            <span className="hidden h-3 w-px bg-border sm:block" />
-
-            <span className="text-xs tabular-nums text-muted-foreground">
-              © {year}
-            </span>
-          </div>
+        <div className="mt-12 flex flex-col gap-2 border-t border-border pt-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <span>{siteName}</span>
+          <span>{tagline || `© ${year}`}</span>
+          <span>© {year}</span>
         </div>
       </div>
     </footer>
   );
 }
-
