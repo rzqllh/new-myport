@@ -82,9 +82,9 @@ test.describe("release-critical public flows", () => {
     await expect(page.locator("#email")).toBeVisible();
     await expect(page.locator("#message")).toBeVisible();
 
-    expect(await page.locator("#name").evaluate((node) => !node.checkValidity())).toBe(true);
-    expect(await page.locator("#email").evaluate((node) => !node.checkValidity())).toBe(true);
-    expect(await page.locator("#message").evaluate((node) => !node.checkValidity())).toBe(true);
+    expect(await page.locator("#name").evaluate((node) => !(node as HTMLInputElement).checkValidity())).toBe(true);
+    expect(await page.locator("#email").evaluate((node) => !(node as HTMLInputElement).checkValidity())).toBe(true);
+    expect(await page.locator("#message").evaluate((node) => !(node as HTMLTextAreaElement).checkValidity())).toBe(true);
   });
 
   test("assistant is deferred but keyboard-accessible", async ({ page }) => {
