@@ -8,6 +8,9 @@ All notable changes to this project are documented here.
 - Rebuilt the admin shell around grouped information architecture and responsive navigation.
 - Replaced the stats-first dashboard with attention, recent-edit, and publishing-state hierarchy.
 - Reworked Work and Insights lists into editorial rows with search and publication-state filtering.
+- Rebuilt Work and Insight editing around outline / canvas / inspector hierarchy.
+- Added EN/ID authoring, permalink locking/change flow, unsaved-change protection, preview, publication state, and locale-aware SEO editing.
+- Added safe dual-write compatibility: legacy content remains writable before schema v2 is deployed, while v2 translations and redirect history synchronize when available.
 - Added consistent admin empty/error/page-header patterns.
 
 ### Data model

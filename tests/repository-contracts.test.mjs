@@ -47,3 +47,16 @@ test("security headers are configured", () => {
     assert.match(config, new RegExp(header));
   }
 });
+
+test("Work and Insight editors use the editorial workspace and permalink contract", () => {
+  const workEditor = read("src/components/admin/project-form.tsx");
+  const insightEditor = read("src/app/admin/(dashboard)/blog/blog-form.tsx");
+
+  for (const source of [workEditor, insightEditor]) {
+    assert.match(source, /EditorialWorkspace/);
+    assert.match(source, /LocaleSwitch/);
+    assert.match(source, /Change permalink/);
+    assert.match(source, /content_redirects/);
+    assert.match(source, /beforeunload/);
+  }
+});
