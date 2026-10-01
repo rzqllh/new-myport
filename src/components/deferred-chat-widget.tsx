@@ -8,19 +8,30 @@ const ChatWidget = dynamic(() => import("@/components/chat-widget"), {
   loading: () => null,
 });
 
+interface IdleWindow {
+  requestIdleCallback?: (
+    callback: () => void,
+    options?: { timeout: number }
+  ) => number;
+  cancelIdleCallback?: (id: number) => void;
+}
+
 export function DeferredChatWidget() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if ("requestIdleCallback" in window) {
-      const id = window.requestIdleCallback(() => setReady(true), {
+    const idleWindow = window as unknown as IdleWindow;
+
+    if (idleWindow.requestIdleCallback) {
+      const id = idleWindow.requestIdleCallback(() => setReady(true), {
         timeout: 1500,
       });
-      return () => window.cancelIdleCallback(id);
+
+      return () => idleWindow.cancelIdleCallback?.(id);
     }
 
-    const id = window.setTimeout(() => setReady(true), 800);
-    return () => window.clearTimeout(id);
+    const id = globalThis.setTimeout(() => setReady(true), 800);
+    return () => globalThis.clearTimeout(id);
   }, []);
 
   return ready ? <ChatWidget /> : null;
