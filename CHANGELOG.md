@@ -4,6 +4,12 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+### Admin
+- Rebuilt the admin shell around grouped information architecture and responsive navigation.
+- Replaced the stats-first dashboard with attention, recent-edit, and publishing-state hierarchy.
+- Reworked Work and Insights lists into editorial rows with search and publication-state filtering.
+- Added consistent admin empty/error/page-header patterns.
+
 ### Data model
 - Added an additive bilingual Work/Insights content model with media, evidence, site content, redirect history, localized experience, and qualitative capabilities.
 - Added a staged explicit-admin authorization model that preserves owner access during bootstrap.
@@ -24,14 +30,6 @@ All notable changes to this project are documented here.
 - Removed broad ESLint suppression from the auth proxy.
 
 ### Documentation
-- Added the portfolio redesign PRD.
-- Added unified public/admin design direction.
-- Added bilingual editorial and anti-slop copy standards.
-- Added Work/Insights routing, slug, permalink, redirect, and locale contracts.
-- Added CMS content model and source-of-truth rules.
-- Added the admin editorial workspace specification.
-- Added public page hierarchy contracts.
-- Added dedicated visitor-facing UI/UX contracts for Work and Insight slug/detail pages.
-- Added phased implementation plan and verification gates.
-- Added the v2 schema migration and compatibility strategy.
-- Updated README to point to the tracked redesign documentation.
+- Added the portfolio redesign PRD and supporting design/editorial/content contracts.
+- Added dedicated visitor-facing UI/UX contracts for Work and Insight detail pages.
+- Added phased implementation and v2 schema migration documentation.
