@@ -2,12 +2,19 @@ import Link from "next/link";
 import {
   Article,
   ArrowRight,
+  CheckCircle,
   Envelope,
   FolderOpen,
   Image,
+  Info,
   WarningCircle,
+  XCircle,
 } from "@phosphor-icons/react/dist/ssr";
 import { createClient } from "@/lib/supabase/server";
+import {
+  getAdminContentHealth,
+  type ContentHealthSeverity,
+} from "@/lib/content/admin-content-health";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 
 function formatDate(value: string | null | undefined) {
@@ -19,6 +26,22 @@ function formatDate(value: string | null | undefined) {
   }).format(new Date(value));
 }
 
+function severityLabel(severity: ContentHealthSeverity) {
+  if (severity === "blocking") return "Blocking";
+  if (severity === "review") return "Review";
+  return "Info";
+}
+
+function SeverityIcon({ severity }: { severity: ContentHealthSeverity }) {
+  if (severity === "blocking") {
+    return <XCircle className="size-[18px] shrink-0 text-destructive" />;
+  }
+  if (severity === "review") {
+    return <WarningCircle className="size-[18px] shrink-0 text-muted-foreground" />;
+  }
+  return <Info className="size-[18px] shrink-0 text-muted-foreground" />;
+}
+
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
 
@@ -27,10 +50,13 @@ export default async function AdminDashboardPage() {
     postResult,
     unreadResult,
     missingAltResult,
+    contentHealth,
   ] = await Promise.all([
     supabase
       .from("projects")
-      .select("id, title, slug, status, description, cover_url, updated_at, featured")
+      .select(
+        "id, title, slug, status, description, cover_url, updated_at, featured"
+      )
       .order("updated_at", { ascending: false })
       .limit(12),
     supabase
@@ -46,6 +72,7 @@ export default async function AdminDashboardPage() {
       .from("project_images")
       .select("*", { count: "exact", head: true })
       .is("alt_text", null),
+    getAdminContentHealth(),
   ]);
 
   const projects = projectResult.data ?? [];
@@ -59,7 +86,7 @@ export default async function AdminDashboardPage() {
     (item) => !item.description || !item.cover_url
   );
 
-  const attention = [
+  const workflowAttention = [
     draftProjects.length
       ? {
           label: `${draftProjects.length} Work draft${draftProjects.length === 1 ? "" : "s"} waiting for review`,
@@ -74,25 +101,25 @@ export default async function AdminDashboardPage() {
           icon: Article,
         }
       : null,
-    incompleteProjects.length
-      ? {
-          label: `${incompleteProjects.length} Work item${incompleteProjects.length === 1 ? "" : "s"} missing a summary or cover`,
-          href: "/admin/projects",
-          icon: WarningCircle,
-        }
-      : null,
-    missingAlt
-      ? {
-          label: `${missingAlt} project image${missingAlt === 1 ? "" : "s"} missing alt text`,
-          href: "/admin/projects",
-          icon: Image,
-        }
-      : null,
     unreadMessages
       ? {
           label: `${unreadMessages} unread message${unreadMessages === 1 ? "" : "s"} in the inbox`,
           href: "/admin/messages",
           icon: Envelope,
+        }
+      : null,
+    !contentHealth.schemaV2Available && incompleteProjects.length
+      ? {
+          label: `${incompleteProjects.length} legacy Work item${incompleteProjects.length === 1 ? "" : "s"} missing a summary or cover`,
+          href: "/admin/projects",
+          icon: WarningCircle,
+        }
+      : null,
+    !contentHealth.schemaV2Available && missingAlt
+      ? {
+          label: `${missingAlt} legacy project image${missingAlt === 1 ? "" : "s"} missing alt text`,
+          href: "/admin/projects",
+          icon: Image,
         }
       : null,
   ].filter(Boolean) as {
@@ -128,10 +155,18 @@ export default async function AdminDashboardPage() {
   const publishedProjects = projects.filter(
     (item) => item.status === "published"
   ).length;
-  const publishedPosts = posts.filter((item) => item.status === "published").length;
+  const publishedPosts = posts.filter(
+    (item) => item.status === "published"
+  ).length;
+  const blockingHealth = contentHealth.issues.filter(
+    (issue) => issue.severity === "blocking"
+  ).length;
+  const reviewHealth = contentHealth.issues.filter(
+    (issue) => issue.severity === "review"
+  ).length;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-9">
       <AdminPageHeader
         title="Dashboard"
         description="What needs attention, what changed recently, and the current publishing state."
@@ -140,16 +175,16 @@ export default async function AdminDashboardPage() {
       <section aria-labelledby="attention-heading" className="space-y-3">
         <div className="flex items-baseline justify-between gap-4">
           <h2 id="attention-heading" className="text-base font-semibold">
-            Needs attention
+            Workflow attention
           </h2>
           <span className="text-xs text-muted-foreground">
-            {attention.length} active
+            {workflowAttention.length} active
           </span>
         </div>
 
         <div className="border-y border-border">
-          {attention.length ? (
-            attention.map((item) => {
+          {workflowAttention.length ? (
+            workflowAttention.map((item) => {
               const Icon = item.icon;
               return (
                 <Link
@@ -167,8 +202,61 @@ export default async function AdminDashboardPage() {
             })
           ) : (
             <p className="py-6 text-sm text-muted-foreground">
-              No content issues are flagged by the current checks.
+              No drafts or inbox items currently need workflow attention.
             </p>
+          )}
+        </div>
+      </section>
+
+      <section aria-labelledby="health-heading" className="space-y-3">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+          <div>
+            <h2 id="health-heading" className="text-base font-semibold">
+              Content health
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Deterministic checks for publish readiness, localization, accessibility, and evidence.
+            </p>
+          </div>
+          <span className="text-xs text-muted-foreground">
+            {blockingHealth
+              ? `${blockingHealth} blocking`
+              : reviewHealth
+                ? `${reviewHealth} to review`
+                : "No flagged gaps"}
+          </span>
+        </div>
+
+        <div className="border-y border-border">
+          {contentHealth.issues.length ? (
+            contentHealth.issues.map((issue) => (
+              <Link
+                key={issue.id}
+                href={issue.href}
+                className="group grid gap-3 border-b border-border px-1 py-4 last:border-b-0 sm:grid-cols-[90px_minmax(0,1fr)_auto] sm:items-start"
+              >
+                <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <SeverityIcon severity={issue.severity} />
+                  {severityLabel(issue.severity)}
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium text-foreground">
+                    {issue.label}
+                  </span>
+                  <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+                    {issue.detail}
+                  </span>
+                </span>
+                <ArrowRight className="mt-0.5 hidden size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 sm:block" />
+              </Link>
+            ))
+          ) : (
+            <div className="flex items-center gap-3 py-6 text-sm text-muted-foreground">
+              <CheckCircle className="size-[18px]" />
+              <span>
+                Published content passes the current deterministic health checks.
+              </span>
+            </div>
           )}
         </div>
       </section>

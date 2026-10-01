@@ -469,3 +469,46 @@ test("global public search uses canonical locale routes and localized UI copy", 
   assert.match(routes, /searchPlaceholder/);
   assert.match(routes, /searchKeyboardHelp/);
 });
+
+
+test("admin content health uses deterministic CMS checks without fabricated scoring", () => {
+  const health = read("src/lib/content/admin-content-health.ts");
+  const dashboard = read("src/app/admin/(dashboard)/page.tsx");
+
+  assert.match(health, /getAdminContentHealth/);
+  assert.match(health, /work_translations/);
+  assert.match(health, /insight_translations/);
+  assert.match(health, /work_evidence/);
+  assert.match(health, /media_translations/);
+  assert.match(health, /capability_translations/);
+  assert.match(health, /isV2SchemaUnavailable/);
+  assert.match(dashboard, /Content health/);
+  assert.match(dashboard, /Deterministic checks/);
+  assert.doesNotMatch(health, /healthScore|qualityScore|generateContent|fetch\(/);
+  assert.doesNotMatch(dashboard, /\b\d+\s*\/\s*100\b|health score/i);
+});
+
+test("admin content health flags locale, SEO, accessibility, and sourced-claim gaps", () => {
+  const health = read("src/lib/content/admin-content-health.ts");
+
+  assert.match(health, /has no published Indonesian translation/);
+  assert.match(health, /missing an English SEO description/);
+  assert.match(health, /missing an Indonesian SEO description/);
+  assert.match(health, /missing English alt text/);
+  assert.match(health, /missing Indonesian alt text/);
+  assert.match(health, /missing Indonesian copy/);
+  assert.match(health, /quantified claim without published evidence/);
+});
+
+test("admin content health degrades safely when schema v2 is unavailable", () => {
+  const health = read("src/lib/content/admin-content-health.ts");
+  const dashboard = read("src/app/admin/(dashboard)/page.tsx");
+
+  assert.match(health, /schemaV2Available: false/);
+  assert.match(
+    health,
+    /Content health checks are limited until schema v2 is active/
+  );
+  assert.match(dashboard, /!contentHealth\.schemaV2Available/);
+  assert.match(dashboard, /legacy Work item/);
+});

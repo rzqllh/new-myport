@@ -86,6 +86,9 @@ All notable changes to this project are documented here.
 - Fixed expired-session retry so the original submitted question is preserved.
 - Added bilingual global portfolio search across published Work, Insights, About, Contact, and Resume.
 - Added Cmd/Ctrl+K access plus arrow-key and Enter navigation without adding a search dependency or external service.
+- Added deterministic admin content-health checks for bilingual readiness, SEO completeness, localized media alt text, capability translations, and evidence-backed quantified Work claims.
+- Split dashboard attention into workflow state and content health, with blocking/review/info severity instead of an arbitrary health score.
+- Content-health checks degrade safely when schema v2 or a required query is unavailable; no external link status is claimed without an actual check.
 
 ### Engineering
 - Standardized the repository on pnpm and added lint/typecheck/test/build CI.
