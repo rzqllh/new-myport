@@ -4,6 +4,12 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+### Public portfolio
+- Added a CMS-first public content compatibility layer that reads the bilingual v2 model when available and falls back to the existing database tables before the production migration is applied.
+- Removed hardcoded project/article fallback content from Home, Work index, and Insights index rendering.
+- Rebuilt Home around professional positioning, selected Work, a capability/experience bridge, selected Insights, and a restrained contact closure.
+- Rebuilt Work and Insights indexes as editorial collections rather than card-heavy galleries.
+
 ### Design system
 - Replaced the neutral default palette with the tracked warm-paper, ink, and oxblood semantic tokens in light and dark modes.
 - Simplified public navigation into a restrained editorial header and removed floating-glass, numbered-menu, and decorative availability treatments.

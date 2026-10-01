@@ -86,3 +86,17 @@ test("public shell uses editorial tokens and avoids the old glass navigation tre
   assert.doesNotMatch(root, /ChatWidget/);
   assert.match(publicLayout, /ChatWidget/);
 });
+
+test("public index pages use the CMS compatibility layer instead of hardcoded portfolio fallbacks", () => {
+  const home = read("src/app/(public)/page.tsx");
+  const work = read("src/app/(public)/projects/page.tsx");
+  const insights = read("src/app/(public)/blog/page.tsx");
+
+  for (const source of [home, work, insights]) {
+    assert.doesNotMatch(source, /FALLBACK_PROJECTS|DEFAULT_POSTS|PROJECT_DETAILS_DATA/);
+  }
+
+  assert.match(home, /getPublicWork/);
+  assert.match(work, /getPublicWork/);
+  assert.match(insights, /getPublicInsights/);
+});
