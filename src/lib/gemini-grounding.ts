@@ -16,6 +16,10 @@ import {
   type GroundingSource,
 } from "@/lib/grounding-ranker";
 
+function clean(value: string | null | undefined) {
+  return value?.trim() || "";
+}
+
 export const getCachedGroundingCorpus = unstable_cache(
   async (): Promise<GroundingSource[]> => {
     const [about, experiences, capabilities, work] = await Promise.all([
