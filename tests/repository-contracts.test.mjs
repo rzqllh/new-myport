@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import test from "node:test";
 
 function read(path) {
@@ -577,4 +577,56 @@ test("phase 10 motion contract is tracked", () => {
     existsSync(new URL("../docs/PHASE_10_MOTION_PRD.md", import.meta.url)),
     true
   );
+});
+
+
+function walkFiles(path) {
+  const root = new URL(`../${path}/`, import.meta.url);
+  const files = [];
+
+  function visit(url, relative) {
+    for (const entry of readdirSync(url)) {
+      const child = new URL(entry, url);
+      const childRelative = relative ? `${relative}/${entry}` : entry;
+      if (statSync(child).isDirectory()) {
+        visit(new URL(`${entry}/`, url), childRelative);
+      } else {
+        files.push({ url: child, path: childRelative });
+      }
+    }
+  }
+
+  visit(root, "");
+  return files;
+}
+
+test("source tree has no broad eslint-disable file suppression", () => {
+  const offenders = walkFiles("src")
+    .filter((file) => /\.(?:ts|tsx|js|jsx)$/.test(file.path))
+    .filter((file) => /\/\*\s*eslint-disable\s*\*\//.test(readFileSync(file.url, "utf8")))
+    .map((file) => file.path);
+
+  assert.deepEqual(offenders, []);
+});
+
+test("runtime dependencies use one animation stack", () => {
+  const pkg = JSON.parse(read("package.json"));
+
+  assert.equal(pkg.dependencies.gsap, undefined);
+  assert.ok(pkg.dependencies.motion);
+});
+
+test("operational profile facts do not get invented code fallbacks", () => {
+  const settings = read("src/app/admin/(dashboard)/settings/settings-form.tsx");
+
+  assert.doesNotMatch(settings, /location:\s*initialSettings\.profile\?\.location\s*\?\?\s*"Indonesia"/);
+});
+
+test("GitHub Actions are pinned to immutable reviewed SHAs", () => {
+  const ci = read(".github/workflows/ci.yml");
+
+  assert.match(ci, /actions\/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1/);
+  assert.match(ci, /actions\/setup-node@820762786026740c76f36085b0efc47a31fe5020/);
+  assert.match(ci, /pnpm\/action-setup@ea17c68df8912ef543352723c149a84f56e3d413/);
+  assert.doesNotMatch(ci, /uses:\s+[^\s]+@v\d+/);
 });

@@ -63,7 +63,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     url: initialSettings.cv?.url ?? "",
   });
   const [profile, setProfile] = useState<ProfileSettings>({
-    location: initialSettings.profile?.location ?? "Indonesia",
+    location: initialSettings.profile?.location ?? "",
     availability: initialSettings.profile?.availability ?? "",
   });
   const [saving, setSaving] = useState(false);
