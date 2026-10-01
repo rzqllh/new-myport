@@ -12,5 +12,6 @@ All notable changes to this project are documented here.
 - Added CMS content model and source-of-truth rules.
 - Added the admin editorial workspace specification.
 - Added public page hierarchy contracts.
+- Added dedicated visitor-facing UI/UX contracts for Work and Insight slug/detail pages, including desktop/mobile composition, evidence behavior, section hierarchy, rails/TOC, and anti-pattern gates.
 - Added phased implementation plan and verification gates.
 - Updated README to point to the tracked redesign documentation.

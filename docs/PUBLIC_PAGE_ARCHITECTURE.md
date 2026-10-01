@@ -12,6 +12,8 @@ Each page must have:
 
 Public pages should not all reuse “eyebrow + title + paragraph + grid of cards” as a default template.
 
+For the detailed UI/UX contract of public detail pages, see [DETAIL_PAGE_UIUX.md](./DETAIL_PAGE_UIUX.md).
+
 ## 2. Home
 
 Suggested hierarchy:
@@ -41,37 +43,17 @@ Filters may use discipline/type. Avoid a control-heavy gallery for a small datas
 
 The detail page is narrative, not a fixed component checklist.
 
-### Opening
-- breadcrumb/back context,
-- discipline/type/status when meaningful,
-- title,
-- short summary,
-- role/timeframe,
-- primary external action if relevant,
-- hero visual or evidence when available.
+The full page-level composition, responsive layout, evidence behavior, sticky rules, loading states, and anti-pattern gate are defined in [DETAIL_PAGE_UIUX.md](./DETAIL_PAGE_UIUX.md).
 
-Do not place all metadata inside a “Project Specifications” card by default.
-
-### Body
-Possible sections:
-- Context
-- Challenge
-- Role and responsibilities
-- Approach
-- Key decisions
-- Implementation/architecture
-- Evidence
-- Outcome
-- Lessons
-- Related insight/work
-
-Only render relevant sections.
-
-### Evidence
-Evidence may interrupt the text column and expand to a wider media canvas. It should feel integrated into the story.
-
-### Metrics
-Render only sourced, relevant metrics. Never render a three-stat banner as a mandatory visual pattern.
+Non-negotiable summary:
+- title and summary dominate the opening,
+- metadata is visually quieter and usually aligned in a rail/group rather than a specifications card,
+- primary evidence appears early when meaningful,
+- body section hierarchy follows the story,
+- media may break beyond the reading column,
+- only relevant sections render,
+- metrics require evidence and context,
+- mobile uses a deliberate one-column reading order rather than a compressed desktop layout.
 
 ## 5. Insights index
 
@@ -85,25 +67,16 @@ Hierarchy:
 
 ## 6. Insight detail
 
-### Header
-- title,
-- concise dek/excerpt,
-- publish/update date,
-- topic metadata,
-- related Work if applicable.
+The full article-page UI/UX is defined in [DETAIL_PAGE_UIUX.md](./DETAIL_PAGE_UIUX.md).
 
-### Article body
-- readable measure,
-- strong heading hierarchy,
-- images/diagrams can break out wider,
-- code blocks only when necessary,
-- optional TOC for genuinely long pieces,
-- references/notes where relevant.
-
-### End
-- related Work,
-- related Insights,
-- contact or resume only when contextually appropriate.
+Non-negotiable summary:
+- title/dek first,
+- metadata remains tertiary,
+- readable article measure,
+- optional TOC only for long structured pieces,
+- media may break out wider,
+- related Work is contextually integrated,
+- no generic blog-template chrome.
 
 ## 7. About
 

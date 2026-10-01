@@ -4,12 +4,13 @@ This plan is intentionally phased. Each phase must complete its verification gat
 
 ## Phase 0 — Documentation and baseline
 
-Status: complete when this documentation PR is merged.
+Status: complete when the documentation foundation and detail-page UI/UX correction are merged.
 
 Tasks:
 - track docs in git,
 - align README,
 - establish route/content/design/editorial contracts,
+- establish visitor-facing Work/Insight detail-page UI/UX contracts,
 - record baseline technical debt,
 - add and maintain CHANGELOG,
 - no product implementation in this phase.
@@ -18,7 +19,8 @@ Gate:
 - documents do not contradict each other,
 - route and locale model is consistent,
 - CMS ownership is explicit,
-- design direction and anti-patterns are explicit.
+- design direction and anti-patterns are explicit,
+- Work/Insight detail pages have desktop/mobile hierarchy contracts independent of slug-routing/admin UX.
 
 ## Phase 1 — Foundation and repository hygiene
 
@@ -147,11 +149,18 @@ Tasks:
 - Contact,
 - Resume,
 - related content,
-- evidence presentation.
+- evidence presentation,
+- create explicit desktop and mobile compositions for Work detail before implementation,
+- create explicit desktop and mobile compositions for Insight detail before implementation,
+- verify opening fold, narrative measure, rail/TOC behavior, media breakouts, related-content closure, and state behavior against DETAIL_PAGE_UIUX.md.
 
 Gate:
 - each page passes hierarchy review,
 - page layouts are related but not template-identical,
+- Work and Insight detail implementations pass DETAIL_PAGE_UIUX.md,
+- slug/detail pages are reviewed at mobile, tablet, small desktop, and large desktop widths,
+- no generic specifications-card opening,
+- no fixed Challenge/Solution/Architecture/Features template across all Work types,
 - no fabricated metrics,
 - all relevant data is CMS-driven.
 

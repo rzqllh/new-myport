@@ -10,10 +10,11 @@ This directory is the source of truth for the next portfolio architecture and re
 4. [ROUTING_AND_I18N.md](./ROUTING_AND_I18N.md) — route model, locale behavior, slug rules, redirects, canonical URLs, and permalink lifecycle.
 5. [CONTENT_MODEL.md](./CONTENT_MODEL.md) — CMS ownership, bilingual content model, entities, evidence, taxonomy, and dynamic-content rules.
 6. [ADMIN_EDITORIAL_WORKSPACE.md](./ADMIN_EDITORIAL_WORKSPACE.md) — admin information architecture and editorial canvas UX.
-7. [PUBLIC_PAGE_ARCHITECTURE.md](./PUBLIC_PAGE_ARCHITECTURE.md) — hierarchy and content contracts for public pages and detail pages.
-8. [DECISIONS.md](./DECISIONS.md) — approved decisions that implementation must not silently reinterpret.
-9. [BASELINE_AUDIT.md](./BASELINE_AUDIT.md) — current repository debt mapped to the redesign phases.
-10. [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) — phased execution plan and verification gates.
+7. [PUBLIC_PAGE_ARCHITECTURE.md](./PUBLIC_PAGE_ARCHITECTURE.md) — hierarchy and content contracts for public pages.
+8. [DETAIL_PAGE_UIUX.md](./DETAIL_PAGE_UIUX.md) — visitor-facing UI/UX, layout, hierarchy, evidence, and responsive contracts for Work and Insight slug/detail pages.
+9. [DECISIONS.md](./DECISIONS.md) — approved decisions that implementation must not silently reinterpret.
+10. [BASELINE_AUDIT.md](./BASELINE_AUDIT.md) — current repository debt mapped to the redesign phases.
+11. [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) — phased execution plan and verification gates.
 
 ## Governing principles
 
@@ -25,6 +26,7 @@ This directory is the source of truth for the next portfolio architecture and re
 - Public and admin experiences share one design language but use different density.
 - A page must have a clear primary task and visual hierarchy. Equal visual weight everywhere is a defect.
 - Existing routes must remain reachable through permanent redirects during migrations.
+- A slug/detail route is not considered designed merely because routing, permalink, and editor UX exist; the visitor-facing page composition is a separate required contract.
 - No implementation phase may silently reinterpret the contracts in these documents.
 
 ## Reference direction
