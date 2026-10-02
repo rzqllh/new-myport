@@ -27,6 +27,18 @@ function hasQuantifiedClaim(values: unknown[]) {
   return quantifiedClaimPattern.test(values.map(text).filter(Boolean).join(" "));
 }
 
+function isHttpUrl(value: unknown) {
+  const candidate = text(value);
+  if (!candidate) return false;
+
+  try {
+    const url = new URL(candidate);
+    return url.protocol === "https:" || url.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
 function sortIssues(issues: ContentHealthIssue[]) {
   const rank: Record<ContentHealthSeverity, number> = {
     blocking: 0,
@@ -89,6 +101,7 @@ export async function getAdminContentHealth(): Promise<AdminContentHealth> {
     mediaTranslationsResult,
     capabilitiesResult,
     capabilityTranslationsResult,
+    redirectsResult,
   ] = await Promise.all([
     supabase
       .from("work_translations")
@@ -97,7 +110,7 @@ export async function getAdminContentHealth(): Promise<AdminContentHealth> {
       ),
     supabase
       .from("work_evidence")
-      .select("work_id, is_public")
+      .select("id, work_id, is_public, evidence_type, media_id, source_url")
       .eq("is_public", true),
     supabase
       .from("insights")
@@ -108,7 +121,7 @@ export async function getAdminContentHealth(): Promise<AdminContentHealth> {
       .select("insight_id, locale, status, title, excerpt, seo_description"),
     supabase
       .from("media_assets")
-      .select("id")
+      .select("id, url")
       .eq("is_public", true),
     supabase
       .from("media_translations")
@@ -120,6 +133,9 @@ export async function getAdminContentHealth(): Promise<AdminContentHealth> {
     supabase
       .from("capability_translations")
       .select("capability_id, locale, name"),
+    supabase
+      .from("content_redirects")
+      .select("content_type, locale, old_slug, new_slug"),
   ]);
 
   const queryFailed = [
@@ -131,6 +147,7 @@ export async function getAdminContentHealth(): Promise<AdminContentHealth> {
     mediaTranslationsResult.error,
     capabilitiesResult.error,
     capabilityTranslationsResult.error,
+    redirectsResult.error,
   ].some(Boolean);
 
   if (queryFailed) {
@@ -158,6 +175,7 @@ export async function getAdminContentHealth(): Promise<AdminContentHealth> {
   const mediaTranslations = mediaTranslationsResult.data ?? [];
   const capabilities = capabilitiesResult.data ?? [];
   const capabilityTranslations = capabilityTranslationsResult.data ?? [];
+  const redirects = redirectsResult.data ?? [];
 
   for (const work of workItemsResult.data ?? []) {
     const translations = workTranslations.filter(
@@ -293,6 +311,90 @@ export async function getAdminContentHealth(): Promise<AdminContentHealth> {
         detail: "The Indonesian article is published but its SEO copy is incomplete.",
         href,
       });
+    }
+  }
+
+  for (const item of evidence) {
+    if (!item.media_id && !text(item.source_url)) {
+      issues.push({
+        id: "evidence-source-" + item.id,
+        severity: "review",
+        label: "Published evidence is missing a source or media artifact.",
+        detail:
+          "Evidence should point to a public-safe source URL or a managed media asset.",
+        href: "/admin/projects/" + item.work_id + "/edit",
+      });
+    } else if (text(item.source_url) && !isHttpUrl(item.source_url)) {
+      issues.push({
+        id: "evidence-url-" + item.id,
+        severity: "review",
+        label: "Published evidence has an invalid source URL.",
+        detail:
+          "Evidence source URLs must use an explicit http or https URL. Availability is not inferred without a live check.",
+        href: "/admin/projects/" + item.work_id + "/edit",
+      });
+    }
+  }
+
+  for (const asset of media) {
+    if (!isHttpUrl(asset.url)) {
+      issues.push({
+        id: "media-url-" + asset.id,
+        severity: "blocking",
+        label: "Public media has an invalid asset URL.",
+        detail:
+          "Public media must resolve from an explicit http or https URL before it can be relied on by visitors.",
+        href: "/admin/projects",
+      });
+    }
+  }
+
+  const redirectMap = new Map(
+    redirects.map((redirect) => [
+      [redirect.content_type, redirect.locale, redirect.old_slug].join(":"),
+      redirect.new_slug,
+    ])
+  );
+
+  for (const redirect of redirects) {
+    if (redirect.old_slug === redirect.new_slug) {
+      issues.push({
+        id:
+          "redirect-self-" +
+          [redirect.content_type, redirect.locale, redirect.old_slug].join("-"),
+        severity: "blocking",
+        label: "Redirect history contains a self-redirect.",
+        detail: "A canonical URL cannot redirect to the same slug.",
+        href: "/admin",
+      });
+      continue;
+    }
+
+    const start = redirect.old_slug;
+    let current = redirect.new_slug;
+    const seen = new Set([start]);
+
+    for (let depth = 0; depth < 20; depth += 1) {
+      if (seen.has(current)) {
+        issues.push({
+          id:
+            "redirect-cycle-" +
+            [redirect.content_type, redirect.locale, redirect.old_slug].join("-"),
+          severity: "blocking",
+          label: "Redirect history contains a cycle.",
+          detail:
+            "Resolve the redirect chain before publishing another permalink change.",
+          href: "/admin",
+        });
+        break;
+      }
+
+      seen.add(current);
+      const next = redirectMap.get(
+        [redirect.content_type, redirect.locale, current].join(":")
+      );
+      if (!next) break;
+      current = next;
     }
   }
 

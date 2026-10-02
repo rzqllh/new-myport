@@ -630,3 +630,173 @@ test("GitHub Actions are pinned to immutable reviewed SHAs", () => {
   assert.match(ci, /pnpm\/action-setup@ea17c68df8912ef543352723c149a84f56e3d413/);
   assert.doesNotMatch(ci, /uses:\s+[^\s]+@v\d+/);
 });
+
+
+test("public chat writes enforce origin, bounded model output, and timeout", () => {
+  const route = read("src/app/api/chat/route.ts");
+
+  assert.match(route, /isAllowedWriteOrigin/);
+  assert.match(route, /ORIGIN_NOT_ALLOWED/);
+  assert.match(route, /CHAT_MAX_OUTPUT_TOKENS = 512/);
+  assert.match(route, /CHAT_TIMEOUT_MS = 12_000/);
+  assert.match(route, /AI_TIMEOUT/);
+  assert.match(route, /x-request-id/);
+});
+
+test("operational logging schema excludes user content and identity fields", () => {
+  const observability = read("src/lib/observability.ts");
+  const chat = read("src/app/api/chat/route.ts");
+  const contact = read("src/app/(public)/contact/actions.ts");
+
+  assert.doesNotMatch(observability, /messageText|email|name|token|rawIp/);
+  assert.doesNotMatch(chat, /(reason|message|text):\s*latestQuestion/);
+  assert.doesNotMatch(contact, /(reason|message|text|data):\s*parsed\.data/);
+});
+
+test("Turnstile verification and public rate-limit dependencies fail closed with bounded upstream work", () => {
+  const auth = read("src/lib/chat-auth.ts");
+  const contact = read("src/app/(public)/contact/actions.ts");
+
+  assert.match(auth, /AbortSignal\.timeout\(10_000\)/);
+  assert.match(contact, /contact\.rate_limit_unavailable/);
+  assert.match(contact, /process\.env\.NODE_ENV === "production"/);
+});
+
+
+test("CMS resilience tracks editorial revisions without restoring structural metadata", () => {
+  const migration = read("supabase/migrations/007_editorial_revisions.sql");
+  const restore = read("src/app/api/admin/revisions/restore/route.ts");
+  const revisions = read("src/components/admin/revision-history.tsx");
+
+  assert.match(migration, /content_revisions/);
+  assert.match(migration, /work_translation/);
+  assert.match(migration, /insight_translation/);
+  assert.match(migration, /site_content/);
+  assert.doesNotMatch(migration, /resource_type IN \([^)]*work_item/);
+  assert.doesNotMatch(restore, /slug|published_at|repository_url|live_url/);
+  assert.match(revisions, /current version will remain in revision history/i);
+});
+
+test("authenticated CMS backup excludes contact and authentication data", () => {
+  const route = read("src/app/api/admin/export/route.ts");
+
+  assert.match(route, /getPortfolioAdminClient/);
+  assert.match(route, /portfolio-content-backup\.json/);
+  assert.match(route, /content_revisions/);
+  assert.doesNotMatch(route, /contacts|messages|portfolio_admins|auth\.users/);
+  assert.match(route, /Cache-Control.*no-store/s);
+});
+
+test("draft preview tokens are short-lived, scoped, and production-secret backed", () => {
+  const auth = read("src/lib/preview-auth.ts");
+  const route = read("src/app/api/admin/preview-token/route.ts");
+
+  assert.match(auth, /PREVIEW_TOKEN_SECRET/);
+  assert.match(auth, /setExpirationTime\("15m"\)/);
+  assert.match(auth, /portfolio-preview/);
+  assert.match(route, /getPortfolioAdminClient/);
+  assert.match(route, /resourceType/);
+  assert.match(route, /resourceId/);
+});
+
+test("content health detects source-less evidence and redirect integrity failures", () => {
+  const health = read("src/lib/content/admin-content-health.ts");
+
+  assert.match(health, /Published evidence is missing a source or media artifact/);
+  assert.match(health, /Redirect history contains a self-redirect/);
+  assert.match(health, /Redirect history contains a cycle/);
+});
+
+
+test("security workflows are least-privilege, immutable-pinned, and silent in PR comments", () => {
+  const codeql = read(".github/workflows/codeql.yml");
+  const review = read(".github/workflows/dependency-review.yml");
+
+  assert.match(codeql, /github\/codeql-action\/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2/);
+  assert.match(codeql, /github\/codeql-action\/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2/);
+  assert.match(codeql, /security-events:\s*write/);
+  assert.match(review, /actions\/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294/);
+  assert.match(review, /fail-on-severity:\s*high/);
+  assert.match(review, /comment-summary-in-pr:\s*never/);
+  assert.match(review, /continue-on-error:\s*true/);
+  assert.match(review, /pnpm audit --audit-level high/);
+  assert.doesNotMatch(review, /pull-requests:\s*write/);
+});
+
+test("Dependabot is review-only and groups routine updates without auto-merge", () => {
+  const config = read(".github/dependabot.yml");
+
+  assert.match(config, /package-ecosystem:\s*npm/);
+  assert.match(config, /interval:\s*weekly/);
+  assert.match(config, /production-dependencies/);
+  assert.match(config, /development-dependencies/);
+  assert.doesNotMatch(config, /auto-merge|automerge/i);
+});
+
+test("release governance tracks required gates and the external branch-protection target", () => {
+  const governance = read("docs/RELEASE_GOVERNANCE.md");
+
+  assert.match(governance, /CI `quality` green/);
+  assert.match(governance, /CI `e2e` green/);
+  assert.match(governance, /CodeQL green/);
+  assert.match(governance, /Dependency security gate green/);
+  assert.match(governance, /block force-push/);
+  assert.match(governance, /cannot mutate branch-protection administration/);
+  assert.match(governance, /No bot\/Codex\/GPT review comments/);
+});
+
+
+test("public and admin route groups have actionable error boundaries", () => {
+  const publicError = read("src/app/(public)/error.tsx");
+  const adminError = read("src/app/admin/error.tsx");
+
+  assert.match(publicError, /reset/);
+  assert.match(publicError, /Kembali ke beranda/);
+  assert.match(adminError, /reset/);
+  assert.match(adminError, /Unsaved browser state is not treated as successfully persisted/);
+});
+
+test("CI audits public client boundaries before production build", () => {
+  const pkg = JSON.parse(read("package.json"));
+  const ci = read(".github/workflows/ci.yml");
+  const audit = read("scripts/client-boundary-audit.mjs");
+
+  assert.equal(pkg.scripts["audit:client"], "node scripts/client-boundary-audit.mjs");
+  assert.match(ci, /Client boundary audit/);
+  assert.match(ci, /pnpm audit:client/);
+  assert.match(audit, /@tiptap\//);
+  assert.match(audit, /react-image-crop/);
+  assert.match(audit, /@\/lib\/supabase\/client/);
+  assert.match(audit, /turns a route page\/layout into a client component/);
+});
+
+test("resume print layout is part of browser release QA", () => {
+  const e2e = read("tests/e2e/public.spec.ts");
+
+  assert.match(e2e, /emulateMedia\(\{ media: "print" \}\)/);
+  assert.match(e2e, /\.print-resume/);
+  assert.match(e2e, /data-print-hidden/);
+  assert.match(e2e, /scrollWidth/);
+});
+
+test("authenticated content audit exports deterministic health findings", () => {
+  const route = read("src/app/api/admin/content-audit/route.ts");
+  const health = read("src/lib/content/admin-content-health.ts");
+
+  assert.match(route, /getPortfolioAdminClient/);
+  assert.match(route, /getAdminContentHealth/);
+  assert.match(route, /portfolio-content-health\.json/);
+  assert.match(route, /Cache-Control.*no-store/s);
+  assert.match(health, /invalid source URL/);
+  assert.match(health, /invalid asset URL/);
+  assert.doesNotMatch(health, /fetch\(/);
+});
+
+test("performance documentation distinguishes targets, lab results, and field evidence", () => {
+  const performance = read("docs/PERFORMANCE.md");
+
+  assert.match(performance, /These are targets, not measured claims/);
+  assert.match(performance, /separate lab data from field data/);
+  assert.match(performance, /record that field data is unavailable/);
+  assert.match(performance, /No analytics or monitoring vendor is added/);
+});

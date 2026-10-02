@@ -4,6 +4,10 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+### Release QA
+- Added Playwright 1.63 browser verification for canonical routes, legacy redirects, EN/ID document semantics, keyboard search, unauthenticated admin protection, contact validation, assistant accessibility, reduced motion, and mobile navigation.
+- Added an environment-driven production smoke script and manual workflow that verifies public routes, redirects, locale markup, and baseline security headers without triggering a deployment.
+
 ### Routing & localization
 - Added canonical public route infrastructure for /work, /insights, /about, /contact, and /resume with Indonesian /id equivalents.
 - Added permanent redirects from legacy /projects and /blog routes, including legacy Indonesian variants.
@@ -43,6 +47,13 @@ All notable changes to this project are documented here.
 - Replaced shared button transition-all behavior with explicit transition properties.
 - Extended reduced-motion handling to the portfolio assistant.
 
+### CMS resilience
+- Added database-backed editorial revision snapshots for Work translations, Insight translations, and Site Content.
+- Added authenticated revision restore that preserves the displaced current copy as another revision.
+- Added authenticated JSON content backup export without contact messages, auth users, or admin membership data.
+- Added short-lived signed preview-token infrastructure for future draft rendering.
+- Extended content health with source-less evidence and redirect self-loop/cycle checks.
+
 ### Admin
 - Rebuilt the admin shell around grouped information architecture and responsive navigation.
 - Replaced the stats-first dashboard with attention, recent-edit, and publishing-state hierarchy.
@@ -66,13 +77,31 @@ All notable changes to this project are documented here.
 - Added contact-schema compatibility for the existing runtime `contacts` path and legacy `messages` data.
 - Added PostgreSQL migration verification in CI with representative legacy data.
 
+### Governance
+- Added CodeQL analysis for JavaScript/TypeScript with immutable action pins and least-privilege workflow permissions.
+- Added native high-severity Dependency Review without PR bot comments, with a mandatory lockfile-wide high-severity pnpm audit fallback for repositories where GitHub Dependency Graph is unavailable.
+- Added weekly grouped Dependabot minor/patch updates without auto-merge.
+- Added a tracked release/branch-governance contract, including the intended master protection ruleset and production-smoke requirement.
+
 ### Security
+- Added same-origin enforcement for public chat POST requests.
+- Added bounded assistant output, upstream timeout handling, and request IDs.
+- Tightened trusted proxy/IP header precedence for rate-limit keys.
+- Made contact rate-limit infrastructure fail closed in production and bounded Turnstile verification time.
+- Added privacy-safe structured operational events and adversarial assistant regression tests.
 - Pinned CI third-party actions to immutable reviewed commit SHAs.
 - Added baseline response security headers.
 - Added server-side contact rate limiting and normalized request-IP handling.
 - Added validated, size-bounded chat requests and fail-closed production rate limiting.
 - Removed the production chat signing-secret fallback.
 - Added a tracked security audit and reporting guidance.
+
+### Final hardening
+- Added public and admin route-group error boundaries with retry and safe navigation paths.
+- Added a CI client-boundary audit that keeps editor-heavy and browser-only dependencies out of public route components.
+- Added print-media browser QA for Resume, including chrome removal and horizontal-overflow checks.
+- Added authenticated content-health JSON export plus evidence/media URL-format integrity checks.
+- Expanded the performance contract with an explicit post-deployment measurement procedure and no fabricated field metrics.
 
 ### Performance & reliability
 - Added a cookie-free anonymous Supabase client for public CMS reads.

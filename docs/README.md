@@ -39,3 +39,5 @@ This directory is the source of truth for the portfolio architecture and redesig
 ## Reference direction
 
 The redesign draws principles from Impeccable, UI/UX Pro Max, anti-slop, and Taste: audit first, establish hierarchy, use a coherent system, avoid generic card-and-badge composition, and treat anti-slop as a quality gate rather than a visual style.
+
+18. [POST_REDESIGN_ROADMAP.md](./POST_REDESIGN_ROADMAP.md) — prioritized post-redesign production hardening phases and stacked-branch merge gates.

@@ -165,6 +165,22 @@ test(
         SELECT public.is_portfolio_admin() AS value
       `;
       assert.equal(isAdmin.value, true);
+
+      await sql`
+        UPDATE work_translations
+        SET summary = 'Revision test'
+        WHERE work_id = '22222222-2222-2222-2222-222222222222'
+          AND locale = 'en'
+      `;
+
+      const [revisionCount] = await sql`
+        SELECT COUNT(*)::int AS count
+        FROM content_revisions
+        WHERE resource_type = 'work_translation'
+          AND resource_id = '22222222-2222-2222-2222-222222222222'
+          AND locale = 'en'
+      `;
+      assert.equal(revisionCount.count > 0, true);
     } finally {
       await sql.end({ timeout: 1 });
     }
