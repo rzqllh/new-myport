@@ -30,9 +30,10 @@ jobs:
       - name: Probe pnpm security fixes
         run: |
           pnpm audit --fix --audit-level high || true
-          echo "=== PACKAGE PNPM FIELD ==="
-          node -e "const p=require('./package.json'); console.log(JSON.stringify(p.pnpm || {}, null, 2))"
+          pnpm install --lockfile-only --no-frozen-lockfile
+          echo "=== PACKAGE AFTER ==="
+          cat package.json
           echo "=== LOCK PACKAGE BLOCKS ==="
-          grep -n -A4 -B2 -E 'nanoid@|fast-uri@|js-yaml@|undici@|brace-expansion@' pnpm-lock.yaml
+          grep -n -A5 -B2 -E 'nanoid@|fast-uri@|js-yaml@|undici@|brace-expansion@|hono@|ip-address@|qs@' pnpm-lock.yaml
           echo "=== AUDIT AFTER ==="
-          pnpm audit --audit-level high || true
+          pnpm audit --audit-level high
