@@ -27,13 +27,16 @@ jobs:
         with:
           node-version: 22
 
-      - name: Probe pnpm security fixes
+      - name: Resolve patched lockfile
         run: |
-          pnpm audit --fix --audit-level high || true
           pnpm install --lockfile-only --no-frozen-lockfile
-          echo "=== PACKAGE AFTER ==="
-          cat package.json
-          echo "=== LOCK PACKAGE BLOCKS ==="
-          grep -n -A5 -B2 -E 'nanoid@|fast-uri@|js-yaml@|undici@|brace-expansion@|hono@|ip-address@|qs@' pnpm-lock.yaml
-          echo "=== AUDIT AFTER ==="
           pnpm audit --audit-level high
+
+      - name: Upload generated dependency graph
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: phase15-patched-lock
+          path: |
+            package.json
+            pnpm-lock.yaml
+          retention-days: 1
