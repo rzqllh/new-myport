@@ -809,7 +809,7 @@ test("dependency security exception is single-advisory and production scan runs 
   assert.equal("shadcn" in pkg.dependencies, false);
   assert.equal(typeof pkg.devDependencies.shadcn, "string");
   assert.match(workflow, /Audit production lockfile without exceptions/);
-  assert.match(workflow, /delete p\\.pnpm\\.auditConfig/);
+  assert.match(workflow, /delete p\.pnpm\.auditConfig/);
   assert.match(workflow, /pnpm audit --prod --audit-level high/);
   assert.match(workflow, /pnpm audit --audit-level high/);
   assert.match(read("docs/RELEASE_GOVERNANCE.md"), /2026-12-18/);

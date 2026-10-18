@@ -44,7 +44,7 @@ jobs:
         run: |
           cp package.json "$RUNNER_TEMP/package-before-audit.json"
           trap 'cp "$RUNNER_TEMP/package-before-audit.json" package.json' EXIT
-          node -e 'const fs=require("node:fs"); const p=JSON.parse(fs.readFileSync("package.json","utf8")); delete p.pnpm.auditConfig; fs.writeFileSync("package.json",JSON.stringify(p,null,2)+"\\n");'
+          node -e 'const fs=require("node:fs"); const p=JSON.parse(fs.readFileSync("package.json","utf8")); delete p.pnpm.auditConfig; fs.writeFileSync("package.json",JSON.stringify(p,null,2)+"\n");'
           pnpm audit --prod --audit-level high
 
       - name: Audit complete lockfile with reviewed dev-only advisory exception
