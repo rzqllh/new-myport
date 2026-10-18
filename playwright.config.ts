@@ -13,12 +13,7 @@ export default defineConfig({
   reporter: process.env.CI ? [["list"]] : [["list"], ["html", { open: "never" }]],
   timeout: 30_000,
   expect: { timeout: 7_500 },
-  use: {
-    baseURL,
-    trace: "retain-on-failure",
-    screenshot: "only-on-failure",
-    video: "off",
-  },
+  use: { baseURL, trace: "retain-on-failure", screenshot: "only-on-failure", video: "off", executablePath: "C:/Program Files/Google/Chrome/Application/chrome.exe" },
   projects: [
     {
       name: "chromium-desktop",

@@ -207,7 +207,8 @@ export function Navbar({
                         pathname === href || pathname.startsWith(`${href}/`);
                       return (
                         <li key={item.key}>
-                          <SheetClose asChild>
+                          <SheetClose>
+
                             <Link
                               href={href}
                               aria-current={active ? "page" : undefined}
