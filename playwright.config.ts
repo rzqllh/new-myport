@@ -30,10 +30,13 @@ export default defineConfig({
   webServer: process.env.PLAYWRIGHT_BASE_URL
     ? undefined
     : {
-        command: "pnpm dev --hostname 127.0.0.1",
+        // Exercise the built artifact in CI; avoid Turbopack/font-loader dev flakiness.
+        command: process.env.CI
+          ? "pnpm build && pnpm start --hostname 127.0.0.1"
+          : "pnpm dev --hostname 127.0.0.1",
         url: baseURL,
         reuseExistingServer: !process.env.CI,
-        timeout: 120_000,
+        timeout: process.env.CI ? 240_000 : 120_000,
         env: {
           NEXT_PUBLIC_SUPABASE_URL:
             process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://example.supabase.co",
