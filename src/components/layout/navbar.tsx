@@ -17,6 +17,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  SheetClose,
 } from "@/components/ui/sheet";
 import {
   PUBLIC_UI,
@@ -206,18 +207,20 @@ export function Navbar({
                         pathname === href || pathname.startsWith(`${href}/`);
                       return (
                         <li key={item.key}>
-                          <Link
-                            href={href}
-                            aria-current={active ? "page" : undefined}
-                            className={cn(
-                              "flex min-h-12 items-center border-l-2 px-3 text-base transition-colors duration-150",
-                              active
-                                ? "border-primary text-foreground"
-                                : "border-transparent text-foreground hover:border-border"
-                            )}
-                          >
-                            {labels[item.key]}
-                          </Link>
+                          <SheetClose asChild>
+                            <Link
+                              href={href}
+                              aria-current={active ? "page" : undefined}
+                              className={cn(
+                                "flex min-h-12 items-center border-l-2 px-3 text-base transition-colors duration-150",
+                                active
+                                  ? "border-primary text-foreground"
+                                  : "border-transparent text-foreground hover:border-border"
+                              )}
+                            >
+                              {labels[item.key]}
+                            </Link>
+                          </SheetClose>
                         </li>
                       );
                     })}

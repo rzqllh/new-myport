@@ -39,7 +39,7 @@ export async function generateMetadata({
   const canonical = publicPath(locale, "/");
 
   return {
-    title: copy["home.hero"].name,
+    title: { absolute: copy["home.hero"].name },
     description: copy["home.hero"].positioning,
     alternates: {
       canonical,

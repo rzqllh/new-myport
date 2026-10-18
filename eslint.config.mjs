@@ -13,6 +13,11 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     ".agents/**",
+    // Generated QA/test artifacts — not linted in CI either.
+    "playwright-report/**",
+    "test-results/**",
+    "docs/qa-evidence/**",
+    "playwright.local.config.ts",
   ]),
 ]);
 

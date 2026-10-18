@@ -48,6 +48,7 @@ export function Footer({
 }: FooterProps) {
   const pathname = usePathname();
   const locale = localeFromPathname(pathname);
+  const isHome = pathname === "/" || pathname === "/id" || pathname === "/id/";
   const labels = labelsByLocale[locale];
   const copy = copyByLocale[locale];
   const ui = PUBLIC_UI[locale];
@@ -64,10 +65,12 @@ export function Footer({
       <div className="editorial-container py-14 md:py-18">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_.8fr_.8fr]">
           <div className="max-w-xl">
-            <p className="font-display text-2xl font-semibold tracking-tight">
-              {copy.heading}
-            </p>
-            {copy.body ? (
+            {!isHome && copy.heading ? (
+              <p className="font-display text-2xl font-semibold tracking-tight">
+                {copy.heading}
+              </p>
+            ) : null}
+            {!isHome && copy.body ? (
               <p className="mt-3 max-w-lg text-sm leading-6 text-muted-foreground">
                 {copy.body}
               </p>

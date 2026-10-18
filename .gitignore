@@ -58,3 +58,10 @@ skills-lock.json
 
 # Supabase local state
 supabase/.temp/
+
+# QA / E2E artifacts (local-only, not committed)
+playwright-report/
+test-results/
+docs/qa-evidence/
+playwright.local.config.ts
+scripts/portfolio-browser-audit.mjs
