@@ -39,3 +39,4 @@ jobs:
           git diff --cached --exit-code && exit 0
           git commit -m "chore(security): regenerate pnpm lockfile"
           git push origin HEAD:chore/security-dependency-remediation
+# One-time second run after reclassifying shadcn as dev-only.
