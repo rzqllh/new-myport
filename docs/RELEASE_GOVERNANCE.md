@@ -8,7 +8,7 @@ Required release evidence, in order:
 1. CI `quality` green.
 2. CI `e2e` green.
 3. CodeQL green or reviewed with no unresolved high-confidence issue.
-4. Dependency security gate green: native GitHub Dependency Review when the repository dependency graph is available, plus a mandatory complete-lockfile `pnpm audit --audit-level high` fallback.
+4. Dependency security gate green: native GitHub Dependency Review when the repository dependency graph is available, plus an unfiltered **production** `pnpm audit --prod --audit-level high` and a complete-lockfile `pnpm audit --audit-level high` check with at most the documented, narrowly scoped dev-only advisory exception below.
 5. Production smoke after a production deployment exists.
 
 ## Branching
@@ -23,7 +23,7 @@ Required release evidence, in order:
 
 - No bot/Codex/GPT review comments are required or permitted by the automated workflows in this repository.
 - Native Dependency Review explicitly uses `comment-summary-in-pr: never`.
-- The native action is allowed to degrade only because GitHub rejects it when Dependency Graph is disabled; the same job still requires the lockfile-wide high-severity pnpm audit to pass.
+- The native action is allowed to degrade only because GitHub rejects it when Dependency Graph is disabled; the same job still requires both the unfiltered production audit and the full-lockfile audit with the explicitly documented advisory exception to pass.
 - Dependabot may open dependency PRs, but nothing auto-merges them.
 - High or critical dependency findings require review before merge.
 - PR descriptions must identify user-visible, schema, security, or deployment implications.
@@ -68,3 +68,13 @@ After deployment:
 - record field performance only from the live deployment.
 
 If Vercel rejects a deployment because of platform quota/rate limiting, keep `master` as the source of truth and do not promote an older preview as a substitute.
+
+## Time-limited dependency audit exception (reviewed 2026-10-18)
+
+- **Exception:** Only `GHSA-vfj7-8cjw-p6xm` / `CVE-2026-93687` in `braces@3.0.3`, through development tooling `eslint-config-next > @next/eslint-plugin-next > fast-glob > micromatch > braces`. Tracked in [issue #20](https://github.com/rzqllh/new-myport/issues/20).
+- **Reason:** The upstream advisory currently lists **no patched version**. The observed exploit requires attacker-controlled deeply nested brace/glob patterns; the affected package is reached through build/lint tooling, not the deployed Next.js runtime graph. This reduces, but does not eliminate, risk.
+- **Compensating gate:** The production dependency audit deliberately removes the exception from the temporary CI checkout before running `pnpm audit --prod --audit-level high`. This must pass with **zero ignored production advisories**. The full-lockfile audit keeps all unrelated high/critical findings blocking.
+- **Review due:** 2026-12-18, and sooner if upstream publishes a patch, the advisory is amended, or `braces` enters production dependencies. When a supported fix exists, upgrade and remove the exception in the same PR.
+- **Boundary:** No wildcard exceptions; never use `--ignore-unfixable`, `|| true`, a higher severity threshold, or bypass of lint/build/E2E/CodeQL checks. The exception remains visible in this policy, the security audit, and GitHub Actions step summary.
+
+This is a recorded, constrained risk disposition, **not** a claim of zero vulnerabilities or of a patched `braces` package.
