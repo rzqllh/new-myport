@@ -71,3 +71,9 @@ Next.js Server Actions retain the framework's origin protections. The explicit a
 - Dependency Review does not post PR comments.
 - Dependabot opens grouped weekly minor/patch PRs; it does not auto-merge.
 - Third-party workflow actions are immutable-SHA pinned with reviewed release comments.
+
+## October 2026 dependency remediation
+
+Dependency PR #21 updates Next.js, Gemini/MCP transitive dependencies, `proxy-addr`, and `source-map-js`, and moves the `shadcn` CLI to development dependencies. The refreshed lockfile passed a production high/critical audit in CI.
+
+The remaining high-severity `braces` issue (GHSA-vfj7-8cjw-p6xm, CVE-2026-93687) has **no upstream patched version** as checked on 2026-10-18 and is reached through ESLint development tooling. Issue #20 records the upstream reference and required reassessment. A single GHSA-scoped audit exception is documented in RELEASE_GOVERNANCE.md with review due on 2026-12-18. CI also performs a separate production audit with the exception removed in-memory. This is not an assertion that the advisory is fixed or that the development toolchain is vulnerability-free.

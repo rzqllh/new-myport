@@ -800,3 +800,17 @@ test("performance documentation distinguishes targets, lab results, and field ev
   assert.match(performance, /record that field data is unavailable/);
   assert.match(performance, /No analytics or monitoring vendor is added/);
 });
+
+
+test("dependency security exception is single-advisory and production scan runs unfiltered", () => {
+  const pkg = JSON.parse(read("package.json"));
+  const workflow = read(".github/workflows/dependency-review.yml");
+  assert.deepEqual(pkg.pnpm?.auditConfig?.ignoreGhsas, ["GHSA-vfj7-8cjw-p6xm"]);
+  assert.equal("shadcn" in pkg.dependencies, false);
+  assert.equal(typeof pkg.devDependencies.shadcn, "string");
+  assert.match(workflow, /Audit production lockfile without exceptions/);
+  assert.match(workflow, /delete p\.pnpm\.auditConfig/);
+  assert.match(workflow, /pnpm audit --prod --audit-level high/);
+  assert.match(workflow, /pnpm audit --audit-level high/);
+  assert.match(read("docs/RELEASE_GOVERNANCE.md"), /2026-12-18/);
+});
