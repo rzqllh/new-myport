@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React, { useRef, useState, useCallback } from "react";
+import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { uploadImage } from "@/lib/cloudinary";
 import { UploadSimple, X, Image as ImageIcon, Crop as CropIcon } from "@phosphor-icons/react";
