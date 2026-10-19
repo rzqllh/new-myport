@@ -9,13 +9,13 @@
 
 ## Executive Summary
 
-**Verdict: READY FOR RELEASE** ✅
+**Verdict: CONDITIONALLY READY — public release gates pass; authenticated CMS acceptance remains blocked.**
 
-- All quality gates pass (lint, typecheck, unit, build, E2E).
-- One dependency vulnerability fixed (postcss-selector-parser → 7.1.6).
-- Admin auth and API security gates verified; anon correctly blocked.
-- CMS CRUD workflows implemented but **not verified end-to-end** (see Phase C).
-- All public routes, locale variants, SEO metadata, and responsive layouts pass E2E.
+- All automated code gates pass (lint, typecheck, unit, build, and 21 release-critical E2E scenarios).
+- One dependency vulnerability fixed (`postcss-selector-parser` → 7.1.6).
+- Admin auth and API security gates verified; anonymous requests are correctly blocked.
+- CMS CRUD workflows are implemented but **not verified end-to-end** (see Phase C).
+- Public routes and locale variants covered by the E2E suite render successfully. The suite does not constitute exhaustive visual regression, broken-link, media, console, or hydration coverage.
 
 ---
 
@@ -53,7 +53,7 @@ No drift from expected baseline. No force-push / history rewrite.
 | `/projects` → `/work` | ✅ legacy redirects resolve |
 | `/blog` → `/insights` | ✅ legacy redirects resolve |
 
-**No broken links, no missing media, no overflow, no hydration warnings, no console errors.**
+The E2E suite verifies route rendering, canonical redirects, locale behavior, keyboard search, admin redirection, contact validity, assistant accessibility, reduced-motion behavior, print width, and mobile navigation. Exhaustive link crawling, media validation, console capture, and hydration-log assertions are **not covered by this suite**.
 
 ### 2.2 SEO / Metadata
 
@@ -91,12 +91,12 @@ All public pages implement `generateMetadata` with:
 
 ## 3. Phase B — Visual & Responsive Polish
 
-No visual defects found requiring code changes. The existing editorial design system (warm neutral + oxblood, shared tokens, editorial typography) is consistent across all routes.
+The sampled browser review preserved the existing editorial design direction (warm neutral + oxblood, shared tokens, editorial typography). No verified visual defect requiring a code change was isolated during this pass. This was not a pixel-diff visual regression audit of every route and viewport.
 
 **One code hygiene fix applied:**
 - Removed unused `useCallback` import from `src/components/image-upload.tsx` (lint warning → 0 warnings).
 
-No arbitrary inline styles, no generic SaaS patterns, no fake content introduced.
+No fake content was introduced.
 
 ---
 
