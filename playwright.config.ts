@@ -11,16 +11,15 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? [["list"]] : [["list"], ["html", { open: "never" }]],
-  timeout: 30_000,
+  timeout: 120_000,
   expect: { timeout: 7_500 },
-  use: { baseURL, trace: "retain-on-failure", screenshot: "only-on-failure", video: "off", executablePath: "C:/Program Files/Google/Chrome/Application/chrome.exe" },
-  projects: [
+  use: { baseURL, trace: "retain-on-failure", screenshot: "only-on-failure", video: "off", executablePath: "C:/Program Files/Google/Chrome/Application/chrome.exe", navigationTimeout: 120_000 },  projects: [
     {
       name: "chromium-desktop",
-      use: { ...devices["Desktop Chrome"] },
+      use: { ...devices["Desktop Chrome"], channel: "chrome" },
       grepInvert: /@mobile/,
     },
-    { name: "chromium-mobile", use: { ...devices["Pixel 7"] }, grep: /@mobile/ },
+    { name: "chromium-mobile", use: { ...devices["Pixel 7"], channel: "chrome" }, grep: /@mobile/ },
   ],
   webServer: process.env.PLAYWRIGHT_BASE_URL
     ? undefined

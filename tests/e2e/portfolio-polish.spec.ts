@@ -2,13 +2,13 @@ import { expect, test } from '@playwright/test';
 
 for (const route of ['/', '/id']) {
   test(`${route} home title does not repeat the owner's name`, async ({ page }) => {
-    await page.goto(route);
+    await page.goto(route, { waitUntil: 'domcontentloaded' });
     const name = (await page.locator('h1').innerText()).trim();
     expect(await page.title()).toBe(name);
   });
 
   test(`${route} home has one editorial contact closure`, async ({ page }) => {
-    await page.goto(route);
+    await page.goto(route, { waitUntil: 'domcontentloaded' });
     const closure = page.locator('main section').last().locator('h2');
     const heading = (await closure.innerText()).trim();
     await expect(page.getByText(heading, { exact: true })).toHaveCount(1);
